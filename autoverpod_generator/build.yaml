@@ -1,0 +1,20 @@
+builders:
+  autoverpod_generator:
+    import: "package:autoverpod_generator/builder.dart"
+    builder_factories: ["autoverpodGenerator"]
+    build_extensions: {".dart": [".widget.dart"]}
+    auto_apply: dependents
+    build_to: source
+    required_inputs:
+      - ".freezed.dart"
+    applies_builders: ["source_gen|combining_builder"]
+
+  form_provider_generator:
+    import: "package:autoverpod_generator/builder.dart"
+    builder_factories: ["formProviderBuilder"]
+    build_extensions: {".dart": [".form.g.part"]}
+    auto_apply: dependents
+    build_to: cache
+    applies_builders: ["source_gen|combining_builder"]
+    required_inputs:
+      - ".freezed.dart"
