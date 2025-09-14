@@ -1,8 +1,7 @@
 import 'package:autoverpod_generator/src/core/generator_registry.dart';
 import 'package:autoverpod_generator/src/core/unified_widget_builder.dart';
-import 'package:autoverpod_generator/src/generators/form_widget/form_provider_generator.dart';
-import 'package:autoverpod_generator/src/generators/form_widget/form_widget_generator.dart';
-import 'package:autoverpod_generator/src/generators/state_widget/state_widget_generator.dart';
+import 'package:autoverpod_generator/src/form_widget/form_provider_generator.dart';
+import 'package:autoverpod_generator/src/form_widget/form_widget_generator.dart';
 import 'package:build/build.dart';
 import 'package:source_gen/source_gen.dart';
 
@@ -10,8 +9,6 @@ import 'package:source_gen/source_gen.dart';
 void _initializeRegistry() {
   final registry = GeneratorRegistry.instance;
 
-  // Register all widget generators
-  registry.registerGenerator(StateWidgetGenerator());
   registry.registerGenerator(FormWidgetGenerator());
 }
 
