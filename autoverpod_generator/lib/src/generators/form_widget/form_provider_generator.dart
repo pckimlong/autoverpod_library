@@ -29,7 +29,8 @@ class FormProviderGenerator extends GeneratorForAnnotation<FormWidget> {
       );
     }
 
-    final provider = ProviderDefinition.parse(element, parseReturnTypeClassInfo: true);
+    final provider =
+        ProviderDefinition.parse(element, parseReturnTypeClassInfo: true);
     final buffer = StringBuffer();
 
     // Add descriptive header comment
@@ -45,20 +46,26 @@ class FormProviderGenerator extends GeneratorForAnnotation<FormWidget> {
   String _generateHeaderComment(ProviderDefinition provider) {
     final buffer = StringBuffer();
 
-    buffer
-        .writeln('// ============================================================================');
-    buffer.writeln('// AUTOVERPOD GENERATED FORM PROVIDER - DO NOT MODIFY BY HAND');
-    buffer.writeln('// ============================================================================');
+    buffer.writeln(
+        '// ============================================================================');
+    buffer.writeln(
+        '// AUTOVERPOD GENERATED FORM PROVIDER - DO NOT MODIFY BY HAND');
+    buffer.writeln(
+        '// ============================================================================');
     buffer.writeln('//');
     buffer.writeln('// Generated from: ${provider.providerName}');
     buffer.writeln('//');
     buffer.writeln('// GENERATED PROVIDER:');
-    buffer.writeln('// - ${provider.callStatusProviderName}: Form submission status provider');
+    buffer.writeln(
+        '// - ${provider.callStatusProviderName}: Form submission status provider');
     buffer.writeln('//');
     buffer.writeln('// ABSTRACT CLASS: _\$${provider.baseName}Widget');
-    buffer.writeln('// - call(): Submit form with validation and status handling');
-    buffer.writeln('// - submit(): Override to implement form submission logic');
-    buffer.writeln('// - onSuccess(): Override to handle successful submissions');
+    buffer.writeln(
+        '// - call(): Submit form with validation and status handling');
+    buffer
+        .writeln('// - submit(): Override to implement form submission logic');
+    buffer
+        .writeln('// - onSuccess(): Override to handle successful submissions');
     buffer.writeln('//');
 
     return buffer.toString();
@@ -85,7 +92,8 @@ class StateProviderInfo {
 /// - Success/error handling
 String _generateFormProviderAbstraction(ProviderDefinition provider) {
   final submitMethodInfo = provider.getSubmitMethodInfo();
-  final stateProviderInfo = _generateStateProviderInfo(provider, submitMethodInfo);
+  final stateProviderInfo =
+      _generateStateProviderInfo(provider, submitMethodInfo);
   final updateMethods = _generateUpdateMethods(provider);
 
   // Generate the proxy class using code_builder
@@ -160,7 +168,8 @@ List<Method> _generateUpdateMethods(ProviderDefinition provider) {
   // Add field-specific update methods if class info is available
   if (provider.returnType.classInfo != null) {
     final returnClass = provider.returnType.classInfo!;
-    final copyWithNames = returnClass.copyWithMethod?.parameters.map((e) => e.name).toSet() ?? {};
+    final copyWithNames =
+        returnClass.copyWithMethod?.parameters.map((e) => e.name).toSet() ?? {};
 
     // Generate update methods for each field where not in copyWith method
     // this allow developer to override it
@@ -195,7 +204,9 @@ List<Method> _generateUpdateMethods(ProviderDefinition provider) {
 /// Generates a method for updating the entire state
 Method _generateStateUpdateMethod(ProviderDefinition provider) {
   // Create appropriate update statement based on state type
-  final updateStatement = provider.isAsyncValue ? 'state.whenData(update)' : 'update(state)';
+  final updateStatement = provider.isAsyncValue
+      ? 'this.state.whenData(update)'
+      : 'update(this.state)';
 
   return Method(
     (b) => b
@@ -215,7 +226,7 @@ Method _generateStateUpdateMethod(ProviderDefinition provider) {
         ),
       )
       ..lambda = true
-      ..body = Code('state = $updateStatement'),
+      ..body = Code('this.state = $updateStatement'),
   );
 }
 
@@ -254,7 +265,8 @@ Method _generateCallMethod(
   SubmitMethodInfo submitInfo,
   StateProviderInfo stateInfo,
 ) {
-  final hasOverrideOnSuccess = provider.methods.any((e) => e.name == 'onSuccess');
+  final hasOverrideOnSuccess =
+      provider.methods.any((e) => e.name == 'onSuccess');
   // Check if form is loaded based on state type
   final loadingCheck = provider.isAsyncValue
       ? '''
@@ -278,8 +290,8 @@ Method _generateCallMethod(
       ..body = Code('''
 $loadingCheck
 
-final _callStatus = ref.read(${stateInfo.readProvider});
-final _updateCallStatus = ref.read(${stateInfo.readProvider}.notifier);
+final _callStatus = this.ref.read(${stateInfo.readProvider});
+final _updateCallStatus = this.ref.read(${stateInfo.readProvider}.notifier);
 
 if (_callStatus?.isLoading == true) return const AsyncValue.loading();
 
@@ -320,7 +332,7 @@ Method _generateInvalidateSelfMethod(ProviderDefinition provider) {
       ..name = 'invalidateSelf'
       ..returns = refer('void')
       ..body = Code(
-        'ref.invalidate(${provider.callStatusProviderName});\nref.invalidateSelf();',
+        'this.ref.invalidate(${provider.callStatusProviderName});\nthis.ref.invalidateSelf();',
       ),
   );
 }
