@@ -1,8 +1,15 @@
 name: Publish autoverpod_generator
 
 on:
-  # Pub.dev automated publishing triggers workflows via workflow_dispatch
+  # Manual trigger
   workflow_dispatch:
+  # Auto-publish when a matching tag is pushed (e.g. autoverpod_generator-v0.0.7)
+  push:
+    tags:
+      - 'autoverpod_generator-v*'
+  # Optionally publish when a release is published that matches the tag scheme
+  release:
+    types: [published]
 
 permissions:
   id-token: write
@@ -15,6 +22,8 @@ jobs:
     defaults:
       run:
         working-directory: autoverpod_generator
+    env:
+      PACKAGE_NAME: autoverpod_generator
     steps:
       - name: Checkout
         uses: actions/checkout@v4
@@ -30,9 +39,21 @@ jobs:
       - name: Install dependencies
         run: flutter pub get
 
+      - name: Validate tag vs pubspec version
+        if: startsWith(github.ref, 'refs/tags/')
+        run: |
+          VERSION=$(grep '^version:' pubspec.yaml | awk '{print $2}')
+          TAG_NAME=${GITHUB_REF#refs/tags/}
+          EXPECTED_TAG="$PACKAGE_NAME-v$VERSION"
+          echo "pubspec version: $VERSION"
+          echo "tag: $TAG_NAME | expected: $EXPECTED_TAG"
+          if [ "$TAG_NAME" != "$EXPECTED_TAG" ]; then
+            echo "Tag does not match pubspec version."
+            exit 1
+          fi
+
       - name: Dry run publish
         run: flutter pub publish --dry-run
 
       - name: Publish to pub.dev
         run: flutter pub publish -f
-
