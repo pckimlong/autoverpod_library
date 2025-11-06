@@ -273,15 +273,15 @@
     },
     {
       "name": "riverpod",
-      "rootUri": "file:///Users/kim/.pub-cache/hosted/pub.dev/riverpod-3.0.0",
+      "rootUri": "file:///Users/kim/.pub-cache/hosted/pub.dev/riverpod-3.0.3",
       "packageUri": "lib/",
-      "languageVersion": "3.8"
+      "languageVersion": "3.7"
     },
     {
       "name": "riverpod_annotation",
-      "rootUri": "file:///Users/kim/.pub-cache/hosted/pub.dev/riverpod_annotation-3.0.0",
+      "rootUri": "file:///Users/kim/.pub-cache/hosted/pub.dev/riverpod_annotation-3.0.3",
       "packageUri": "lib/",
-      "languageVersion": "3.8"
+      "languageVersion": "3.7"
     },
     {
       "name": "shelf",

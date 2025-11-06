@@ -121,7 +121,7 @@
     },
     {
       "name": "riverpod",
-      "version": "3.0.0",
+      "version": "3.0.3",
       "dependencies": [
         "async",
         "clock",
@@ -148,14 +148,6 @@
         "pub_semver",
         "source_span",
         "yaml"
-      ]
-    },
-    {
-      "name": "riverpod_annotation",
-      "version": "3.0.0",
-      "dependencies": [
-        "meta",
-        "riverpod"
       ]
     },
     {
@@ -730,6 +722,14 @@
       "dependencies": [
         "args",
         "yaml"
+      ]
+    },
+    {
+      "name": "riverpod_annotation",
+      "version": "3.0.3",
+      "dependencies": [
+        "meta",
+        "riverpod"
       ]
     }
   ],
