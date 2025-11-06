@@ -2,7 +2,7 @@ name: autoverpod_library
 repository: https://github.com/pckimlong/autoverpod_library
 publish_to: none
 environment:
-  sdk: 3.9.0-333.2.beta
+  sdk: ^3.9.2
 
 workspace:
   - autoverpod
