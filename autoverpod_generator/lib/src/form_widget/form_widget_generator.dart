@@ -19,11 +19,10 @@ import '../../autoverpod_generator.dart';
 
 class FormWidgetGenerator extends WidgetGenerator {
   @override
-  final TypeChecker annotationTypeChecker = const TypeChecker.fromStatic(FormWidget);
+  final TypeChecker annotationTypeChecker = const TypeChecker.fromUrl('package:autoverpod/autoverpod.dart#FormWidget');
 
   @override
   List<String> getRequiredImports() {
-    TypeChecker.
     return [
       'package:flutter/widgets.dart',
       'package:flutter/material.dart',

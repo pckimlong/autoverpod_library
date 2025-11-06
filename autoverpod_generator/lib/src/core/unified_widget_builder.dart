@@ -74,8 +74,8 @@ class UnifiedWidgetBuilder implements Builder {
     final imports = Set<String>.from(_registry.getAllRequiredImports());
 
     // Add source file's imports to ensure dependencies are available
-    final sourceImports = library.element.importedLibraries
-        .map((lib) => lib.source.uri.toString())
+    final sourceImports = library.element.firstFragment.importedLibraries
+        .map((lib) => lib.uri.toString())
         .where((uri) => _shouldIncludeSourceImport(uri))
         .cast<String>()
         .toSet();

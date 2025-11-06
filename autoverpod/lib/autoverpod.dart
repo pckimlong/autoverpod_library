@@ -5,7 +5,6 @@
 library;
 
 export 'package:meta/meta.dart' show nonVirtual, protected;
-export 'package:riverpod/riverpod.dart' show StateProvider;
 
 export 'src/annotations.dart';
 export 'src/helpers.dart';

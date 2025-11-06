@@ -34,14 +34,14 @@ class ParamDefinition {
     };
   }
 
-  factory ParamDefinition.parse(ParameterElement parameter) {
+  factory ParamDefinition.parse(FormalParameterElement parameter) {
     return ParamDefinition(
-      name: parameter.name,
+      name: parameter.name ?? '',
       type: parameter.type.getDisplayString(),
       isRequired: parameter.isRequired,
       isNamed: parameter.isNamed,
       defaultValue: parameter.defaultValueCode,
-      annotations: parameter.metadata.map((m) => m.toSource()).toList(),
+      annotations: parameter.metadata.annotations.map((m) => m.toSource()).toList(),
       documentation: parameter.documentationComment,
     );
   }

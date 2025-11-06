@@ -9,5 +9,3 @@ workspace:
   - autoverpod_generator
 
 
-dev_dependencies:
-  build_runner: ^2.8.0

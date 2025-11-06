@@ -6,11 +6,12 @@ import 'package:source_gen/source_gen.dart';
 /// Base class for all widget generators
 class WidgetGenerator {
   /// The annotation type checker used to identify elements to process
-  TypeChecker get annotationTypeChecker => throw UnimplementedError(
-        'Subclasses must override annotationTypeChecker',
-      );
-  static final TypeChecker riverpodAnnotationTypeChecker =
-      const TypeChecker.fromRuntime(Riverpod);
+  TypeChecker get annotationTypeChecker =>
+      throw UnimplementedError('Subclasses must override annotationTypeChecker');
+  static final TypeChecker riverpodAnnotationTypeChecker = const TypeChecker.typeNamed(
+    Riverpod,
+    inPackage: 'riverpod',
+  );
 
   /// Generate code for the given library
   ///
@@ -21,11 +22,9 @@ class WidgetGenerator {
 
     for (final element in library.allElements) {
       if (canProcess(element)) {
-        final annotation =
-            ConstantReader(annotationTypeChecker.firstAnnotationOf(element));
+        final annotation = ConstantReader(annotationTypeChecker.firstAnnotationOf(element));
 
-        final output =
-            await generateForAnnotatedElement(element, annotation, buildStep);
+        final output = await generateForAnnotatedElement(element, annotation, buildStep);
 
         if (output.isNotEmpty) {
           buffer.writeln(output);
@@ -45,8 +44,7 @@ class WidgetGenerator {
   /// unless you need custom annotation detection logic.
   bool canProcess(Element element) {
     final hasWidgetAnnotation = annotationTypeChecker.hasAnnotationOf(element);
-    final hasRiverpodAnnotation =
-        riverpodAnnotationTypeChecker.hasAnnotationOf(element);
+    final hasRiverpodAnnotation = riverpodAnnotationTypeChecker.hasAnnotationOf(element);
 
     if (hasWidgetAnnotation && !hasRiverpodAnnotation) {
       throw InvalidGenerationSourceError(
@@ -66,8 +64,6 @@ class WidgetGenerator {
     ConstantReader annotation,
     BuildStep buildStep,
   ) async {
-    throw UnimplementedError(
-      'Subclasses must override generateForAnnotatedElement',
-    );
+    throw UnimplementedError('Subclasses must override generateForAnnotatedElement');
   }
 }
