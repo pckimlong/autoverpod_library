@@ -1,5 +1,5 @@
-import 'package:code_builder/code_builder.dart';
 import 'package:autoverpod_generator/src/templates/comment_generator.dart';
+import 'package:code_builder/code_builder.dart';
 
 String generateBaseProxyWidgetRef(
   String name, {
@@ -10,16 +10,13 @@ String generateBaseProxyWidgetRef(
     (b) => b
       ..docs.addAll([if (classComment != null) classComment.content])
       ..name = name
-      ..extend = refer('WidgetRef')
+      ..extend = refer('MutationTarget', 'package:hooks_riverpod/experimental/mutation.dart')
       ..fields.add(
         Field(
           (b) => b
             ..modifier = FieldModifier.final$
             ..name = '_ref'
-            ..type = refer(
-              'WidgetRef',
-              'package:flutter_riverpod/flutter_riverpod.dart',
-            ),
+            ..type = refer('WidgetRef', 'package:flutter_riverpod/flutter_riverpod.dart'),
         ),
       )
       ..constructors.add(
@@ -42,7 +39,6 @@ String generateBaseProxyWidgetRef(
             ..name = 'context'
             ..type = MethodType.getter
             ..returns = refer('BuildContext')
-            ..annotations.add(refer('override'))
             ..lambda = true
             ..body = refer('_ref.context').code,
         ),
@@ -50,7 +46,6 @@ String generateBaseProxyWidgetRef(
           (b) => b
             ..name = 'exists'
             ..returns = refer('bool')
-            ..annotations.add(refer('override'))
             ..lambda = true
             ..requiredParameters.add(
               Parameter(
@@ -65,7 +60,6 @@ String generateBaseProxyWidgetRef(
           (b) => b
             ..name = 'invalidate'
             ..returns = refer('void')
-            ..annotations.add(refer('override'))
             ..lambda = true
             ..requiredParameters.add(
               Parameter(
@@ -81,7 +75,6 @@ String generateBaseProxyWidgetRef(
             ..name = 'listen'
             ..types.add(refer('T'))
             ..returns = refer('void')
-            ..annotations.add(refer('override'))
             ..lambda = true
             ..requiredParameters.addAll([
               Parameter(
@@ -103,17 +96,15 @@ String generateBaseProxyWidgetRef(
                   ..type = refer('void Function(Object, StackTrace)?'),
               ),
             )
-            ..body = refer('_ref.listen').call(
-              [refer('provider'), refer('listener')],
-              {'onError': refer('onError')},
-            ).code,
+            ..body = refer(
+              '_ref.listen',
+            ).call([refer('provider'), refer('listener')], {'onError': refer('onError')}).code,
         ),
         Method(
           (b) => b
             ..name = 'listenManual'
             ..types.add(refer('T'))
             ..returns = refer('ProviderSubscription<T>')
-            ..annotations.add(refer('override'))
             ..lambda = true
             ..requiredParameters.addAll([
               Parameter(
@@ -142,20 +133,18 @@ String generateBaseProxyWidgetRef(
                   ..defaultTo = literalFalse.code,
               ),
             ])
-            ..body = refer('_ref.listenManual').call(
-              [refer('provider'), refer('listener')],
-              {
-                'onError': refer('onError'),
-                'fireImmediately': refer('fireImmediately'),
-              },
-            ).code,
+            ..body = refer('_ref.listenManual')
+                .call(
+                  [refer('provider'), refer('listener')],
+                  {'onError': refer('onError'), 'fireImmediately': refer('fireImmediately')},
+                )
+                .code,
         ),
         Method(
           (b) => b
             ..name = 'read'
             ..types.add(refer('T'))
             ..returns = refer('T')
-            ..annotations.add(refer('override'))
             ..lambda = true
             ..requiredParameters.add(
               Parameter(
@@ -171,7 +160,6 @@ String generateBaseProxyWidgetRef(
             ..name = 'refresh'
             ..types.add(refer('State'))
             ..returns = refer('State')
-            ..annotations.add(refer('override'))
             ..lambda = true
             ..requiredParameters.add(
               Parameter(
@@ -187,7 +175,6 @@ String generateBaseProxyWidgetRef(
             ..name = 'watch'
             ..types.add(refer('T'))
             ..returns = refer('T')
-            ..annotations.add(refer('override'))
             ..lambda = true
             ..requiredParameters.add(
               Parameter(
@@ -197,6 +184,14 @@ String generateBaseProxyWidgetRef(
               ),
             )
             ..body = refer('_ref.watch').call([refer('provider')]).code,
+        ),
+        Method(
+          (b) => b
+            ..name = 'container'
+            ..type = MethodType.getter
+            ..returns = refer('ProviderContainer', 'package:hooks_riverpod/misc.dart')
+            ..lambda = true
+            ..body = refer('_ref.container').code,
         ),
       ]),
   ).accept(DartEmitter()).toString();

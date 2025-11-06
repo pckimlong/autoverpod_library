@@ -42,6 +42,14 @@ class UnifiedWidgetBuilder implements Builder {
     bool hasAnnotations = false;
 
     for (final element in library.allElements) {
+      // Skip elements from generated files
+      final elementLibraryUri = element.library?.uri.toString() ?? '';
+      if (elementLibraryUri.endsWith('.g.dart') ||
+          elementLibraryUri.endsWith('.freezed.dart') ||
+          elementLibraryUri.endsWith('.widget.dart')) {
+        continue;
+      }
+
       for (final generator in _registry.generators) {
         if (generator.canProcess(element)) {
           hasAnnotations = true;

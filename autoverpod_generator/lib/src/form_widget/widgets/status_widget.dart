@@ -15,12 +15,12 @@ String generateStatusWidget(ProviderDefinition provider) {
       ClassField(
         name: 'builder',
         type:
-            'Widget Function(BuildContext context, ${provider.formBaseProxyWidgetName} ref, ${provider.getSubmitMethodInfo().asyncValueType()} status)',
+            'Widget Function(BuildContext context, ${provider.formBaseProxyWidgetName} ref, MutationState<${provider.getSubmitMethodInfo().rawResultType}>? status)',
       ),
       ClassField(
         name: 'onChanged',
         type:
-            'void Function(${provider.getSubmitMethodInfo().asyncValueType()} previous, ${provider.getSubmitMethodInfo().asyncValueType()} next)?',
+            'void Function(MutationState<${provider.getSubmitMethodInfo().rawResultType}>? previous, MutationState<${provider.getSubmitMethodInfo().rawResultType}>? next)?',
         isRequired: false,
       ),
     ],

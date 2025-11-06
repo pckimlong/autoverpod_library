@@ -56,11 +56,11 @@ class FormProviderGenerator extends GeneratorForAnnotation<FormWidget> {
     buffer.writeln('// Generated from: ${provider.providerName}');
     buffer.writeln('//');
     buffer.writeln('// GENERATED PROVIDER:');
-    buffer.writeln('// - ${provider.callStatusProviderName}: Form submission status provider');
+    buffer.writeln('// - ${provider.callStatusProviderName}: Form submission mutation provider');
     buffer.writeln('//');
     buffer.writeln('// ABSTRACT CLASS: _\$${provider.baseName}Widget');
-    buffer.writeln('// - call(): Submit form with validation and status handling');
-    buffer.writeln('// - submit(): Override to implement form submission logic');
+    buffer.writeln('// - call(): Submit form with mutation handling');
+    buffer.writeln('// - submit(): Override to implement form submission logic with MutationTransaction');
     buffer.writeln('// - onSuccess(): Override to handle successful submissions');
     buffer.writeln('//');
 
@@ -68,16 +68,16 @@ class FormProviderGenerator extends GeneratorForAnnotation<FormWidget> {
   }
 }
 
-/// Contains information about the state provider
-class StateProviderInfo {
+/// Contains information about the mutation provider
+class MutationProviderInfo {
   final String declaration;
   final String readProvider;
-  final Field statusProvider;
+  final Field mutationProvider;
 
-  StateProviderInfo({
+  MutationProviderInfo({
     required this.declaration,
     required this.readProvider,
-    required this.statusProvider,
+    required this.mutationProvider,
   });
 }
 
@@ -88,7 +88,7 @@ class StateProviderInfo {
 /// - Success/error handling
 String _generateFormProviderAbstraction(ProviderDefinition provider) {
   final submitMethodInfo = provider.getSubmitMethodInfo();
-  final stateProviderInfo = _generateStateProviderInfo(provider, submitMethodInfo);
+  final mutationProviderInfo = _generateMutationProviderInfo(provider, submitMethodInfo);
   final updateMethods = _generateUpdateMethods(provider);
 
   // Generate the proxy class using code_builder
@@ -99,41 +99,41 @@ String _generateFormProviderAbstraction(ProviderDefinition provider) {
       ..extend = refer('_\$${provider.baseName}')
       ..methods.addAll([
         _generateOnSuccessMethod(provider, submitMethodInfo.rawResultType),
-        _generateCallMethod(provider, submitMethodInfo, stateProviderInfo),
+        _generateCallMethod(provider, submitMethodInfo, mutationProviderInfo),
         _generateInvalidateSelfMethod(provider),
         _generateSubmitMethod(provider, submitMethodInfo),
         ...updateMethods,
       ]),
   ).accept(DartEmitter()).toString();
 
-  // Create the call status provider declaration
-  final callStatusDeclaration =
-      'StateProvider.autoDispose'
+  // Create the mutation provider declaration
+  final mutationDeclaration =
+      'Mutation'
       '${provider.hasFamily ? ".family" : ""}'
-      '<AsyncValue<${submitMethodInfo.rawResultType}>?'
+      '<${submitMethodInfo.rawResultType}'
       '${provider.hasFamily ? ",${provider.familyAsRecordType}" : ""}>'
-      '((ref${provider.hasFamily ? " ,_" : ""}) => null)';
+      '()';
 
   // Return the complete generated code
   return '''
-final ${provider.callStatusProviderName} = $callStatusDeclaration;
+final ${provider.callStatusProviderName} = $mutationDeclaration;
 
 $proxyClass
 ''';
 }
 
-/// Generates state provider information
-StateProviderInfo _generateStateProviderInfo(
+/// Generates mutation provider information
+MutationProviderInfo _generateMutationProviderInfo(
   ProviderDefinition provider,
   SubmitMethodInfo submitInfo,
 ) {
   // Create the provider declaration
   final declaration =
-      'StateProvider.autoDispose'
+      'Mutation'
       '${provider.hasFamily ? ".family" : ""}'
-      '<AsyncValue<${submitInfo.rawResultType}>?'
+      '<${submitInfo.rawResultType}'
       '${provider.hasFamily ? ",${provider.familyAsRecordType}" : ""}>'
-      '((ref${provider.hasFamily ? " ,_" : ""}) => null)';
+      '()';
 
   // Create the provider read expression
   final readProvider =
@@ -141,18 +141,17 @@ StateProviderInfo _generateStateProviderInfo(
       "${provider.hasFamily ? "(${provider.familyAsRecordBindString()})" : ""}";
 
   // Create the field definition
-  final statusProvider = Field(
+  final mutationProvider = Field(
     (b) => b
       ..name = provider.callStatusProviderName
-      ..static = false
       ..modifier = FieldModifier.final$
       ..assignment = Code(declaration),
   );
 
-  return StateProviderInfo(
+  return MutationProviderInfo(
     declaration: declaration,
     readProvider: readProvider,
-    statusProvider: statusProvider,
+    mutationProvider: mutationProvider,
   );
 }
 
@@ -259,16 +258,22 @@ Method _generateOnSuccessMethod(ProviderDefinition provider, String rawResultTyp
 Method _generateCallMethod(
   ProviderDefinition provider,
   SubmitMethodInfo submitInfo,
-  StateProviderInfo stateInfo,
+  MutationProviderInfo mutationInfo,
 ) {
   final hasOverrideOnSuccess = provider.methods.any((e) => e.name == 'onSuccess');
+
+  // Filter out MutationTransaction and state parameters to avoid duplication
+  final filteredPositionalParams = submitInfo.positionalParams
+      .where((p) => p.name != 'tsx' && p.name != 'state')
+      .toList();
+
   // Check if form is loaded based on state type
   final loadingCheck = provider.isAsyncValue
       ? '''
   // Ignore if form is not loaded yet
-  if (this.state.isLoading) return const AsyncValue.loading();
+  if (this.state.isLoading) return;
   // Cannot submit when form is not loaded yet
-  if (this.state.hasValue == false) return const AsyncValue.loading();
+  if (this.state.hasValue == false) return;
 '''
       : '';
 
@@ -277,42 +282,24 @@ Method _generateCallMethod(
       ..name = 'call'
       ..annotations.addAll([refer('nonVirtual')])
       ..modifier = MethodModifier.async
-      ..returns = refer(provider.callFunctionReturnType)
-      ..requiredParameters.addAll(
-        submitInfo.positionalParams.where((e) => e.name != 'state').toList(),
-      )
+      ..returns = refer(submitInfo.futureResultType)
+      ..requiredParameters.addAll(filteredPositionalParams)
       ..optionalParameters.addAll(submitInfo.namedParams)
       ..body = Code('''
 $loadingCheck
 
-final _callStatus = this.ref.read(${stateInfo.readProvider});
-final _updateCallStatus = this.ref.read(${stateInfo.readProvider}.notifier);
+final result = await ${mutationInfo.readProvider}.run(this.ref, (tsx) async {
+  final result = await submit(
+    tsx,
+    ${provider.isAsyncValue ? 'this.state.requireValue' : 'this.state'}
+    ${submitInfo.positionalParams.where((p) => p.name != 'tsx' && p.name != 'state').isNotEmpty ? ', ' + submitInfo.positionalParams.where((p) => p.name != 'tsx' && p.name != 'state').map((e) => e.name).join(', ') : ''}
+    ${submitInfo.namedParams.isNotEmpty ? "${submitInfo.positionalParams.where((p) => p.name != 'tsx' && p.name != 'state').isNotEmpty || submitInfo.positionalParams.any((e) => e.name == 'state') ? ',' : ''}${submitInfo.namedParams.map((e) => "${e.name}: ${e.name}").join(', ')}" : ""}
+  );
+  return result;
+});
 
-if (_callStatus?.isLoading == true) return const AsyncValue.loading();
-
-if (_callStatus?.hasValue == true) {
-  return _callStatus!;
-}
-
-_updateCallStatus.state = const AsyncValue.loading();
-final result = await AsyncValue.guard(() async => await submit(
-  ${submitInfo.positionalParams.map((e) {
-        if (e.name == 'state') {
-          if (provider.isAsyncValue) {
-            return 'this.state.requireValue';
-          } else {
-            return 'this.state';
-          }
-        }
-        return e.name;
-      }).join(', ')}
-  ${submitInfo.namedParams.isNotEmpty ? "${submitInfo.positionalParams.isNotEmpty ? ',' : ''}${submitInfo.namedParams.map((e) => "${e.name}: ${e.name}").join(', ')}" : ""}
-));
-
-_updateCallStatus.state = result;
-
-${hasOverrideOnSuccess ? '''if (result.hasValue) {
-  onSuccess(result.requireValue);
+${hasOverrideOnSuccess ? '''if (this.ref.read(${mutationInfo.readProvider}).isSuccess) {
+  onSuccess(result);
 }''' : ''}
 
 return result;
@@ -327,13 +314,18 @@ Method _generateInvalidateSelfMethod(ProviderDefinition provider) {
       ..name = 'invalidateSelf'
       ..returns = refer('void')
       ..body = Code(
-        'this.ref.invalidate(${provider.callStatusProviderName});\nthis.ref.invalidateSelf();',
+        '${provider.callStatusProviderName}.reset(this.ref);\nthis.ref.invalidateSelf();',
       ),
   );
 }
 
 /// Generates the submit method signature
 Method _generateSubmitMethod(ProviderDefinition provider, SubmitMethodInfo submitInfo) {
+  // Filter out MutationTransaction parameters to avoid duplication
+  final filteredPositionalParams = submitInfo.positionalParams
+      .where((p) => p.name != 'tsx')
+      .toList();
+
   return Method(
     (b) => b
       ..name = 'submit'
@@ -356,15 +348,22 @@ Method _generateSubmitMethod(ProviderDefinition provider, SubmitMethodInfo submi
       ])
       ..modifier = MethodModifier.async
       ..returns = refer(submitInfo.futureResultType)
+      ..requiredParameters.add(
+        Parameter(
+          (b) => b
+            ..name = 'tsx'
+            ..type = refer('MutationTransaction', 'package:hooks_riverpod/experimental/mutation.dart'),
+        ),
+      )
       ..requiredParameters.addAll([
-        if (!submitInfo.positionalParams.any((e) => e.name == 'state'))
+        if (!filteredPositionalParams.any((e) => e.name == 'state'))
           Parameter(
             (b) => b
               ..name = 'state'
               ..type = refer(provider.returnType.baseType),
           ),
       ])
-      ..requiredParameters.addAll(submitInfo.positionalParams)
+      ..requiredParameters.addAll(filteredPositionalParams)
       ..optionalParameters.addAll(submitInfo.namedParams),
   );
 }

@@ -203,11 +203,12 @@ class ClassDefinition {
     if (isFreezed) {
       // For freezed classes, look at the factory constructor parameters
       final factoryConstructors = element.constructors.where((c) {
+        final constructorName = c.name ?? '';
         return c.isFactory &&
             (!c.isSynthetic || options.parseSyntheticFields) &&
             (c.isPublic || options.parsePrivateFields) &&
             (options.parseStaticFields || !c.isStatic) &&
-            c.name != 'fromJson'; // ignore fromJson factory constructor
+            constructorName != 'fromJson'; // ignore fromJson factory constructor
       });
 
       for (final constructor in factoryConstructors) {
@@ -217,8 +218,8 @@ class ClassDefinition {
         });
 
         for (final param in params) {
-          final name = param.name;
-          if (fields.any((f) => f.name == name)) {
+          final paramName = param.name ?? '';
+          if (paramName.isEmpty || fields.any((f) => f.name == paramName)) {
             continue;
           }
 

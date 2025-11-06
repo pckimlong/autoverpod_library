@@ -110,8 +110,8 @@ class _${provider.formScopeWidgetName}State extends ConsumerState<${provider.for
     ref.listen(
       ${provider.callStatusProviderNameWithFamily(prefix: 'widget')},
       (previous, next) {
-        if (previous?.hasValue == false && next?.hasValue == true) {
-          widget.onSucceed?.call(context, next!.requireValue);
+        if ((previous?.isSuccess ?? false) == false && (next.isSuccess) == true) {
+          widget.onSucceed?.call(context, (next as MutationSuccess<${provider.getSubmitMethodInfo().rawResultType}>).value);
         }
       },
     );

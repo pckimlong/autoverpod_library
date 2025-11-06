@@ -19,7 +19,7 @@ import '../../autoverpod_generator.dart';
 
 class FormWidgetGenerator extends WidgetGenerator {
   @override
-  final TypeChecker annotationTypeChecker = const TypeChecker.fromUrl('package:autoverpod/autoverpod.dart#FormWidget');
+  final TypeChecker annotationTypeChecker = const TypeChecker.fromUrl('package:autoverpod/src/annotations.dart#FormWidget');
 
   @override
   List<String> getRequiredImports() {
@@ -28,6 +28,8 @@ class FormWidgetGenerator extends WidgetGenerator {
       'package:flutter/material.dart',
       'package:flutter_hooks/flutter_hooks.dart',
       'package:hooks_riverpod/hooks_riverpod.dart',
+      'package:hooks_riverpod/experimental/mutation.dart',
+      'package:hooks_riverpod/misc.dart',
     ];
   }
 

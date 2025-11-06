@@ -33,7 +33,7 @@ String generateFormBaseProxyWidgetRef(ProviderDefinition provider) {
         (b) => b
           ..name = hasStatusConflict ? 'formStatus' : 'status'
           ..type = MethodType.getter
-          ..returns = refer(provider.getSubmitMethodInfo().asyncValueType())
+          ..returns = refer('MutationState<${provider.getSubmitMethodInfo().rawResultType}>?')
           ..lambda = true
           ..docs.addAll([
             if (hasStatusConflict)
@@ -69,49 +69,7 @@ String generateFormBaseProxyWidgetRef(ProviderDefinition provider) {
               _ref.read(${provider.providerNameWithFamily(prefix: 'params')}.notifier)
               '''),
       ),
-      Method((b) {
-        final submitInfo = provider.getSubmitMethodInfo();
-
-        final positionalParamsString = submitInfo.positionalParams
-            .where((e) => e.name != 'state')
-            .map((param) => param.name)
-            .join(', ');
-
-        final namedParamsString = submitInfo.namedParams
-            .map((param) => '${param.name}: ${param.name}')
-            .join(', ');
-
-        String callParams = '';
-        if (positionalParamsString.isNotEmpty && namedParamsString.isNotEmpty) {
-          callParams = '$positionalParamsString, $namedParamsString';
-        } else if (positionalParamsString.isNotEmpty) {
-          callParams = positionalParamsString;
-        } else if (namedParamsString.isNotEmpty) {
-          callParams = namedParamsString;
-        }
-
-        b
-          ..name = hasSubmitConflict ? 'formSubmit' : 'submit'
-          ..returns = refer(provider.callFunctionReturnType)
-          ..docs.addAll([
-            '/// Submits the form. Internally this calls [notifier.submit] with the form key validated.',
-            if (hasSubmitConflict)
-              '/// Using formSubmit to avoid conflict with field named "submit".',
-          ])
-          ..modifier = MethodModifier.async
-          ..requiredParameters.addAll(
-            submitInfo.positionalParams.where((e) => e.name != 'state').toList(),
-          )
-          ..optionalParameters.addAll(submitInfo.namedParams)
-          ..body = Code('''
-    if (!(${hasFormKeyConflict ? 'getFormKey' : 'formKey'}.currentState?.validate() ?? false)) {
-      return AsyncValue.error(Exception('Form is not valid'), StackTrace.current);
-    }
-    ${hasFormKeyConflict ? 'getFormKey' : 'formKey'}.currentState?.save();
-
-    return await ${hasNotifierConflict ? 'formNotifier' : 'notifier'}($callParams);
-''');
-      }),
+      // Submit method removed - use notifier() call method instead
       // To force user to use select instead of state, I disabled this method, select will able to access full state too
       // Method(
       //   (b) => b
