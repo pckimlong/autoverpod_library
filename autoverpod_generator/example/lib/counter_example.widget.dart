@@ -113,6 +113,7 @@ class CounterFormFormScope extends ConsumerStatefulWidget {
     required this.builder,
     this.child,
     this.onSucceed,
+    this.onStatusChanged,
   }) : assert(
          child != null || builder != null,
          'Either child or builder must be provided',
@@ -129,6 +130,11 @@ class CounterFormFormScope extends ConsumerStatefulWidget {
   final AutovalidateMode? autovalidateMode;
   final void Function(bool, Object?)? onPopInvokedWithResult;
   final void Function(BuildContext context, String value)? onSucceed;
+  final void Function(
+    MutationState<String>? previous,
+    MutationState<String>? next,
+  )?
+  onStatusChanged;
 
   @override
   ConsumerState<ConsumerStatefulWidget> createState() =>
@@ -153,11 +159,16 @@ class _CounterFormFormScopeState extends ConsumerState<CounterFormFormScope> {
   @override
   Widget build(BuildContext context) {
     ref.listen(counterFormCallStatusProvider, (previous, next) {
-      if ((previous?.isSuccess ?? false) == false && (next.isSuccess) == true) {
-        widget.onSucceed?.call(
-          context,
-          (next as MutationSuccess<String>).value,
-        );
+      if (widget.onStatusChanged != null) {
+        if (previous != next) {
+          widget.onStatusChanged!(previous, next);
+        }
+      }
+      if (widget.onSucceed != null) {
+        if ((previous?.isSuccess ?? false) == false &&
+            (next.isSuccess) == true) {
+          widget.onSucceed!(context, (next as MutationSuccess<String>).value);
+        }
       }
     });
 

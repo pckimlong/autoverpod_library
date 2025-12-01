@@ -147,6 +147,7 @@ class SimpleUserFormFormScope extends ConsumerStatefulWidget {
     required this.builder,
     this.child,
     this.onSucceed,
+    this.onStatusChanged,
   }) : assert(
          child != null || builder != null,
          'Either child or builder must be provided',
@@ -163,6 +164,8 @@ class SimpleUserFormFormScope extends ConsumerStatefulWidget {
   final AutovalidateMode? autovalidateMode;
   final void Function(bool, Object?)? onPopInvokedWithResult;
   final void Function(BuildContext context, int value)? onSucceed;
+  final void Function(MutationState<int>? previous, MutationState<int>? next)?
+  onStatusChanged;
 
   @override
   ConsumerState<ConsumerStatefulWidget> createState() =>
@@ -188,8 +191,16 @@ class _SimpleUserFormFormScopeState
   @override
   Widget build(BuildContext context) {
     ref.listen(simpleUserFormCallStatusProvider, (previous, next) {
-      if ((previous?.isSuccess ?? false) == false && (next.isSuccess) == true) {
-        widget.onSucceed?.call(context, (next as MutationSuccess<int>).value);
+      if (widget.onStatusChanged != null) {
+        if (previous != next) {
+          widget.onStatusChanged!(previous, next);
+        }
+      }
+      if (widget.onSucceed != null) {
+        if ((previous?.isSuccess ?? false) == false &&
+            (next.isSuccess) == true) {
+          widget.onSucceed!(context, (next as MutationSuccess<int>).value);
+        }
       }
     });
 

@@ -56,6 +56,8 @@ return isInitializedAsync.when(
 ''';
   }
 
+  final statusType = 'MutationState<${provider.getSubmitMethodInfo().rawResultType}>';
+
   return '''
 class ${provider.formScopeWidgetName} extends ConsumerStatefulWidget {
   const ${provider.formScopeWidgetName}({
@@ -66,6 +68,7 @@ class ${provider.formScopeWidgetName} extends ConsumerStatefulWidget {
     required this.builder,
     this.child,
     this.onSucceed,
+    this.onStatusChanged,
     ${provider.isAsyncValue ? '''
     this.onInitLoading,
     this.onInitError,''' : ''}
@@ -81,6 +84,7 @@ class ${provider.formScopeWidgetName} extends ConsumerStatefulWidget {
   final AutovalidateMode? autovalidateMode;
   final void Function(bool, Object?)? onPopInvokedWithResult;
   final void Function(BuildContext context, ${provider.getSubmitMethodInfo().rawResultType} value)? onSucceed;
+  final void Function($statusType? previous, $statusType? next)? onStatusChanged;
   ${provider.isAsyncValue ? '''
   final Widget Function()? onInitLoading;
   final Widget Function(Object error, StackTrace stack)? onInitError;
@@ -110,8 +114,15 @@ class _${provider.formScopeWidgetName}State extends ConsumerState<${provider.for
     ref.listen(
       ${provider.callStatusProviderNameWithFamily(prefix: 'widget')},
       (previous, next) {
-        if ((previous?.isSuccess ?? false) == false && (next.isSuccess) == true) {
-          widget.onSucceed?.call(context, (next as MutationSuccess<${provider.getSubmitMethodInfo().rawResultType}>).value);
+        if (widget.onStatusChanged != null) {
+          if (previous != next) {
+            widget.onStatusChanged!(previous, next);
+          }
+        }
+        if (widget.onSucceed != null) {
+          if ((previous?.isSuccess ?? false) == false && (next.isSuccess) == true) {
+            widget.onSucceed!(context, (next as MutationSuccess<${provider.getSubmitMethodInfo().rawResultType}>).value);
+          }
         }
       },
     );

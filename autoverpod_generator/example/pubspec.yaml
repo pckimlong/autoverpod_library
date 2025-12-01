@@ -43,6 +43,11 @@ dev_dependencies:
   autoverpod_generator: ^0.0.5
   build_runner: ^2.10.1
   freezed: ^3.2.3
+  flutter_test:
+    sdk: flutter
+  test: ^1.24.4
+  mockito: ^5.4.2
+  hooks_riverpod: ^3.0.3
 
   # The "flutter_lints" package below contains a set of recommended lints to
   # encourage good coding practices. The lint set provided by the package is
