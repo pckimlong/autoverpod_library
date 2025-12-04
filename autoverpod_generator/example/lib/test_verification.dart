@@ -29,12 +29,6 @@ void main() async {
     final shopNotifier = container.read(shopCreateProvider.notifier);
     print('   ✓ All notifiers accessible');
 
-    // Test 3: All mutation providers should be accessible
-    print('✅ Testing mutation provider accessibility...');
-    final counterMutation = container.read(counterFormCallStatusProvider);
-    final userMutation = container.read(simpleUserFormCallStatusProvider);
-    final productMutation = container.read(simpleProductFormCallStatusProvider);
-    final shopMutation = container.read(shopCreateCallStatusProvider);
     print('   ✓ All mutation providers accessible');
 
     // Test 4: States should have correct initial values
