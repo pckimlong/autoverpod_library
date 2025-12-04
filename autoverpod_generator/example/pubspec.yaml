@@ -47,7 +47,6 @@ dev_dependencies:
     sdk: flutter
   test: ^1.24.4
   mockito: ^5.4.2
-  hooks_riverpod: ^3.0.3
 
   # The "flutter_lints" package below contains a set of recommended lints to
   # encourage good coding practices. The lint set provided by the package is

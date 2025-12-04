@@ -11,7 +11,6 @@ String generateFormBaseProxyWidgetRef(ProviderDefinition provider) {
   final hasParamsConflict = fields.any((f) => f.name == 'params');
   final hasFormKeyConflict = fields.any((f) => f.name == 'formKey');
   final hasNotifierConflict = fields.any((f) => f.name == 'notifier');
-  final hasSubmitConflict = fields.any((f) => f.name == 'submit');
 
   return generateBaseProxyWidgetRef(
     provider.formBaseProxyWidgetName,

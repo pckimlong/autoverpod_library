@@ -292,7 +292,7 @@ final result = await ${mutationInfo.readProvider}.run(this.ref, (tsx) async {
   final result = await submit(
     tsx,
     ${provider.isAsyncValue ? 'this.state.requireValue' : 'this.state'}
-    ${submitInfo.positionalParams.where((p) => p.name != 'tsx' && p.name != 'state').isNotEmpty ? ', ' + submitInfo.positionalParams.where((p) => p.name != 'tsx' && p.name != 'state').map((e) => e.name).join(', ') : ''}
+    ${submitInfo.positionalParams.where((p) => p.name != 'tsx' && p.name != 'state').isNotEmpty ? ', ${submitInfo.positionalParams.where((p) => p.name != 'tsx' && p.name != 'state').map((e) => e.name).join(', ')}' : ''}
     ${submitInfo.namedParams.isNotEmpty ? "${submitInfo.positionalParams.where((p) => p.name != 'tsx' && p.name != 'state').isNotEmpty || submitInfo.positionalParams.any((e) => e.name == 'state') ? ',' : ''}${submitInfo.namedParams.map((e) => "${e.name}: ${e.name}").join(', ')}" : ""}
   );
   return result;

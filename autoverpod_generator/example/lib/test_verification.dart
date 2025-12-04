@@ -1,3 +1,5 @@
+// ignore_for_file: avoid_print
+
 import 'package:hooks_riverpod/hooks_riverpod.dart';
 
 import 'counter_example.dart';

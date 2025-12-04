@@ -181,9 +181,13 @@ class UnifiedWidgetBuilder implements Builder {
     
     // Relative imports last
     if (!a.startsWith('dart:') && !a.startsWith('package:') && 
-        (b.startsWith('dart:') || b.startsWith('package:'))) return 1;
+        (b.startsWith('dart:') || b.startsWith('package:'))) {
+      return 1;
+    }
     if ((a.startsWith('dart:') || a.startsWith('package:')) && 
-        !b.startsWith('dart:') && !b.startsWith('package:')) return -1;
+        !b.startsWith('dart:') && !b.startsWith('package:')) {
+      return -1;
+    }
     
     // Within each category, sort alphabetically
     return a.compareTo(b);
