@@ -51,8 +51,8 @@
     }
   ],
   "generator": "pub",
-  "generatorVersion": "3.9.2",
+  "generatorVersion": "3.10.1",
   "flutterRoot": "file:///Users/kim/Development/flutter",
-  "flutterVersion": "3.35.4",
+  "flutterVersion": "3.38.3",
   "pubCache": "file:///Users/kim/.pub-cache"
 }
