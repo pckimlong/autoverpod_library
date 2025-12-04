@@ -1,17 +1,62 @@
-## 0.0.7
+## 0.0.6 - 2025-12-05
 
-- Update repository links to `pckimlong/autoverpod_library`
-- Update dependency to `autoverpod ^0.0.6`
-- Prepare for automated publishing via GitHub Actions (OIDC)
+### BREAKING CHANGES
 
-## 0.0.6
+- **Removed StateWidget generators** - The StateWidget generators have been completely removed. Use the new FormWidget generators instead.
+- **Generator architecture refactoring** - Significant internal refactoring of the generator system for better performance and maintainability.
 
-- **FIX**: Stabilize import generation to prevent random git commits
-  - Remove self-imports that caused generated files to import themselves
-  - Filter out unnecessary dart:core imports while preserving required ones like dart:typed_data
-  - Add deterministic import sorting for consistent output
-  - Improve source import filtering to avoid generator package imports
-  - This eliminates random import changes that caused unnecessary git commits on every build_runner execution
+### Features
+
+- **New FormWidget generators** - Complete rewrite of form widget generation with enhanced capabilities:
+  - `FormWidgetGenerator` for main form widget generation
+  - `FormProviderGenerator` for automatic provider generation
+  - Enhanced form validation and error handling
+  - Automatic mutation provider generation for submit operations
+- **Improved example applications** - New comprehensive examples showcasing:
+  - Counter example with mutation support
+  - Simple user form with validation
+  - Simple product form with validation
+  - Automated test verification suite
+
+### Improvements
+
+- **Better generated file handling** - Improved filtering of generated files (.g.dart, .freezed.dart, .widget.dart) to prevent circular dependencies
+- **Enhanced import resolution** - Better handling of imports with improved dependency management
+- **Updated dependencies** - All dependencies updated to latest versions:
+  - Riverpod 3.0.3 with experimental mutation support
+  - Analyzer ^7.4.0
+  - Build tools updated
+- **Performance optimizations** - Improved generator performance with better caching and reduced redundant processing
+- **Enhanced error handling** - Better error messages and debugging information during code generation
+- **Code cleanup** - Removed deprecated workflow files and unused generators
+
+### Upgrade Steps
+
+1. Update dependencies in `pubspec.yaml`:
+   ```yaml
+   dependencies:
+     autoverpod: ^0.0.6
+     autoverpod_generator: ^0.0.6
+     riverpod: ^3.0.3
+   dev_dependencies:
+     build_runner: ^4.0.2
+   ```
+
+2. Replace `@StateWidget()` with `@FormWidget()` in your code
+
+3. Regenerate code (required due to generator architecture changes):
+   ```bash
+   dart run build_runner build --delete-conflicting-outputs
+   ```
+
+4. Update your provider usage to use the new generated providers
+
+### Requirements
+
+- **Dart SDK**: ^3.9.2
+- **Flutter**: SDK requirement automatically handled by workspace
+- **autoverpod**: ^0.0.6
+- **build_runner**: ^4.0.2
 
 ## 0.0.5
 
