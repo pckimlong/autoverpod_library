@@ -1,13 +1,13 @@
 name: Publish autoverpod_generator to pub.dev
 
 on:
-  push:
-    tags:
-      - 'autoverpod_generator-v*'
+  release:
+    types: [published]
 
 jobs:
   publish:
     runs-on: ubuntu-latest
+    if: startsWith(github.event.release.tag_name, 'autoverpod_generator-v')
     permissions:
       id-token: write  # IMPORTANT: this permission is mandatory for pub.dev publishing
     
