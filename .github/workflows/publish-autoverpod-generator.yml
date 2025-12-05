@@ -1,0 +1,45 @@
+name: Publish autoverpod_generator to pub.dev
+
+on:
+  push:
+    tags:
+      - 'autoverpod_generator-v*'
+
+jobs:
+  publish:
+    runs-on: ubuntu-latest
+    permissions:
+      id-token: write  # IMPORTANT: this permission is mandatory for pub.dev publishing
+    
+    steps:
+    - uses: actions/checkout@v4
+    
+    - name: Setup Dart
+      uses: dart-lang/setup-dart@v1
+      with:
+        sdk: stable
+    
+    - name: Get required autoverpod version
+      id: required_version
+      run: |
+        REQUIRED_VERSION=$(grep '^autoverpod:' autoverpod_generator/pubspec.yaml | awk '{print $2}' | sed 's/\^//')
+        echo "required_version=$REQUIRED_VERSION" >> $GITHUB_OUTPUT
+    
+    - name: Check if autoverpod version exists on pub.dev
+      run: |
+        VERSION="${{ steps.required_version.outputs.required_version }}"
+        HTTP_STATUS=$(curl -s -o /dev/null -w "%{http_code}" "https://pub.dev/api/packages/autoverpod/versions/$VERSION")
+        if [ "$HTTP_STATUS" != "200" ]; then
+          echo "❌ autoverpod version $VERSION is not available on pub.dev"
+          echo "Please publish autoverpod first before publishing the generator"
+          exit 1
+        fi
+        echo "✅ autoverpod version $VERSION is available on pub.dev"
+    
+    - name: Install dependencies
+      run: dart pub get
+      working-directory: autoverpod_generator
+    
+    - name: Publish to pub.dev
+      run: dart pub publish --force
+      working-directory: autoverpod_generator
