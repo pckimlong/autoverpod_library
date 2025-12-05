@@ -9,9 +9,14 @@ jobs:
     runs-on: ubuntu-latest
     permissions:
       contents: write
+    outputs:
+      autoverpod_released: ${{ steps.check_tags.outputs.autoverpod_exists == 'false' }}
+      generator_released: ${{ steps.check_tags.outputs.generator_exists == 'false' }}
     
     steps:
     - uses: actions/checkout@v4
+      with:
+        fetch-depth: 0  # Fetch all tags
     
     - name: Get current versions
       id: versions
@@ -24,6 +29,8 @@ jobs:
       run: |
         AUTOVERPOD_TAG="autoverpod-v${{ steps.versions.outputs.autoverpod_version }}"
         GENERATOR_TAG="autoverpod_generator-v${{ steps.versions.outputs.autoverpod_generator_version }}"
+        
+        git fetch --tags
         
         if git rev-parse --verify "refs/tags/$AUTOVERPOD_TAG" >/dev/null 2>&1; then
           echo "autoverpod_exists=true" >> $GITHUB_OUTPUT
@@ -79,3 +86,19 @@ jobs:
           autoverpod_generator/pubspec.yaml
         draft: false
         prerelease: false
+
+  publish-autoverpod:
+    needs: release
+    if: needs.release.outputs.autoverpod_released == 'true'
+    uses: ./.github/workflows/publish-autoverpod.yml
+    permissions:
+      id-token: write
+      contents: read
+
+  publish-generator:
+    needs: [release, publish-autoverpod]
+    if: always() && needs.release.outputs.generator_released == 'true' && (needs.publish-autoverpod.result == 'success' || needs.publish-autoverpod.result == 'skipped')
+    uses: ./.github/workflows/publish-autoverpod-generator.yml
+    permissions:
+      id-token: write
+      contents: read

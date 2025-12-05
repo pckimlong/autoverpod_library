@@ -3,11 +3,13 @@ name: Publish autoverpod to pub.dev
 on:
   release:
     types: [published]
+  workflow_call:
+  workflow_dispatch:
 
 jobs:
   publish:
     runs-on: ubuntu-latest
-    if: startsWith(github.event.release.tag_name, 'autoverpod-v')
+    if: ${{ github.event_name == 'workflow_call' || github.event_name == 'workflow_dispatch' || startsWith(github.event.release.tag_name, 'autoverpod-v') }}
     permissions:
       id-token: write  # IMPORTANT: this permission is mandatory for pub.dev publishing
     
