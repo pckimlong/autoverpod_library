@@ -134,7 +134,7 @@ class ClassDefinition {
         : const <String>[];
 
     return ClassDefinition(
-      name: classElement.name,
+      name: classElement.name ?? '',
       fields: fields,
       isFreezed: isFreezed,
       methods: methods,
@@ -161,7 +161,7 @@ class ClassDefinition {
   static bool _isFreezed(ClassElement element) {
     // Check for @freezed annotation
     final hasFreezedAnnotation =
-        element.metadata.any((m) => m.element?.displayName == 'freezed');
+        element.metadata.annotations.any((m) => m.element?.displayName == 'freezed');
 
     // Check for the _$ mixin which is characteristic of freezed classes
     final hasMixin =
@@ -203,22 +203,23 @@ class ClassDefinition {
     if (isFreezed) {
       // For freezed classes, look at the factory constructor parameters
       final factoryConstructors = element.constructors.where((c) {
+        final constructorName = c.name ?? '';
         return c.isFactory &&
             (!c.isSynthetic || options.parseSyntheticFields) &&
             (c.isPublic || options.parsePrivateFields) &&
             (options.parseStaticFields || !c.isStatic) &&
-            c.name != 'fromJson'; // ignore fromJson factory constructor
+            constructorName != 'fromJson'; // ignore fromJson factory constructor
       });
 
       for (final constructor in factoryConstructors) {
-        final params = constructor.parameters.where((p) {
+        final params = constructor.formalParameters.where((p) {
           return (!p.isSynthetic || options.parseSyntheticFields) &&
               (p.isPublic || options.parsePrivateFields);
         });
 
         for (final param in params) {
-          final name = param.name;
-          if (fields.any((f) => f.name == name)) {
+          final paramName = param.name ?? '';
+          if (paramName.isEmpty || fields.any((f) => f.name == paramName)) {
             continue;
           }
 
@@ -268,31 +269,39 @@ class ClassDefinition {
 
     // Get methods directly declared in the class
     for (final method in element.methods.where((m) {
-      return (!m.isSynthetic || options.parseSyntheticFields) &&
-              (m.isPublic || options.parsePrivateFields) &&
-              (options.parseAllMethods ||
-                  options.toParseMethods.contains(m.name)) ||
-          (options.parseCopyWith && m.name == 'copyWith');
+      final methodName = m.name;
+      return methodName != null &&
+          ((!m.isSynthetic || options.parseSyntheticFields) &&
+                  (m.isPublic || options.parsePrivateFields) &&
+                  (options.parseAllMethods ||
+                      options.toParseMethods.contains(methodName)) ||
+              (options.parseCopyWith && methodName == 'copyWith'));
     })) {
-      methods[method.name] = MethodDefinition.parseMethod(method);
+      final methodName = method.name;
+      if (methodName != null) {
+        methods[methodName] = MethodDefinition.parseMethod(method);
+      }
     }
 
     // Get getters
-    for (final accessor in element.accessors.where((a) {
-      return a.isGetter &&
-              (!a.isSynthetic || options.parseSyntheticFields) &&
-              (a.isPublic || options.parsePrivateFields) &&
-              (options.parseAllMethods ||
-                  options.toParseMethods.contains(a.name)) ||
-          (options.parseCopyWith && a.name == 'copyWith');
+    for (final accessor in element.getters.where((a) {
+      final accessorName = a.name;
+      return accessorName != null &&
+          ((!a.isSynthetic || options.parseSyntheticFields) &&
+                  (a.isPublic || options.parsePrivateFields) &&
+                  (options.parseAllMethods ||
+                      options.toParseMethods.contains(accessorName)) ||
+              (options.parseCopyWith && accessorName == 'copyWith'));
     })) {
-      methods[accessor.name] = MethodDefinition.parseGetter(accessor);
+      final accessorName = accessor.name;
+      if (accessorName != null) {
+        methods[accessorName] = MethodDefinition.parseGetter(accessor);
+      }
     }
 
     if (_isFreezed(element as ClassElement)) {
       // For Freezed classes, look for the generated CopyWith interface
-      final copyWithInterface = element.library.topLevelElements
-          .whereType<ClassElement>()
+      final copyWithInterface = element.library.classes
           .where((e) => e.name == '\$${element.name}CopyWith')
           .firstOrNull;
 
@@ -308,37 +317,47 @@ class ClassDefinition {
       }
 
       // Also look for methods in the private mixin for completeness
-      final privateMixin = element.library.topLevelElements
-          .whereType<MixinElement>()
-          .where((e) => e.name.startsWith('_\$${element.name}'))
+      final privateMixin = element.library.mixins
+          .where((e) => e.name?.startsWith('_\$${element.name}') ?? false)
           .firstOrNull;
 
       if (privateMixin != null) {
         for (final method in privateMixin.methods.where(
-          (m) =>
-              (!m.isSynthetic || options.parseSyntheticFields) &&
-              (m.isPublic || options.parsePrivateFields) &&
-              !m.name.startsWith('_') &&
-              // Skip methods that are already defined as fields
-              !fields.any((f) => f.name == m.name) &&
-              (options.parseAllMethods ||
-                  options.toParseMethods.contains(m.name)),
+          (m) {
+            final methodName = m.name;
+            return methodName != null &&
+                (!m.isSynthetic || options.parseSyntheticFields) &&
+                (m.isPublic || options.parsePrivateFields) &&
+                !methodName.startsWith('_') &&
+                // Skip methods that are already defined as fields
+                !fields.any((f) => f.name == methodName) &&
+                (options.parseAllMethods ||
+                    options.toParseMethods.contains(methodName));
+          },
         )) {
-          methods[method.name] = MethodDefinition.parseMethod(method);
+          final methodName = method.name;
+          if (methodName != null) {
+            methods[methodName] = MethodDefinition.parseMethod(method);
+          }
         }
 
         // Get getters from private mixin
-        for (final accessor in privateMixin.accessors.where(
-          (a) =>
-              a.isGetter &&
-              (!a.isSynthetic || options.parseSyntheticFields) &&
-              (a.isPublic || options.parsePrivateFields) &&
-              !a.name.startsWith('_') &&
-              !fields.any((f) => f.name == a.name) &&
-              (options.parseAllMethods ||
-                  options.toParseMethods.contains(a.name)),
+        for (final accessor in privateMixin.getters.where(
+          (a) {
+            final accessorName = a.name;
+            return accessorName != null &&
+                (!a.isSynthetic || options.parseSyntheticFields) &&
+                (a.isPublic || options.parsePrivateFields) &&
+                !accessorName.startsWith('_') &&
+                !fields.any((f) => f.name == accessorName) &&
+                (options.parseAllMethods ||
+                    options.toParseMethods.contains(accessorName));
+          },
         )) {
-          methods[accessor.name] = MethodDefinition.parseGetter(accessor);
+          final accessorName = accessor.name;
+          if (accessorName != null) {
+            methods[accessorName] = MethodDefinition.parseGetter(accessor);
+          }
         }
       }
     }
@@ -356,7 +375,7 @@ class ClassDefinition {
           return (!c.isSynthetic || options.parseSyntheticFields) &&
               (c.isPublic || options.parsePrivateFields);
         })
-        .map((c) => c.name)
+        .map((c) => c.name ?? '')
         .toList();
   }
 }

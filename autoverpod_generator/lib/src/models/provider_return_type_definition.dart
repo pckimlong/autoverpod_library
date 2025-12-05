@@ -52,9 +52,18 @@ class ProviderReturnTypeDefinition {
           ? isAsync
               ? ClassDefinition.parse(
                   (type as InterfaceType).typeArguments.first,
-                  options: ClassParserOptions(),
+                  options: const ClassParserOptions(
+                    parseFields: true,
+                    parseSyntheticFields: true,
+                  ),
                 )
-              : ClassDefinition.parse(type)
+              : ClassDefinition.parse(
+                  type,
+                  options: const ClassParserOptions(
+                    parseFields: true,
+                    parseSyntheticFields: true,
+                  ),
+                )
           : null,
     );
   }

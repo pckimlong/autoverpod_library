@@ -42,6 +42,14 @@ class UnifiedWidgetBuilder implements Builder {
     bool hasAnnotations = false;
 
     for (final element in library.allElements) {
+      // Skip elements from generated files
+      final elementLibraryUri = element.library?.uri.toString() ?? '';
+      if (elementLibraryUri.endsWith('.g.dart') ||
+          elementLibraryUri.endsWith('.freezed.dart') ||
+          elementLibraryUri.endsWith('.widget.dart')) {
+        continue;
+      }
+
       for (final generator in _registry.generators) {
         if (generator.canProcess(element)) {
           hasAnnotations = true;
@@ -74,8 +82,8 @@ class UnifiedWidgetBuilder implements Builder {
     final imports = Set<String>.from(_registry.getAllRequiredImports());
 
     // Add source file's imports to ensure dependencies are available
-    final sourceImports = library.element.importedLibraries
-        .map((lib) => lib.source.uri.toString())
+    final sourceImports = library.element.firstFragment.importedLibraries
+        .map((lib) => lib.uri.toString())
         .where((uri) => _shouldIncludeSourceImport(uri))
         .cast<String>()
         .toSet();
@@ -173,9 +181,13 @@ class UnifiedWidgetBuilder implements Builder {
     
     // Relative imports last
     if (!a.startsWith('dart:') && !a.startsWith('package:') && 
-        (b.startsWith('dart:') || b.startsWith('package:'))) return 1;
+        (b.startsWith('dart:') || b.startsWith('package:'))) {
+      return 1;
+    }
     if ((a.startsWith('dart:') || a.startsWith('package:')) && 
-        !b.startsWith('dart:') && !b.startsWith('package:')) return -1;
+        !b.startsWith('dart:') && !b.startsWith('package:')) {
+      return -1;
+    }
     
     // Within each category, sort alphabetically
     return a.compareTo(b);

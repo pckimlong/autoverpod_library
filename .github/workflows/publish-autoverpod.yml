@@ -1,0 +1,28 @@
+name: Publish autoverpod to pub.dev
+
+on:
+  push:
+    tags:
+      - 'autoverpod-v*'
+
+jobs:
+  publish:
+    runs-on: ubuntu-latest
+    permissions:
+      id-token: write  # IMPORTANT: this permission is mandatory for pub.dev publishing
+    
+    steps:
+    - uses: actions/checkout@v4
+    
+    - name: Setup Dart
+      uses: dart-lang/setup-dart@v1
+      with:
+        sdk: stable
+    
+    - name: Install dependencies
+      run: dart pub get
+      working-directory: autoverpod
+    
+    - name: Publish to pub.dev
+      run: dart pub publish --force
+      working-directory: autoverpod

@@ -34,24 +34,24 @@ class MethodDefinition {
 
   factory MethodDefinition.parseMethod(MethodElement method) {
     return MethodDefinition(
-      name: method.name,
+      name: method.name ?? '',
       returnType: method.returnType.getDisplayString(),
       parameters:
-          method.parameters.map((p) => ParamDefinition.parse(p)).toList(),
+          method.formalParameters.map((p) => ParamDefinition.parse(p)).toList(),
       isStatic: method.isStatic,
-      annotations: method.metadata.map((m) => m.toSource()).toList(),
+      annotations: method.metadata.annotations.map((m) => m.toSource()).toList(),
       documentation: method.documentationComment,
     );
   }
 
   factory MethodDefinition.parseGetter(PropertyAccessorElement getter) {
     return MethodDefinition(
-      name: getter.name,
+      name: getter.name ?? '',
       returnType: getter.returnType.getDisplayString(),
       parameters:
-          getter.parameters.map((p) => ParamDefinition.parse(p)).toList(),
+          getter.formalParameters.map((p) => ParamDefinition.parse(p)).toList(),
       isStatic: getter.isStatic,
-      annotations: getter.metadata.map((m) => m.toSource()).toList(),
+      annotations: getter.metadata.annotations.map((m) => m.toSource()).toList(),
       documentation: getter.documentationComment,
       // body: getter.source.contents.data,
     );

@@ -76,7 +76,7 @@ class ProviderDefinition {
             buildMethod.returnType,
             parseClassInfo: parseReturnTypeClassInfo,
           ),
-          familyParameters: buildMethod.parameters
+          familyParameters: buildMethod.formalParameters
               .map((p) => ParamDefinition.parse(p))
               .toList(),
           methods: classElement.methods
@@ -89,7 +89,7 @@ class ProviderDefinition {
         );
       } else {
         // Function-based provider
-        final functionElement = element as FunctionElement;
+        final functionElement = element as TopLevelFunctionElement;
 
         return ProviderDefinition(
           baseName: baseName,
@@ -97,7 +97,7 @@ class ProviderDefinition {
           providerType: ProviderType.functionBased,
           returnType:
               ProviderReturnTypeDefinition.parse(functionElement.returnType),
-          familyParameters: functionElement.parameters
+          familyParameters: functionElement.formalParameters
               .skip(1) // Skip first param (Ref)
               .map((p) => ParamDefinition.parse(p))
               .toList(),
@@ -117,7 +117,7 @@ class ProviderDefinition {
 
   static Set<ProviderModifier> _parseModifiers(Element element) {
     final modifiers = <ProviderModifier>{};
-    for (final metadata in element.metadata) {
+    for (final metadata in element.metadata.annotations) {
       final annotation = metadata.computeConstantValue();
       if (annotation != null) {
         final type = annotation.type?.toString();
@@ -149,6 +149,9 @@ class ProviderDefinition {
     final genericParams = <String, List<String>>{};
     if (element is ClassElement) {
       for (final typeParam in element.typeParameters) {
+        final paramName = typeParam.name ?? '';
+        if (paramName.isEmpty) continue;
+
         final bound = typeParam.bound;
         final bounds = <String>[];
 
@@ -168,7 +171,7 @@ class ProviderDefinition {
           }
         }
 
-        genericParams[typeParam.name] = bounds;
+        genericParams[paramName] = bounds;
       }
     }
     return genericParams;

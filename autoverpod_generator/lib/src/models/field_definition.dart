@@ -51,20 +51,20 @@ class FieldDefinition {
     String? importPath;
     final fieldType = field.type;
     if (fieldType.element != null) {
-      final uri = fieldType.element!.librarySource?.uri.toString();
+      final uri = fieldType.element!.library?.uri.toString();
       if (uri != null && !uri.startsWith('dart:')) {
         importPath = uri;
       }
     }
 
     return FieldDefinition(
-      name: field.name,
+      name: field.name ?? '',
       type: field.type.toString(),
       isNullable: field.type.nullabilitySuffix == NullabilitySuffix.question,
       isFinal: field.isFinal,
       documentation: field.documentationComment,
       defaultValue: field.computeConstantValue()?.toString(),
-      annotations: field.metadata.map((m) => m.toSource()).toList(),
+      annotations: field.metadata.annotations.map((m) => m.toSource()).toList(),
       isPrivate: field.isPrivate,
       isStatic: field.isStatic,
       isGetter: field.getter != null && field.setter == null,
@@ -73,24 +73,24 @@ class FieldDefinition {
     );
   }
 
-  factory FieldDefinition.parseFreezedParam(ParameterElement param) {
+  factory FieldDefinition.parseFreezedParam(FormalParameterElement param) {
     String? importPath;
     final paramType = param.type;
     if (paramType.element != null) {
-      final uri = paramType.element!.librarySource?.uri.toString();
+      final uri = paramType.element!.library?.uri.toString();
       if (uri != null && !uri.startsWith('dart:')) {
         importPath = uri;
       }
     }
 
     return FieldDefinition(
-      name: param.name,
+      name: param.name ?? '',
       type: param.type.toString(),
       isNullable: param.type.nullabilitySuffix == NullabilitySuffix.question,
       isFinal: true, // Freezed classes always generated as final
       documentation: param.documentationComment,
       defaultValue: param.defaultValueCode,
-      annotations: param.metadata.map((m) => m.toSource()).toList(),
+      annotations: param.metadata.annotations.map((m) => m.toSource()).toList(),
       isPrivate: param.isPrivate,
       isStatic: param.isStatic,
       isGetter: param is FieldFormalParameterElement,
