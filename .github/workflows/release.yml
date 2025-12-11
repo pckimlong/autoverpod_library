@@ -10,9 +10,9 @@ jobs:
     permissions:
       contents: write
     outputs:
-      autoverpod_released: ${{ steps.check_tags.outputs.autoverpod_exists == 'false' }}
-      generator_released: ${{ steps.check_tags.outputs.generator_exists == 'false' }}
-      annotation_released: ${{ steps.check_tags.outputs.annotation_exists == 'false' }}
+      autoverpod_released: ${{ steps.set_release_flags.outputs.autoverpod_released }}
+      generator_released: ${{ steps.set_release_flags.outputs.generator_released }}
+      annotation_released: ${{ steps.set_release_flags.outputs.annotation_released }}
     
     steps:
     - uses: actions/checkout@v4
@@ -56,6 +56,27 @@ jobs:
         echo "autoverpod_tag=$AUTOVERPOD_TAG" >> $GITHUB_OUTPUT
         echo "generator_tag=$GENERATOR_TAG" >> $GITHUB_OUTPUT
         echo "annotation_tag=$ANNOTATION_TAG" >> $GITHUB_OUTPUT
+
+    - name: Set release flags
+      id: set_release_flags
+      run: |
+        if [ "${{ steps.check_tags.outputs.autoverpod_exists }}" = "false" ]; then
+          echo "autoverpod_released=true" >> "$GITHUB_OUTPUT"
+        else
+          echo "autoverpod_released=false" >> "$GITHUB_OUTPUT"
+        fi
+
+        if [ "${{ steps.check_tags.outputs.generator_exists }}" = "false" ]; then
+          echo "generator_released=true" >> "$GITHUB_OUTPUT"
+        else
+          echo "generator_released=false" >> "$GITHUB_OUTPUT"
+        fi
+
+        if [ "${{ steps.check_tags.outputs.annotation_exists }}" = "false" ]; then
+          echo "annotation_released=true" >> "$GITHUB_OUTPUT"
+        else
+          echo "annotation_released=false" >> "$GITHUB_OUTPUT"
+        fi
     
     - name: Create autoverpod_annotation release
       if: steps.check_tags.outputs.annotation_exists == 'false'
