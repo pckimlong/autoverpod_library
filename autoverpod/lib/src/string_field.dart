@@ -79,7 +79,8 @@ class _StringFieldState extends State<StringField> {
         _controller.dispose();
       }
       _initController();
-    } else if (widget.value != oldWidget.value && widget.value != _controller.text) {
+    } else if (widget.value != oldWidget.value &&
+        widget.value != _controller.text) {
       // Sync value to controller
       _controller.text = _effectiveValue;
     }

@@ -34,18 +34,22 @@ class ProviderDefinition {
     // Find the build method
     final buildMethod = element.methods.firstWhere(
       (m) => m.name == 'build',
-      orElse: () => throw StateError('Provider class ${element.name} must have a build method'),
+      orElse: () => throw StateError(
+          'Provider class ${element.name} must have a build method'),
     );
 
     // Parse return type
     final returnType = buildMethod.returnType;
-    final wrapperType = returnType is InterfaceType ? returnType.element.name : null;
+    final wrapperType =
+        returnType is InterfaceType ? returnType.element.name : null;
     final isAsyncValue = ['Future', 'Stream', 'FutureOr'].contains(wrapperType);
 
     // Get base type (unwrap Future/Stream if needed)
     String baseType;
     DartType stateType;
-    if (isAsyncValue && returnType is ParameterizedType && returnType.typeArguments.isNotEmpty) {
+    if (isAsyncValue &&
+        returnType is ParameterizedType &&
+        returnType.typeArguments.isNotEmpty) {
       stateType = returnType.typeArguments.first;
       baseType = stateType.toString();
     } else {
@@ -54,8 +58,9 @@ class ProviderDefinition {
     }
 
     // Parse family parameters from build method
-    final familyParameters =
-        buildMethod.parameters.map((p) => ParamDefinition.fromElement(p)).toList();
+    final familyParameters = buildMethod.parameters
+        .map((p) => ParamDefinition.fromElement(p))
+        .toList();
 
     // Parse fields from return type's class
     final fields = _parseFields(stateType);
@@ -78,8 +83,10 @@ class ProviderDefinition {
     final fields = <FieldDefinition>[];
 
     // Check if it's a Freezed class by multiple strategies
-    final isFreezed = classElement.mixins.any((m) => m.toString().startsWith('_\$')) ||
-        classElement.mixins.any((m) => m.element?.name.startsWith('_\$') ?? false);
+    final isFreezed =
+        classElement.mixins.any((m) => m.toString().startsWith('_\$')) ||
+            classElement.mixins
+                .any((m) => m.element?.name.startsWith('_\$') ?? false);
 
     if (isFreezed) {
       // Parse from factory constructor parameters for Freezed
@@ -101,9 +108,12 @@ class ProviderDefinition {
     // Fallback: if no fields found via factory, try public getters/fields
     // This handles cases where Freezed detection fails or non-Freezed classes
     if (fields.isEmpty) {
-      for (final field in classElement.fields.where((f) => f.isPublic && !f.isStatic)) {
+      for (final field
+          in classElement.fields.where((f) => f.isPublic && !f.isStatic)) {
         // Skip internal Freezed fields
-        if (field.name.startsWith('_') || field.name == 'copyWith' || field.name == 'hashCode') {
+        if (field.name.startsWith('_') ||
+            field.name == 'copyWith' ||
+            field.name == 'hashCode') {
           continue;
         }
         fields.add(FieldDefinition.fromField(field));

@@ -106,7 +106,9 @@ class StateWidgetGenerator extends GeneratorForAnnotatedClass<StateWidget> {
       if (field.importPath != null) {
         final uri = field.importPath!;
         // Skip dart core and already collected
-        if (uri.startsWith('dart:') || uri.contains('/sky_engine/') || collected.contains(uri)) {
+        if (uri.startsWith('dart:') ||
+            uri.contains('/sky_engine/') ||
+            collected.contains(uri)) {
           continue;
         }
         collected.add(uri);
@@ -117,7 +119,9 @@ class StateWidgetGenerator extends GeneratorForAnnotatedClass<StateWidget> {
     for (final param in provider.familyParameters) {
       if (param.importPath != null) {
         final uri = param.importPath!;
-        if (uri.startsWith('dart:') || uri.contains('/sky_engine/') || collected.contains(uri)) {
+        if (uri.startsWith('dart:') ||
+            uri.contains('/sky_engine/') ||
+            collected.contains(uri)) {
           continue;
         }
         collected.add(uri);
@@ -136,9 +140,11 @@ class StateWidgetGenerator extends GeneratorForAnnotatedClass<StateWidget> {
       '// ============================================================================',
     );
     buffer.writeln('//');
-    buffer.writeln('// Source: ${provider.providerName} → ${provider.baseType}');
+    buffer
+        .writeln('// Source: ${provider.providerName} → ${provider.baseType}');
     buffer.writeln('//');
-    buffer.writeln('// Widgets: ${provider.baseName}Widget, ${provider.baseName}Select');
+    buffer.writeln(
+        '// Widgets: ${provider.baseName}Widget, ${provider.baseName}Select');
     buffer.writeln('// Scope: ${provider.baseName}Scope');
     buffer.writeln('//');
     buffer.writeln('// Fields:');
@@ -154,8 +160,10 @@ class StateWidgetGenerator extends GeneratorForAnnotatedClass<StateWidget> {
 
   String _generateFieldUpdaterExtension(ProviderDefinition provider) {
     final buffer = StringBuffer();
-    buffer.writeln('/// Extension that adds field update methods to the provider.');
-    buffer.writeln('extension ${provider.baseName}FieldUpdater on ${provider.baseName} {');
+    buffer.writeln(
+        '/// Extension that adds field update methods to the provider.');
+    buffer.writeln(
+        'extension ${provider.baseName}FieldUpdater on ${provider.baseName} {');
 
     for (final field in provider.fields) {
       final updateStatement = provider.isAsyncValue
@@ -163,7 +171,8 @@ class StateWidgetGenerator extends GeneratorForAnnotatedClass<StateWidget> {
           : 'state.copyWith(${field.name}: newValue)';
 
       buffer.writeln('  /// Update the ${field.name} field.');
-      buffer.writeln('  void update${field.name.pascalCase}(${field.type} newValue) =>');
+      buffer.writeln(
+          '  void update${field.name.pascalCase}(${field.type} newValue) =>');
       buffer.writeln('      state = $updateStatement;');
       buffer.writeln();
     }
@@ -176,7 +185,8 @@ class StateWidgetGenerator extends GeneratorForAnnotatedClass<StateWidget> {
     final buffer = StringBuffer();
 
     // InheritedWidget for family params (or empty placeholder for non-family)
-    buffer.writeln('class _${provider.baseName}ParamsInheritedWidget extends InheritedWidget {');
+    buffer.writeln(
+        'class _${provider.baseName}ParamsInheritedWidget extends InheritedWidget {');
     buffer.writeln('  const _${provider.baseName}ParamsInheritedWidget({');
     for (final param in provider.familyParameters) {
       buffer.writeln('    required this.${param.name},');
@@ -207,8 +217,9 @@ class StateWidgetGenerator extends GeneratorForAnnotatedClass<StateWidget> {
       '  bool updateShouldNotify(covariant _${provider.baseName}ParamsInheritedWidget oldWidget) {',
     );
     if (provider.hasFamily) {
-      final conditions =
-          provider.familyParameters.map((p) => '${p.name} != oldWidget.${p.name}').join(' || ');
+      final conditions = provider.familyParameters
+          .map((p) => '${p.name} != oldWidget.${p.name}')
+          .join(' || ');
       buffer.writeln('    return $conditions;');
     } else {
       buffer.writeln('    return false;');
@@ -219,9 +230,11 @@ class StateWidgetGenerator extends GeneratorForAnnotatedClass<StateWidget> {
 
     // Scope widget
     if (provider.hasFamily) {
-      buffer.writeln('/// Scope widget to provide family parameters to child widgets.');
+      buffer.writeln(
+          '/// Scope widget to provide family parameters to child widgets.');
     } else {
-      buffer.writeln('/// Scope widget placeholder for future family parameters.');
+      buffer.writeln(
+          '/// Scope widget placeholder for future family parameters.');
       buffer.writeln(
         '/// Wrap your widget tree with this to future-proof for family provider migration.',
       );
@@ -277,9 +290,12 @@ class StateWidgetGenerator extends GeneratorForAnnotatedClass<StateWidget> {
     buffer.writeln();
 
     // Always provide params getter for future-proofing
-    buffer.writeln('  /// Get params from scope (use within ${provider.baseName}Scope).');
-    buffer.writeln('  _${provider.baseName}ParamsInheritedWidget? get params =>');
-    buffer.writeln('      _${provider.baseName}ParamsInheritedWidget.maybeOf(_ref.context);');
+    buffer.writeln(
+        '  /// Get params from scope (use within ${provider.baseName}Scope).');
+    buffer
+        .writeln('  _${provider.baseName}ParamsInheritedWidget? get params =>');
+    buffer.writeln(
+        '      _${provider.baseName}ParamsInheritedWidget.maybeOf(_ref.context);');
     buffer.writeln();
 
     // Generate select method - use params! for family or direct access for non-family
@@ -298,9 +314,12 @@ class StateWidgetGenerator extends GeneratorForAnnotatedClass<StateWidget> {
     buffer.writeln();
     buffer.writeln('  BuildContext get context => _ref.context;');
     buffer.writeln();
-    buffer.writeln('  T read<T>(ProviderListenable<T> provider) => _ref.read(provider);');
-    buffer.writeln('  T watch<T>(ProviderListenable<T> provider) => _ref.watch(provider);');
-    buffer.writeln('  void invalidate(ProviderOrFamily provider) => _ref.invalidate(provider);');
+    buffer.writeln(
+        '  T read<T>(ProviderListenable<T> provider) => _ref.read(provider);');
+    buffer.writeln(
+        '  T watch<T>(ProviderListenable<T> provider) => _ref.watch(provider);');
+    buffer.writeln(
+        '  void invalidate(ProviderOrFamily provider) => _ref.invalidate(provider);');
     buffer.writeln('}');
 
     return buffer.toString();
@@ -308,8 +327,9 @@ class StateWidgetGenerator extends GeneratorForAnnotatedClass<StateWidget> {
 
   String _generateStateWidget(ProviderDefinition provider) {
     final buffer = StringBuffer();
-    final stateType =
-        provider.isAsyncValue ? 'AsyncValue<${provider.baseType}>' : provider.baseType;
+    final stateType = provider.isAsyncValue
+        ? 'AsyncValue<${provider.baseType}>'
+        : provider.baseType;
 
     buffer.writeln('/// Widget that rebuilds when any state changes.');
     buffer.writeln('class ${provider.baseName}Widget extends ConsumerWidget {');
@@ -332,7 +352,8 @@ class StateWidgetGenerator extends GeneratorForAnnotatedClass<StateWidget> {
     buffer.writeln(
       '  final Widget Function(BuildContext context, ${provider.baseName}ProxyWidgetRef ref, $stateType state) builder;',
     );
-    buffer.writeln('  final void Function($stateType? previous, $stateType next)? onStateChanged;');
+    buffer.writeln(
+        '  final void Function($stateType? previous, $stateType next)? onStateChanged;');
     buffer.writeln();
     buffer.writeln('  @override');
     buffer.writeln('  Widget build(BuildContext context, WidgetRef ref) {');
@@ -357,7 +378,8 @@ class StateWidgetGenerator extends GeneratorForAnnotatedClass<StateWidget> {
     buffer.writeln(
       '    final state = ref.watch(${provider.providerNameWithFamily(prefix: 'params')});',
     );
-    buffer.writeln('    return builder(context, ${provider.baseName}ProxyWidgetRef(ref), state);');
+    buffer.writeln(
+        '    return builder(context, ${provider.baseName}ProxyWidgetRef(ref), state);');
     buffer.writeln('  }');
     buffer.writeln('}');
 
@@ -367,8 +389,10 @@ class StateWidgetGenerator extends GeneratorForAnnotatedClass<StateWidget> {
   String _generateSelectWidget(ProviderDefinition provider) {
     final buffer = StringBuffer();
 
-    buffer.writeln('/// Widget that rebuilds only when selected value changes.');
-    buffer.writeln('class ${provider.baseName}Select<Selected> extends ConsumerWidget {');
+    buffer
+        .writeln('/// Widget that rebuilds only when selected value changes.');
+    buffer.writeln(
+        'class ${provider.baseName}Select<Selected> extends ConsumerWidget {');
     buffer.writeln('  const ${provider.baseName}Select({');
     buffer.writeln('    super.key,');
     if (provider.hasFamily) {
@@ -385,7 +409,8 @@ class StateWidgetGenerator extends GeneratorForAnnotatedClass<StateWidget> {
         buffer.writeln('  final ${param.type}? ${param.name};');
       }
     }
-    buffer.writeln('  final Selected Function(${provider.baseType} state) selector;');
+    buffer.writeln(
+        '  final Selected Function(${provider.baseType} state) selector;');
     buffer.writeln(
       '  final Widget Function(BuildContext context, ${provider.baseName}ProxyWidgetRef ref, Selected value) builder;',
     );
@@ -403,7 +428,8 @@ class StateWidgetGenerator extends GeneratorForAnnotatedClass<StateWidget> {
       buffer.writeln('    );');
     }
 
-    final valueSelector = provider.isAsyncValue ? 'value.valueOrNull!' : 'value';
+    final valueSelector =
+        provider.isAsyncValue ? 'value.valueOrNull!' : 'value';
     buffer.writeln(
       '    final selected = ref.watch(${provider.providerNameWithFamily(prefix: 'params')}.select((value) => selector($valueSelector)));',
     );
@@ -416,7 +442,8 @@ class StateWidgetGenerator extends GeneratorForAnnotatedClass<StateWidget> {
     return buffer.toString();
   }
 
-  String _generateFieldWidget(ProviderDefinition provider, FieldDefinition field) {
+  String _generateFieldWidget(
+      ProviderDefinition provider, FieldDefinition field) {
     final buffer = StringBuffer();
     final widgetName = '${provider.baseName}${field.name.pascalCase}Field';
 
@@ -426,13 +453,16 @@ class StateWidgetGenerator extends GeneratorForAnnotatedClass<StateWidget> {
     }
 
     // For non-String fields, generate a simple ConsumerWidget
-    final proxyName = '${provider.baseName}${field.name.pascalCase}ProxyWidgetRef';
+    final proxyName =
+        '${provider.baseName}${field.name.pascalCase}ProxyWidgetRef';
 
     // Field-specific proxy
-    buffer.writeln('class $proxyName extends ${provider.baseName}ProxyWidgetRef {');
+    buffer.writeln(
+        'class $proxyName extends ${provider.baseName}ProxyWidgetRef {');
     buffer.writeln('  $proxyName(super._ref);');
     buffer.writeln();
-    buffer.writeln('  ${field.type} get ${field.name} => select((s) => s.${field.name});');
+    buffer.writeln(
+        '  ${field.type} get ${field.name} => select((s) => s.${field.name});');
     buffer.writeln(
       '  void update${field.name.pascalCase}(${field.type} value) => notifier.update${field.name.pascalCase}(value);',
     );
@@ -456,7 +486,8 @@ class StateWidgetGenerator extends GeneratorForAnnotatedClass<StateWidget> {
         buffer.writeln('  final ${param.type}? ${param.name};');
       }
     }
-    buffer.writeln('  final Widget Function(BuildContext context, $proxyName ref) builder;');
+    buffer.writeln(
+        '  final Widget Function(BuildContext context, $proxyName ref) builder;');
     buffer.writeln();
     buffer.writeln('  @override');
     buffer.writeln('  Widget build(BuildContext context, WidgetRef ref) {');
@@ -480,24 +511,30 @@ class StateWidgetGenerator extends GeneratorForAnnotatedClass<StateWidget> {
   ) {
     final buffer = StringBuffer();
     final valueAccess = provider.isAsyncValue ? '.valueOrNull?' : '';
-    final proxyName = '${provider.baseName}${field.name.pascalCase}ProxyWidgetRef';
+    final proxyName =
+        '${provider.baseName}${field.name.pascalCase}ProxyWidgetRef';
 
     // Field-specific proxy for string fields (with textController)
-    buffer.writeln('/// Proxy ref for the ${field.name} string field with text controller access.');
-    buffer.writeln('class $proxyName extends ${provider.baseName}ProxyWidgetRef {');
+    buffer.writeln(
+        '/// Proxy ref for the ${field.name} string field with text controller access.');
+    buffer.writeln(
+        'class $proxyName extends ${provider.baseName}ProxyWidgetRef {');
     buffer.writeln('  $proxyName(super._ref, this._stringFieldRef);');
     buffer.writeln();
     buffer.writeln('  final StringFieldRef _stringFieldRef;');
     buffer.writeln();
-    buffer.writeln('  ${field.type} get ${field.name} => select((s) => s.${field.name});');
+    buffer.writeln(
+        '  ${field.type} get ${field.name} => select((s) => s.${field.name});');
     buffer.writeln(
       '  void update${field.name.pascalCase}(${field.type} value) => notifier.update${field.name.pascalCase}(value);',
     );
-    buffer.writeln('  TextEditingController get textController => _stringFieldRef.controller;');
+    buffer.writeln(
+        '  TextEditingController get textController => _stringFieldRef.controller;');
     buffer.writeln('}');
     buffer.writeln();
 
-    buffer.writeln('/// Widget for the ${field.name} field with auto text controller sync.');
+    buffer.writeln(
+        '/// Widget for the ${field.name} field with auto text controller sync.');
     buffer.writeln('class $widgetName extends ConsumerWidget {');
     buffer.writeln('  const $widgetName({');
     buffer.writeln('    super.key,');
@@ -516,7 +553,8 @@ class StateWidgetGenerator extends GeneratorForAnnotatedClass<StateWidget> {
       }
     }
     buffer.writeln('  final TextEditingController? controller;');
-    buffer.writeln('  final Widget Function(BuildContext context, $proxyName ref) builder;');
+    buffer.writeln(
+        '  final Widget Function(BuildContext context, $proxyName ref) builder;');
     buffer.writeln();
     buffer.writeln('  @override');
     buffer.writeln('  Widget build(BuildContext context, WidgetRef ref) {');
@@ -544,7 +582,8 @@ class StateWidgetGenerator extends GeneratorForAnnotatedClass<StateWidget> {
       '      onChanged: (v) => ref.read(${provider.providerNameWithFamily(prefix: 'params')}.notifier).update${field.name.pascalCase}(v),',
     );
     buffer.writeln('      builder: (context, stringFieldRef) {');
-    buffer.writeln('        return builder(context, $proxyName(ref, stringFieldRef));');
+    buffer.writeln(
+        '        return builder(context, $proxyName(ref, stringFieldRef));');
     buffer.writeln('      },');
     buffer.writeln('    );');
     buffer.writeln('  }');

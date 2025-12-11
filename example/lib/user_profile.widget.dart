@@ -78,10 +78,8 @@ class _UserProfileParamsInheritedWidget extends InheritedWidget {
   final int id;
 
   static _UserProfileParamsInheritedWidget? maybeOf(BuildContext context) {
-    return context
-        .dependOnInheritedWidgetOfExactType<
-          _UserProfileParamsInheritedWidget
-        >();
+    return context.dependOnInheritedWidgetOfExactType<
+        _UserProfileParamsInheritedWidget>();
   }
 
   static _UserProfileParamsInheritedWidget of(BuildContext context) {
@@ -148,10 +146,9 @@ class UserProfileWidget extends ConsumerWidget {
     BuildContext context,
     UserProfileProxyWidgetRef ref,
     UserProfileState state,
-  )
-  builder;
+  ) builder;
   final void Function(UserProfileState? previous, UserProfileState next)?
-  onStateChanged;
+      onStateChanged;
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
@@ -181,8 +178,7 @@ class UserProfileSelect<Selected> extends ConsumerWidget {
     BuildContext context,
     UserProfileProxyWidgetRef ref,
     Selected value,
-  )
-  builder;
+  ) builder;
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
@@ -217,7 +213,7 @@ class UserProfileNameField extends ConsumerWidget {
   final int? id;
   final TextEditingController? controller;
   final Widget Function(BuildContext context, UserProfileNameProxyWidgetRef ref)
-  builder;
+      builder;
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
@@ -266,8 +262,7 @@ class UserProfileEmailField extends ConsumerWidget {
   final Widget Function(
     BuildContext context,
     UserProfileEmailProxyWidgetRef ref,
-  )
-  builder;
+  ) builder;
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
@@ -303,7 +298,7 @@ class UserProfileAgeField extends ConsumerWidget {
 
   final int? id;
   final Widget Function(BuildContext context, UserProfileAgeProxyWidgetRef ref)
-  builder;
+      builder;
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
@@ -334,7 +329,7 @@ class UserProfileBioField extends ConsumerWidget {
   final int? id;
   final TextEditingController? controller;
   final Widget Function(BuildContext context, UserProfileBioProxyWidgetRef ref)
-  builder;
+      builder;
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
@@ -381,7 +376,7 @@ class UserProfileBio2Field extends ConsumerWidget {
   final int? id;
   final TextEditingController? controller;
   final Widget Function(BuildContext context, UserProfileBio2ProxyWidgetRef ref)
-  builder;
+      builder;
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
@@ -451,10 +446,8 @@ class _SecondUserProfileParamsInheritedWidget extends InheritedWidget {
   static _SecondUserProfileParamsInheritedWidget? maybeOf(
     BuildContext context,
   ) {
-    return context
-        .dependOnInheritedWidgetOfExactType<
-          _SecondUserProfileParamsInheritedWidget
-        >();
+    return context.dependOnInheritedWidgetOfExactType<
+        _SecondUserProfileParamsInheritedWidget>();
   }
 
   static _SecondUserProfileParamsInheritedWidget of(BuildContext context) {
@@ -527,16 +520,14 @@ class SecondUserProfileWidget extends ConsumerWidget {
     BuildContext context,
     SecondUserProfileProxyWidgetRef ref,
     UserProfileState state,
-  )
-  builder;
+  ) builder;
   final void Function(UserProfileState? previous, UserProfileState next)?
-  onStateChanged;
+      onStateChanged;
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
-    final params = (
-      id: id ?? _SecondUserProfileParamsInheritedWidget.of(context).id,
-    );
+    final params =
+        (id: id ?? _SecondUserProfileParamsInheritedWidget.of(context).id,);
     if (onStateChanged != null) {
       ref.listen(secondUserProfileProvider(params.id), (prev, next) {
         if (prev != next) onStateChanged!(prev, next);
@@ -562,14 +553,12 @@ class SecondUserProfileSelect<Selected> extends ConsumerWidget {
     BuildContext context,
     SecondUserProfileProxyWidgetRef ref,
     Selected value,
-  )
-  builder;
+  ) builder;
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
-    final params = (
-      id: id ?? _SecondUserProfileParamsInheritedWidget.of(context).id,
-    );
+    final params =
+        (id: id ?? _SecondUserProfileParamsInheritedWidget.of(context).id,);
     final selected = ref.watch(
       secondUserProfileProvider(params.id).select((value) => selector(value)),
     );
@@ -603,14 +592,12 @@ class SecondUserProfileNameField extends ConsumerWidget {
   final Widget Function(
     BuildContext context,
     SecondUserProfileNameProxyWidgetRef ref,
-  )
-  builder;
+  ) builder;
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
-    final params = (
-      id: id ?? _SecondUserProfileParamsInheritedWidget.of(context).id,
-    );
+    final params =
+        (id: id ?? _SecondUserProfileParamsInheritedWidget.of(context).id,);
     final value = ref.watch(
       secondUserProfileProvider(params.id).select((s) => s.name),
     );
@@ -656,14 +643,12 @@ class SecondUserProfileEmailField extends ConsumerWidget {
   final Widget Function(
     BuildContext context,
     SecondUserProfileEmailProxyWidgetRef ref,
-  )
-  builder;
+  ) builder;
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
-    final params = (
-      id: id ?? _SecondUserProfileParamsInheritedWidget.of(context).id,
-    );
+    final params =
+        (id: id ?? _SecondUserProfileParamsInheritedWidget.of(context).id,);
     final value = ref.watch(
       secondUserProfileProvider(params.id).select((s) => s.email),
     );
@@ -699,8 +684,7 @@ class SecondUserProfileAgeField extends ConsumerWidget {
   final Widget Function(
     BuildContext context,
     SecondUserProfileAgeProxyWidgetRef ref,
-  )
-  builder;
+  ) builder;
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
@@ -734,14 +718,12 @@ class SecondUserProfileBioField extends ConsumerWidget {
   final Widget Function(
     BuildContext context,
     SecondUserProfileBioProxyWidgetRef ref,
-  )
-  builder;
+  ) builder;
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
-    final params = (
-      id: id ?? _SecondUserProfileParamsInheritedWidget.of(context).id,
-    );
+    final params =
+        (id: id ?? _SecondUserProfileParamsInheritedWidget.of(context).id,);
     final value = ref.watch(
       secondUserProfileProvider(params.id).select((s) => s.bio),
     );
@@ -787,14 +769,12 @@ class SecondUserProfileBio2Field extends ConsumerWidget {
   final Widget Function(
     BuildContext context,
     SecondUserProfileBio2ProxyWidgetRef ref,
-  )
-  builder;
+  ) builder;
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
-    final params = (
-      id: id ?? _SecondUserProfileParamsInheritedWidget.of(context).id,
-    );
+    final params =
+        (id: id ?? _SecondUserProfileParamsInheritedWidget.of(context).id,);
     final value = ref.watch(
       secondUserProfileProvider(params.id).select((s) => s.bio2),
     );
