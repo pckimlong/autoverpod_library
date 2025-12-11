@@ -472,7 +472,7 @@ class StateWidgetGenerator extends GeneratorForAnnotatedClass<StateWidget> {
   }
 
   /// Generate a String field widget using the StringField helper.
-  /// This dramatically reduces generated code by delegating to runtime helper.
+  /// This generates a ProxyWidgetRef for string fields with textController access.
   String _generateStringFieldWidget(
     ProviderDefinition provider,
     FieldDefinition field,
@@ -480,6 +480,22 @@ class StateWidgetGenerator extends GeneratorForAnnotatedClass<StateWidget> {
   ) {
     final buffer = StringBuffer();
     final valueAccess = provider.isAsyncValue ? '.valueOrNull?' : '';
+    final proxyName = '${provider.baseName}${field.name.pascalCase}ProxyWidgetRef';
+
+    // Field-specific proxy for string fields (with textController)
+    buffer.writeln('/// Proxy ref for the ${field.name} string field with text controller access.');
+    buffer.writeln('class $proxyName extends ${provider.baseName}ProxyWidgetRef {');
+    buffer.writeln('  $proxyName(super._ref, this._stringFieldRef);');
+    buffer.writeln();
+    buffer.writeln('  final StringFieldRef _stringFieldRef;');
+    buffer.writeln();
+    buffer.writeln('  ${field.type} get ${field.name} => select((s) => s.${field.name});');
+    buffer.writeln(
+      '  void update${field.name.pascalCase}(${field.type} value) => notifier.update${field.name.pascalCase}(value);',
+    );
+    buffer.writeln('  TextEditingController get textController => _stringFieldRef.controller;');
+    buffer.writeln('}');
+    buffer.writeln();
 
     buffer.writeln('/// Widget for the ${field.name} field with auto text controller sync.');
     buffer.writeln('class $widgetName extends ConsumerWidget {');
@@ -500,7 +516,7 @@ class StateWidgetGenerator extends GeneratorForAnnotatedClass<StateWidget> {
       }
     }
     buffer.writeln('  final TextEditingController? controller;');
-    buffer.writeln('  final Widget Function(BuildContext context, StringFieldRef ref) builder;');
+    buffer.writeln('  final Widget Function(BuildContext context, $proxyName ref) builder;');
     buffer.writeln();
     buffer.writeln('  @override');
     buffer.writeln('  Widget build(BuildContext context, WidgetRef ref) {');
@@ -527,7 +543,9 @@ class StateWidgetGenerator extends GeneratorForAnnotatedClass<StateWidget> {
     buffer.writeln(
       '      onChanged: (v) => ref.read(${provider.providerNameWithFamily(prefix: 'params')}.notifier).update${field.name.pascalCase}(v),',
     );
-    buffer.writeln('      builder: builder,');
+    buffer.writeln('      builder: (context, stringFieldRef) {');
+    buffer.writeln('        return builder(context, $proxyName(ref, stringFieldRef));');
+    buffer.writeln('      },');
     buffer.writeln('    );');
     buffer.writeln('  }');
     buffer.writeln('}');
