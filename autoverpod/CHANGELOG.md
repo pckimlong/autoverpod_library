@@ -1,3 +1,54 @@
+## 0.1.0 - 2025-12-11
+
+### ⚠️ COMPLETE REWRITE - BREAKING CHANGES
+
+This version is a **complete rewrite** of the autoverpod package. The previous
+form-focused architecture has been replaced with a simpler, more maintainable
+state widget approach.
+
+#### Migration Notes
+
+- **All previous APIs have been removed** – this is not backwards compatible
+- **`@FormWidget` and form update APIs have been removed**
+- **New `@stateWidget` annotation** (exported from `autoverpod_annotation`)
+- **Form submission handling removed** – submission logic is now user-controlled
+- **Generator moved to `lean_builder`** – use `autoverpod_generator` ^0.1.0 and
+  run `dart run lean_builder` instead of `build_runner`
+
+#### Why This Change?
+
+The previous version tried to be "too magic" with automatic form handling,
+mutations, and complex provider generation. This led to:
+- High maintenance burden with many generator files
+- Difficult-to-debug generated code
+- Tight coupling to specific patterns
+
+The new version is:
+- **Simpler** – focused on generating state field widgets
+- **More flexible** – you own submission and side-effect logic
+- **Easier to maintain** – uses `lean_builder` for cleaner code generation
+- **Future-proof** – generates scope widgets even for non-family providers
+
+### New Features
+
+For a provider annotated with `@stateWidget` and `@riverpod`, autoverpod now
+provides:
+
+- Field updater extension methods on the provider notifier
+- Scope widget (InheritedWidget) for family parameters
+- State widget (`*Widget`) that rebuilds on any state change
+- Select widget (`*Select`) that rebuilds only on selected value changes
+- Individual field widgets with auto `TextEditingController` sync (for
+  `String` fields)
+
+### Dependencies
+
+- Uses `lean_builder` instead of `build_runner` via `autoverpod_generator`
+- Requires `flutter_riverpod: >=3.0.0 <4.0.0`
+- Dart SDK: `^3.6.0`
+
+---
+
 ## 0.0.6 - 2025-12-05
 
 ### BREAKING CHANGES

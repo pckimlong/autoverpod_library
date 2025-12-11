@@ -1,13 +1,10 @@
 # Autoverpod
 
-Autoverpod is a Flutter package that provides widgets and helpers generated from class-based Riverpod providers annotated with `@stateWidget`.
-
-> 0.1.0 is a complete rewrite. All previous form-based APIs have been removed.
-> See `CHANGELOG.md` for migration details.
+Autoverpod is a set of packages that generate widgets and helpers from class-based Riverpod providers annotated with `@stateWidget`.
 
 ## What it does
 
-For each class-based `@riverpod` provider annotated with `@stateWidget`, the `autoverpod_generator` package creates runtime pieces used by this package:
+For each class-based `@riverpod` provider annotated with `@stateWidget`, the `autoverpod_generator` package creates:
 
 - `Scope` widget: `{ProviderName}Scope` to pass family parameters down the tree
 - `State` widget: `{ProviderName}Widget` that rebuilds when any part of the state changes
@@ -47,16 +44,12 @@ The field widget keeps the `TextEditingController` and the `name` value on the p
 
 ```yaml
 dependencies:
-  flutter:
-    sdk: flutter
   autoverpod: ^<latest>
   flutter_riverpod: ^<latest>
 
 dev_dependencies:
   autoverpod_generator: ^<latest>
   lean_builder: ^<latest>
-  riverpod_annotation: ^<latest>
-  freezed_annotation: ^<latest>
 ```
 
 Alternatively, the same dependencies can be added with:
@@ -66,16 +59,14 @@ dart pub add autoverpod
 dart pub add flutter_riverpod
 dart pub add --dev autoverpod_generator
 dart pub add --dev lean_builder
-dart pub add --dev riverpod_annotation
-dart pub add --dev freezed_annotation
 ```
 
 ### 2. Define state and provider
 
 ```dart
-import 'package:autoverpod/autoverpod.dart';
 import 'package:freezed_annotation/freezed_annotation.dart';
 import 'package:riverpod_annotation/riverpod_annotation.dart';
+import 'package:autoverpod/autoverpod.dart';
 
 part 'user_profile.freezed.dart';
 part 'user_profile.g.dart';
@@ -97,6 +88,8 @@ class UserProfile extends _$UserProfile {
 ```
 
 ### 3. Run the generator
+
+From the package that contains the providers:
 
 ```bash
 dart run lean_builder watch
@@ -168,7 +161,14 @@ UserProfileSelect(
 
 In string field builders, a `StringFieldRef` is provided, which includes a `TextEditingController` and an `update` function corresponding to the field.
 
-For more details and migration notes, see `CHANGELOG.md` and the examples under `example/`.
+## Packages
+
+| Package | Description |
+|---------|-------------|
+| `autoverpod_annotation` | Annotations only (pure Dart, no Flutter) |
+| `autoverpod` | Flutter widgets + re-exports annotations |
+| `autoverpod_generator` | Code generator (uses lean_builder) |
+
 ## License
 
-This package is licensed under the MIT License - see the [LICENSE](LICENSE) file for details.
+MIT License - see [LICENSE](LICENSE) for details.

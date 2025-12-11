@@ -1,3 +1,52 @@
+## 0.1.0 - 2025-12-11
+
+### ⚠️ COMPLETE REWRITE - BREAKING CHANGES
+
+This release completely replaces the previous form-focused generator
+architecture. It is **not** backwards compatible with the 0.0.x series.
+
+- All `@FormWidget` / form update generators have been removed
+- The generator now targets the `@stateWidget` annotation only
+- Generator implementation migrated from `build_runner` to `lean_builder`
+- Significantly reduced generator surface area and complexity
+
+### New Features
+
+- `StateWidgetGenerator` for generating:
+  - Field updater extension methods on the provider notifier
+  - Scope widget (InheritedWidget) for family parameters
+  - State widget (`*Widget`) that rebuilds on any state change
+  - Select widget (`*Select`) that rebuilds on selected value changes
+  - Field widgets with auto `TextEditingController` sync for `String` fields
+- Improved import handling for:
+  - Source libraries
+  - Field types
+  - Family parameter types
+- Always generates a scope widget, even for non-family providers, to keep
+  future changes (e.g. adding parameters) migration-friendly
+
+### Migration Notes
+
+- Replace previous form-based annotations and generators with `@stateWidget`
+- Switch code generation from `build_runner` to `lean_builder`:
+  ```bash
+  dart run lean_builder
+  ```
+- Update dependencies in your consuming package:
+  ```yaml
+  dev_dependencies:
+    autoverpod_generator: ^0.1.0
+    lean_builder: ^0.1.2
+  ```
+
+### Requirements
+
+- **Dart SDK**: `^3.6.0`
+- **autoverpod**: `^0.1.0`
+- **autoverpod_annotation**: `^0.1.0`
+
+---
+
 ## 0.0.6 - 2025-12-05
 
 ### BREAKING CHANGES

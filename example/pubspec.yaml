@@ -1,0 +1,33 @@
+name: autoverpod_example
+description: Example app demonstrating autoverpod package usage.
+publish_to: 'none'
+
+environment:
+  sdk: ^3.6.0
+  flutter: ">=3.0.0"
+
+dependencies:
+  flutter:
+    sdk: flutter
+  flutter_riverpod: ^3.0.3
+  riverpod_annotation: ^3.0.3
+  freezed_annotation: ^3.1.0
+  autoverpod:
+    path: ../autoverpod
+
+dev_dependencies:
+  flutter_test:
+    sdk: flutter
+  riverpod_generator: ^3.0.3
+  freezed: ^3.2.3
+  build_runner: 2.10.4
+  lean_builder: ^0.1.2
+  autoverpod_generator:
+    path: ../autoverpod_generator
+
+dependency_overrides:
+  autoverpod_annotation:
+    path: ../autoverpod_annotation
+
+flutter:
+  uses-material-design: true
