@@ -38,6 +38,7 @@ class ParamDefinition {
   }
 
   ClassField toClassField({bool isFinal = true}) {
-    return ClassField(name: name, type: type, isRequired: isRequired, isFinal: isFinal);
+    return ClassField(
+        name: name, type: type, isRequired: isRequired, isFinal: isFinal);
   }
 }

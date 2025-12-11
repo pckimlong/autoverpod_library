@@ -1,4 +1,4 @@
-name: Publish autoverpod to pub.dev
+name: Publish autoverpod_annotation to pub.dev
 
 on:
   release:
@@ -9,7 +9,7 @@ on:
 jobs:
   publish:
     runs-on: ubuntu-latest
-    if: ${{ github.event_name == 'workflow_call' || github.event_name == 'workflow_dispatch' || startsWith(github.event.release.tag_name, 'autoverpod-v') }}
+    if: ${{ github.event_name == 'workflow_call' || github.event_name == 'workflow_dispatch' || startsWith(github.event.release.tag_name, 'autoverpod_annotation-v') }}
     permissions:
       id-token: write  # IMPORTANT: this permission is mandatory for pub.dev publishing
       contents: read
@@ -24,8 +24,9 @@ jobs:
     
     - name: Install dependencies
       run: dart pub get
-      working-directory: autoverpod
+      working-directory: autoverpod_annotation
     
     - name: Publish to pub.dev
       run: dart pub publish --force
-      working-directory: autoverpod
+      working-directory: autoverpod_annotation
+

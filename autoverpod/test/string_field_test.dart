@@ -23,7 +23,8 @@ void main() {
 
   group('StringField', () {
     group('initialization', () {
-      testWidgets('creates internal controller when none provided', (tester) async {
+      testWidgets('creates internal controller when none provided',
+          (tester) async {
         TextEditingController? capturedController;
 
         await tester.pumpWidget(
@@ -69,7 +70,8 @@ void main() {
         externalController.dispose();
       });
 
-      testWidgets('syncs initial value to empty external controller', (tester) async {
+      testWidgets('syncs initial value to empty external controller',
+          (tester) async {
         final externalController = TextEditingController();
 
         await tester.pumpWidget(
@@ -110,7 +112,8 @@ void main() {
     });
 
     group('two-way synchronization', () {
-      testWidgets('calls onChanged when controller text changes', (tester) async {
+      testWidgets('calls onChanged when controller text changes',
+          (tester) async {
         String? changedValue;
         TextEditingController? capturedController;
 
@@ -172,7 +175,8 @@ void main() {
         expect(capturedController!.text, 'updated');
       });
 
-      testWidgets('does not call onChanged when value matches controller text', (tester) async {
+      testWidgets('does not call onChanged when value matches controller text',
+          (tester) async {
         int callCount = 0;
         TextEditingController? capturedController;
 
@@ -197,7 +201,8 @@ void main() {
         expect(callCount, 0);
       });
 
-      testWidgets('does not update controller if value matches controller text', (tester) async {
+      testWidgets('does not update controller if value matches controller text',
+          (tester) async {
         TextEditingController? capturedController;
 
         await tester.pumpWidget(
@@ -234,7 +239,8 @@ void main() {
     });
 
     group('controller lifecycle', () {
-      testWidgets('disposes internal controller on widget dispose', (tester) async {
+      testWidgets('disposes internal controller on widget dispose',
+          (tester) async {
         TextEditingController? capturedController;
 
         await tester.pumpWidget(
@@ -263,7 +269,8 @@ void main() {
         );
       });
 
-      testWidgets('does not dispose external controller on widget dispose', (tester) async {
+      testWidgets('does not dispose external controller on widget dispose',
+          (tester) async {
         final externalController = TextEditingController(text: 'external');
 
         await tester.pumpWidget(
@@ -287,7 +294,8 @@ void main() {
         externalController.dispose();
       });
 
-      testWidgets('handles controller swap from internal to external', (tester) async {
+      testWidgets('handles controller swap from internal to external',
+          (tester) async {
         TextEditingController? capturedController;
         final externalController = TextEditingController(text: 'external');
 
@@ -337,7 +345,8 @@ void main() {
         externalController.dispose();
       });
 
-      testWidgets('handles controller swap from external to internal', (tester) async {
+      testWidgets('handles controller swap from external to internal',
+          (tester) async {
         TextEditingController? capturedController;
         final externalController = TextEditingController(text: 'external');
 
@@ -384,7 +393,8 @@ void main() {
         externalController.dispose();
       });
 
-      testWidgets('handles swap between two external controllers', (tester) async {
+      testWidgets('handles swap between two external controllers',
+          (tester) async {
         TextEditingController? capturedController;
         final controller1 = TextEditingController(text: 'first');
         final controller2 = TextEditingController(text: 'second');
@@ -693,7 +703,8 @@ void main() {
     });
 
     group('listener management', () {
-      testWidgets('removes listener before disposing internal controller', (tester) async {
+      testWidgets('removes listener before disposing internal controller',
+          (tester) async {
         // This test ensures no double-removal errors occur
         await tester.pumpWidget(
           Directionality(
@@ -710,7 +721,8 @@ void main() {
         await tester.pumpWidget(const SizedBox());
       });
 
-      testWidgets('properly manages listener on controller swap', (tester) async {
+      testWidgets('properly manages listener on controller swap',
+          (tester) async {
         String? lastChange;
         final controller1 = TextEditingController(text: 'c1');
         final controller2 = TextEditingController(text: 'c2');
