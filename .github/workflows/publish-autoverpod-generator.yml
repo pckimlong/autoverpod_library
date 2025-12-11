@@ -12,6 +12,7 @@ jobs:
     if: ${{ github.event_name == 'workflow_call' || github.event_name == 'workflow_dispatch' || startsWith(github.event.release.tag_name, 'autoverpod_generator-v') }}
     permissions:
       id-token: write  # IMPORTANT: this permission is mandatory for pub.dev publishing
+      contents: read
     
     steps:
     - uses: actions/checkout@v4

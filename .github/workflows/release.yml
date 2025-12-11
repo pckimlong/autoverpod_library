@@ -12,6 +12,7 @@ jobs:
     outputs:
       autoverpod_released: ${{ steps.check_tags.outputs.autoverpod_exists == 'false' }}
       generator_released: ${{ steps.check_tags.outputs.generator_exists == 'false' }}
+      annotation_released: ${{ steps.check_tags.outputs.annotation_exists == 'false' }}
     
     steps:
     - uses: actions/checkout@v4
@@ -23,12 +24,14 @@ jobs:
       run: |
         echo "autoverpod_version=$(grep '^version:' autoverpod/pubspec.yaml | awk '{print $2}')" >> $GITHUB_OUTPUT
         echo "autoverpod_generator_version=$(grep '^version:' autoverpod_generator/pubspec.yaml | awk '{print $2}')" >> $GITHUB_OUTPUT
+        echo "autoverpod_annotation_version=$(grep '^version:' autoverpod_annotation/pubspec.yaml | awk '{print $2}')" >> $GITHUB_OUTPUT
     
     - name: Check if version tags exist
       id: check_tags
       run: |
         AUTOVERPOD_TAG="autoverpod-v${{ steps.versions.outputs.autoverpod_version }}"
         GENERATOR_TAG="autoverpod_generator-v${{ steps.versions.outputs.autoverpod_generator_version }}"
+        ANNOTATION_TAG="autoverpod_annotation-v${{ steps.versions.outputs.autoverpod_annotation_version }}"
         
         git fetch --tags
         
@@ -43,9 +46,36 @@ jobs:
         else
           echo "generator_exists=false" >> $GITHUB_OUTPUT
         fi
+
+        if git rev-parse --verify "refs/tags/$ANNOTATION_TAG" >/dev/null 2>&1; then
+          echo "annotation_exists=true" >> $GITHUB_OUTPUT
+        else
+          echo "annotation_exists=false" >> $GITHUB_OUTPUT
+        fi
         
         echo "autoverpod_tag=$AUTOVERPOD_TAG" >> $GITHUB_OUTPUT
         echo "generator_tag=$GENERATOR_TAG" >> $GITHUB_OUTPUT
+        echo "annotation_tag=$ANNOTATION_TAG" >> $GITHUB_OUTPUT
+    
+    - name: Create autoverpod_annotation release
+      if: steps.check_tags.outputs.annotation_exists == 'false'
+      uses: softprops/action-gh-release@v2
+      with:
+        token: ${{ secrets.GITHUB_TOKEN }}
+        tag_name: ${{ steps.check_tags.outputs.annotation_tag }}
+        name: autoverpod_annotation ${{ steps.versions.outputs.autoverpod_annotation_version }}
+        body: |
+          Release of autoverpod_annotation package version ${{ steps.versions.outputs.autoverpod_annotation_version }}
+          
+          ## Installation
+          ```yaml
+          dependencies:
+            autoverpod_annotation: ^${{ steps.versions.outputs.autoverpod_annotation_version }}
+          ```
+        files: |
+          autoverpod_annotation/pubspec.yaml
+        draft: false
+        prerelease: false
     
     - name: Create autoverpod release
       if: steps.check_tags.outputs.autoverpod_exists == 'false'
@@ -87,17 +117,25 @@ jobs:
         draft: false
         prerelease: false
 
-  publish-autoverpod:
+  publish-annotation:
     needs: release
-    if: needs.release.outputs.autoverpod_released == 'true'
+    if: needs.release.outputs.annotation_released == 'true'
+    uses: ./.github/workflows/publish-autoverpod-annotation.yml
+    permissions:
+      id-token: write
+      contents: read
+
+  publish-autoverpod:
+    needs: [release, publish-annotation]
+    if: needs.release.outputs.autoverpod_released == 'true' && (needs.publish-annotation.result == 'success' || needs.publish-annotation.result == 'skipped')
     uses: ./.github/workflows/publish-autoverpod.yml
     permissions:
       id-token: write
       contents: read
 
   publish-generator:
-    needs: [release, publish-autoverpod]
-    if: always() && needs.release.outputs.generator_released == 'true' && (needs.publish-autoverpod.result == 'success' || needs.publish-autoverpod.result == 'skipped')
+    needs: [release, publish-annotation, publish-autoverpod]
+    if: always() && needs.release.outputs.generator_released == 'true' && (needs.publish-annotation.result == 'success' || needs.publish-annotation.result == 'skipped') && (needs.publish-autoverpod.result == 'success' || needs.publish-autoverpod.result == 'skipped')
     uses: ./.github/workflows/publish-autoverpod-generator.yml
     permissions:
       id-token: write
