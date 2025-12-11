@@ -117,6 +117,50 @@ UserProfileWidget(
 
 The generator also produces `UserProfileNameField`, `UserProfileEmailField`, and an extension with `updateName`, `updateEmail`, and similar methods for per-field widgets and updates.
 
+### Family providers and scope
+
+For providers with parameters, a scope widget can be used to pass the parameter to descendants:
+
+```dart
+@stateWidget
+@riverpod
+class UserProfile extends _$UserProfile {
+  @override
+  UserProfileState build(int userId) => const UserProfileState();
+}
+
+UserProfileScope(
+  userId: 123,
+  child: Column(
+    children: [
+      UserProfileNameField(builder: ...),
+      UserProfileEmailField(builder: ...),
+    ],
+  ),
+);
+```
+
+The parameter can also be passed directly to an individual field widget instead of via a scope.
+
+### Builder ref API
+
+In the generated widget builders, the `ref` argument is a proxy object that exposes a subset of the usual Riverpod APIs together with some field-specific helpers. For example:
+
+```dart
+UserProfileSelect(
+  selector: (state) => state.name,
+  builder: (context, ref, name) {
+    // ref.notifier  - provider notifier
+    // ref.select()  - derived values from state
+    // ref.watch()   - watch other providers
+    // ref.read()    - read other providers
+    return Text(name);
+  },
+);
+```
+
+In string field builders, a `StringFieldRef` is provided, which includes a `TextEditingController` and an `update` function corresponding to the field.
+
 ## Packages
 
 | Package | Description |
