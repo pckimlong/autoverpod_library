@@ -65,7 +65,7 @@ packages:
     source: path
     version: "0.1.0"
   autoverpod_annotation:
-    dependency: transitive
+    dependency: "direct overridden"
     description:
       path: "../autoverpod_annotation"
       relative: true
@@ -385,7 +385,7 @@ packages:
     source: hosted
     version: "3.0.2"
   lean_builder:
-    dependency: transitive
+    dependency: "direct dev"
     description:
       name: lean_builder
       sha256: f3ddb3b2c29285a726d739f3eaa4877a2478068f975b51231d032711efbc02d8

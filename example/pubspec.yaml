@@ -21,8 +21,13 @@ dev_dependencies:
   riverpod_generator: ^3.0.3
   freezed: ^3.2.3
   build_runner: 2.10.4
+  lean_builder: ^0.1.2
   autoverpod_generator:
     path: ../autoverpod_generator
+
+dependency_overrides:
+  autoverpod_annotation:
+    path: ../autoverpod_annotation
 
 flutter:
   uses-material-design: true

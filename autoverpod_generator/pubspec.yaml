@@ -15,8 +15,7 @@ dependencies:
   lean_builder: ^0.1.2
   meta: ^1.17.0
   recase: ^4.1.0
-  autoverpod_annotation:
-    path: ../autoverpod_annotation
+  autoverpod_annotation: ^0.1.0
 
 dev_dependencies:
   lints: ^6.0.0

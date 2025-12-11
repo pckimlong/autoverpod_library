@@ -1,3 +1,13 @@
+// AUTOVERPOD EXAMPLE PROVIDERS
+//
+// - Source: userProfileProvider → UserProfileState
+//   Widgets: UserProfileWidget, UserProfileSelect
+//   Scope: UserProfileScope
+//
+// - Source: secondUserProfileProvider → UserProfileState
+//   Widgets: SecondUserProfileWidget, SecondUserProfileSelect
+//   Scope: SecondUserProfileScope
+
 import 'package:autoverpod/autoverpod.dart';
 import 'package:freezed_annotation/freezed_annotation.dart';
 import 'package:riverpod_annotation/riverpod_annotation.dart';
@@ -22,4 +32,13 @@ sealed class UserProfileState with _$UserProfileState {
 class UserProfile extends _$UserProfile {
   @override
   UserProfileState build(int id) => const UserProfileState();
+}
+
+@stateWidget
+@riverpod
+class SecondUserProfile extends _$SecondUserProfile {
+  @override
+  UserProfileState build(int id) => const UserProfileState(
+        name: 'Second',
+      );
 }

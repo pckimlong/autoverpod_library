@@ -1,263 +1,130 @@
-<!-- 
-This README describes the package. If you publish this package to pub.dev,
-this README's contents appear on the landing page for your package.
-
-For information about how to write a good package README, see the guide for
-[writing package pages](https://dart.dev/tools/pub/writing-package-pages). 
-
-For general information about developing packages, see the Dart guide for
-[creating packages](https://dart.dev/guides/libraries/create-packages)
-and the Flutter guide for
-[developing packages and plugins](https://flutter.dev/to/develop-packages). 
--->
-
 # Autoverpod
 
-A package providing annotations for creating Riverpod-powered widgets with automated code generation.
+Autoverpod is a Flutter package that provides widgets and helpers generated from class-based Riverpod providers annotated with `@stateWidget`.
 
-## Features
+> 0.1.0 is a complete rewrite. All previous form-based APIs have been removed.
+> See `CHANGELOG.md` for migration details.
 
-- Simplifies the creation of Riverpod widgets through code generation
-- Provides type-safe annotations that integrate with Riverpod's ecosystem
-- Supports form widgets via the `@formWidget` annotation for both create and update forms
-- Supports state management widgets via the `@stateWidget` annotation
-- Reduces boilerplate code and enforces best practices
+## What it does
 
-## Installation
+For each class-based `@riverpod` provider annotated with `@stateWidget`, the `autoverpod_generator` package creates runtime pieces used by this package:
 
-To use autoverpod in your project, you need both the annotation package and the generator:
+- `Scope` widget: `{ProviderName}Scope` to pass family parameters down the tree
+- `State` widget: `{ProviderName}Widget` that rebuilds when any part of the state changes
+- `Select` widget: `{ProviderName}Select<T>` that rebuilds only when a selected value changes
+- Field widgets: `{ProviderName}{FieldName}Field` for building per-field UI
+- Field updater extensions: methods like `updateName()` on the provider notifier
+
+String fields can use an optional helper that manages a `TextEditingController` and keeps it in sync with the field value.
+
+## Typical use cases
+
+- Riverpod applications that model state as Freezed (or similar) data classes with multiple fields
+- Screens that share one provider and contain several widgets that read or update individual fields
+- Form or profile/edit screens that perform per-field updates without separate `ConsumerWidget` classes
+- Family providers that pass a parameter through a scope widget instead of through each widget constructor
+
+One common case is a profile or form screen with several text fields bound to a single provider. In that situation a generated field widget can be paired with a Flutter `TextField`:
+
+```dart
+UserProfileNameField(
+  builder: (context, ref) {
+    return TextField(
+      controller: ref.textController,
+      decoration: const InputDecoration(labelText: 'Name'),
+    );
+  },
+);
+```
+
+The field widget keeps the `TextEditingController` and the `name` value on the provider in sync, while other widgets on the screen may read the same provider through the generated `UserProfileWidget` or `UserProfileSelect`.
+
+## How to use
+
+### 1. Add dependencies
+
+`pubspec.yaml` typically contains:
 
 ```yaml
 dependencies:
-  autoverpod: ^0.0.3
-  # riverpod generation dependancies
+  flutter:
+    sdk: flutter
+  autoverpod: ^<latest>
+  flutter_riverpod: ^<latest>
 
 dev_dependencies:
-  autoverpod_generator: ^0.0.1
-  build_runner: ^2.4.0  # Required for code generation
+  autoverpod_generator: ^<latest>
+  lean_builder: ^<latest>
+  riverpod_annotation: ^<latest>
+  freezed_annotation: ^<latest>
 ```
 
-## Configuration
+Alternatively, the same dependencies can be added with:
 
-To prevent lint errors related to Riverpod's `notifier_extends` rule, add the following to your `analysis_options.yaml` file:
-
-```yaml
-analyzer:
-  plugins:
-    - custom_lint
-  errors:
-    invalid_annotation_target: ignore
-
-custom_lint:
-  rules:
-    - notifier_extends: false  # Allows providers to extend custom classes instead of generated ones
+```bash
+dart pub add autoverpod
+dart pub add flutter_riverpod
+dart pub add --dev autoverpod_generator
+dart pub add --dev lean_builder
+dart pub add --dev riverpod_annotation
+dart pub add --dev freezed_annotation
 ```
 
-This configuration disables the lint rule that requires providers to extend the generated Riverpod provider classes, which is necessary when using Autoverpod's custom widget extensions.
-
-## Usage
-
-Autoverpod works together with Riverpod annotations. You must apply both a Riverpod annotation 
-(like `@riverpod`) and an autoverpod annotation (like `@formWidget` or `@stateWidget`) 
-to the same class or function.
-
-### Form Widget Example
-
-The `@formWidget` annotation is used to create form widgets with built-in state management:
+### 2. Define state and provider
 
 ```dart
-import 'dart:typed_data';
-
 import 'package:autoverpod/autoverpod.dart';
-import 'package:flutter/material.dart';
-import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:freezed_annotation/freezed_annotation.dart';
 import 'package:riverpod_annotation/riverpod_annotation.dart';
 
-part 'example.freezed.dart';
-part 'example.g.dart';
+part 'user_profile.freezed.dart';
+part 'user_profile.g.dart';
 
-// Define your form model (using Freezed is recommended)
 @freezed
-class UpdateUserModel with _$UpdateUserModel {
-  const UpdateUserModel._();
-
-  const factory UpdateUserModel({
+class UserProfileState with _$UserProfileState {
+  const factory UserProfileState({
     @Default('') String name,
-    int? age,
-    String? email,
-  }) = _UpdateUserModel;
-
-  factory UpdateUserModel.fromJson(Map<String, dynamic> json) => 
-      _$UpdateUserModelFromJson(json);
+    @Default('') String email,
+  }) = _UserProfileState;
 }
 
-// Create your form widget with @formWidget and @riverpod annotations
-@formWidget
+@stateWidget
 @riverpod
-class UpdateUser extends _$UpdateUserWidget {
+class UserProfile extends _$UserProfile {
   @override
-  Future<UpdateUserModel> build(int id) async {
-    // For editing existing users: fetch and return initial form data
-    // For new users: return empty model
-    return const UpdateUserModel(
-      name: 'John Doe',
-      age: 30,
-    );
-  }
-
-  @override
-  Future<bool> submit(
-    UpdateUserModel state, {
-    Uint8List? photoBytes,
-  }) async {
-    // Validate and submit form data
-    if (state.name.isEmpty) throw 'Name is required';
-    
-    // Call your repository/API
-    return await ref.read(userRepositoryProvider).updateUser(id, state);
-  }
-
-  @override
-  void onSuccess(bool result) {
-    // Handle successful submission
-    invalidateSelf();
-  }
-}
-
-// Usage in UI
-void main() {
-  runApp(
-    ProviderScope(
-      child: MaterialApp(
-        home: Scaffold(
-          body: UpdateUserFormScope(
-            id: 1,
-            builder: (context, ref, _) {
-              return Column(
-                children: [
-                  // Field widgets are auto-generated
-                  UpdateUserNameField(builder: (context, ref) {
-                    return TextFormField(controller: ref.textController);
-                  }),
-                  
-                  UpdateUserAgeField(builder: (context, ref) {
-                    return TextFormField(
-                      onChanged: (value) {
-                        ref.updateAge(int.tryParse(value));
-                      },
-                    );
-                  }),
-                  
-                  // Form submission status and button
-                  UpdateUserFormStatus(
-                    builder: (context, ref, status) {
-                      return TextButton(
-                        onPressed: () async {
-                          final result = await ref.submit();
-                          // Handle result
-                        },
-                        child: Text(status!.isLoading ? 'Saving...' : 'Save'),
-                      );
-                    },
-                  )
-                ],
-              );
-            },
-          ),
-        ),
-      ),
-    ),
-  );
+  UserProfileState build(int id) => const UserProfileState();
 }
 ```
 
-### State Widget Examples
-
-The `@stateWidget` annotation is used to create widgets that consume Riverpod state:
-
-```dart
-import 'package:flutter/material.dart';
-import 'package:flutter_riverpod/flutter_riverpod.dart';
-import 'package:autoverpod/autoverpod.dart';
-import 'package:riverpod_annotation/riverpod_annotation.dart';
-
-part 'example.g.dart';
-
-// Class-based provider with parameters
-@stateWidget
-@riverpod
-class ProductDetail extends _$ProductDetail {
-  @override
-  FutureOr<String> build(int productId) {
-    return 'Product Detail $productId';
-  }
-}
-
-// Function-based provider
-@riverpod
-@stateWidget
-int counter(Ref ref) {
-  return 1;
-}
-
-// Class-based provider with multiple parameters
-@riverpod
-@stateWidget
-class StringFuture extends _$StringFuture {
-  @override
-  Future<String> build({
-    required String family,
-    required String second,
-  }) async {
-    return 'string';
-  }
-}
-
-// Provider with optional parameters
-@riverpod
-@stateWidget
-class StringFutureOptional extends _$StringFutureOptional {
-  @override
-  Future<String> build(
-    int a, {
-    required String family,
-    String? second,
-  }) async {
-    return 'string';
-  }
-}
-
-// Async provider with Stream
-@riverpod
-@stateWidget
-Stream<int> counterStream(Ref ref, {required int initialValue}) async* {
-  yield initialValue;
-}
-```
-
-## Code Generation
-
-After annotating your classes or functions, run the generator:
+### 3. Run the generator
 
 ```bash
-flutter pub run build_runner build
+dart run lean_builder watch
 ```
 
-The generator will create:
-- Provider implementations
-- Widget components for form fields
-- Helper methods for state management
-- Type-safe interfaces for your widgets
+### 4. Use generated widgets
 
-## Error Handling
+```dart
+// Rebuilds when any field in UserProfileState changes
+UserProfileWidget(
+  builder: (context, ref, state) {
+    return Column(
+      children: [
+        Text('Name: ${state.name}'),
+        // Only rebuilds when the selected value (email) changes
+        UserProfileSelect(
+          selector: (state) => state.email,
+          builder: (context, ref, email) => Text(email),
+        ),
+      ],
+    );
+  },
+);
+```
 
-Autoverpod enforces that widget annotations must be used together with Riverpod annotations. If you use an autoverpod annotation without a corresponding Riverpod annotation, you'll receive a compile-time error.
+The generator also produces `UserProfileNameField`, `UserProfileEmailField`, and an extension with `updateName`, `updateEmail`, and similar methods for per-field widgets and updates.
 
-## Additional Information
-
-This package is designed to work seamlessly with the Riverpod ecosystem. It's part of the kimapp project, which aims to simplify Flutter development with Riverpod.
-
+For more details and migration notes, see `CHANGELOG.md` and the examples under `example/`.
 ## License
 
 This package is licensed under the MIT License - see the [LICENSE](LICENSE) file for details.

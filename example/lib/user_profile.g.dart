@@ -108,3 +108,104 @@ abstract class _$UserProfile extends $Notifier<UserProfileState> {
     element.handleValue(ref, created);
   }
 }
+
+@ProviderFor(SecondUserProfile)
+@stateWidget
+const secondUserProfileProvider = SecondUserProfileFamily._();
+
+@stateWidget
+final class SecondUserProfileProvider
+    extends $NotifierProvider<SecondUserProfile, UserProfileState> {
+  const SecondUserProfileProvider._(
+      {required SecondUserProfileFamily super.from,
+      required int super.argument})
+      : super(
+          retry: null,
+          name: r'secondUserProfileProvider',
+          isAutoDispose: true,
+          dependencies: null,
+          $allTransitiveDependencies: null,
+        );
+
+  @override
+  String debugGetCreateSourceHash() => _$secondUserProfileHash();
+
+  @override
+  String toString() {
+    return r'secondUserProfileProvider'
+        ''
+        '($argument)';
+  }
+
+  @$internal
+  @override
+  SecondUserProfile create() => SecondUserProfile();
+
+  /// {@macro riverpod.override_with_value}
+  Override overrideWithValue(UserProfileState value) {
+    return $ProviderOverride(
+      origin: this,
+      providerOverride: $SyncValueProvider<UserProfileState>(value),
+    );
+  }
+
+  @override
+  bool operator ==(Object other) {
+    return other is SecondUserProfileProvider && other.argument == argument;
+  }
+
+  @override
+  int get hashCode {
+    return argument.hashCode;
+  }
+}
+
+String _$secondUserProfileHash() => r'00b4a590abdb59212ed4f509e5400868a77b9def';
+
+@stateWidget
+final class SecondUserProfileFamily extends $Family
+    with
+        $ClassFamilyOverride<SecondUserProfile, UserProfileState,
+            UserProfileState, UserProfileState, int> {
+  const SecondUserProfileFamily._()
+      : super(
+          retry: null,
+          name: r'secondUserProfileProvider',
+          dependencies: null,
+          $allTransitiveDependencies: null,
+          isAutoDispose: true,
+        );
+
+  @stateWidget
+  SecondUserProfileProvider call(
+    int id,
+  ) =>
+      SecondUserProfileProvider._(argument: id, from: this);
+
+  @override
+  String toString() => r'secondUserProfileProvider';
+}
+
+@stateWidget
+abstract class _$SecondUserProfile extends $Notifier<UserProfileState> {
+  late final _$args = ref.$arg as int;
+  int get id => _$args;
+
+  UserProfileState build(
+    int id,
+  );
+  @$mustCallSuper
+  @override
+  void runBuild() {
+    final created = build(
+      _$args,
+    );
+    final ref = this.ref as $Ref<UserProfileState, UserProfileState>;
+    final element = ref.element as $ClassProviderElement<
+        AnyNotifier<UserProfileState, UserProfileState>,
+        UserProfileState,
+        Object?,
+        Object?>;
+    element.handleValue(ref, created);
+  }
+}
