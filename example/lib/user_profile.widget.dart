@@ -18,14 +18,21 @@
 // coverage:ignore-file
 
 import 'package:autoverpod/autoverpod.dart';
-import 'package:autoverpod_example/user_profile.dart';
-import 'package:flutter/material.dart';
-import 'package:flutter/widgets.dart';
-import 'package:flutter_riverpod/flutter_riverpod.dart';
+
 import 'package:freezed_annotation/freezed_annotation.dart';
+
+import 'package:riverpod_annotation/riverpod_annotation.dart';
+
+import 'package:flutter/widgets.dart';
+
+import 'package:flutter/material.dart';
+
+import 'package:flutter_riverpod/flutter_riverpod.dart';
+
 import 'package:riverpod_annotation/riverpod_annotation.dart'
     show ProviderListenable, ProviderOrFamily;
-import 'package:riverpod_annotation/riverpod_annotation.dart';
+
+import 'package:autoverpod_example/user_profile.dart';
 
 // ============================================================================
 // AUTOVERPOD - GENERATED CODE
@@ -71,7 +78,10 @@ class _UserProfileParamsInheritedWidget extends InheritedWidget {
   final int id;
 
   static _UserProfileParamsInheritedWidget? maybeOf(BuildContext context) {
-    return context.dependOnInheritedWidgetOfExactType<_UserProfileParamsInheritedWidget>();
+    return context
+        .dependOnInheritedWidgetOfExactType<
+          _UserProfileParamsInheritedWidget
+        >();
   }
 
   static _UserProfileParamsInheritedWidget of(BuildContext context) {
@@ -105,13 +115,15 @@ class UserProfileProxyWidgetRef {
 
   final WidgetRef _ref;
 
-  UserProfile get notifier => _ref.read(userProfileProvider(params!.id).notifier);
+  UserProfile get notifier =>
+      _ref.read(userProfileProvider(params!.id).notifier);
 
   /// Get params from scope (use within UserProfileScope).
   _UserProfileParamsInheritedWidget? get params =>
       _UserProfileParamsInheritedWidget.maybeOf(_ref.context);
 
-  Selected select<Selected>(Selected Function(UserProfileState) selector) => _ref.watch(
+  Selected select<Selected>(Selected Function(UserProfileState) selector) =>
+      _ref.watch(
         userProfileProvider(params!.id).select((value) => selector(value)),
       );
 
@@ -136,8 +148,10 @@ class UserProfileWidget extends ConsumerWidget {
     BuildContext context,
     UserProfileProxyWidgetRef ref,
     UserProfileState state,
-  ) builder;
-  final void Function(UserProfileState? previous, UserProfileState next)? onStateChanged;
+  )
+  builder;
+  final void Function(UserProfileState? previous, UserProfileState next)?
+  onStateChanged;
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
@@ -167,7 +181,8 @@ class UserProfileSelect<Selected> extends ConsumerWidget {
     BuildContext context,
     UserProfileProxyWidgetRef ref,
     Selected value,
-  ) builder;
+  )
+  builder;
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
@@ -202,7 +217,8 @@ class UserProfileNameField extends ConsumerWidget {
     return StringField(
       value: value,
       controller: controller,
-      onChanged: (v) => ref.read(userProfileProvider(params.id).notifier).updateName(v),
+      onChanged: (v) =>
+          ref.read(userProfileProvider(params.id).notifier).updateName(v),
       builder: builder,
     );
   }
@@ -231,7 +247,8 @@ class UserProfileEmailField extends ConsumerWidget {
     return StringField(
       value: value,
       controller: controller,
-      onChanged: (v) => ref.read(userProfileProvider(params.id).notifier).updateEmail(v),
+      onChanged: (v) =>
+          ref.read(userProfileProvider(params.id).notifier).updateEmail(v),
       builder: builder,
     );
   }
@@ -248,7 +265,8 @@ class UserProfileAgeField extends ConsumerWidget {
   const UserProfileAgeField({super.key, this.id, required this.builder});
 
   final int? id;
-  final Widget Function(BuildContext context, UserProfileAgeProxyWidgetRef ref) builder;
+  final Widget Function(BuildContext context, UserProfileAgeProxyWidgetRef ref)
+  builder;
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
@@ -279,7 +297,8 @@ class UserProfileBioField extends ConsumerWidget {
     return StringField(
       value: value,
       controller: controller,
-      onChanged: (v) => ref.read(userProfileProvider(params.id).notifier).updateBio(v),
+      onChanged: (v) =>
+          ref.read(userProfileProvider(params.id).notifier).updateBio(v),
       builder: builder,
     );
   }
@@ -308,7 +327,8 @@ class UserProfileBio2Field extends ConsumerWidget {
     return StringField(
       value: value,
       controller: controller,
-      onChanged: (v) => ref.read(userProfileProvider(params.id).notifier).updateBio2(v),
+      onChanged: (v) =>
+          ref.read(userProfileProvider(params.id).notifier).updateBio2(v),
       builder: builder,
     );
   }

@@ -8,6 +8,5 @@ workspace:
   - autoverpod
   - autoverpod_annotation
   - autoverpod_generator
-  - example
 
 
