@@ -5,53 +5,57 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
-## 0.0.6 - 2025-12-05
+## 0.1.0 - 2025-12-11
 
-### BREAKING CHANGES
+### ⚠️ COMPLETE REWRITE - BREAKING CHANGES
 
-- **Removed StateWidget annotation** - The StateWidget annotation and related generators have been removed. Use the new FormWidget annotation instead for form state management.
-- **Updated Riverpod exports** - Replaced `StateProvider` export with `Mutation` and `MutationTransaction` from `riverpod/experimental/mutation.dart`. This aligns with Riverpod 3.0.3's experimental mutation API.
-- **Generator architecture refactoring** - Internal generator architecture has been significantly refactored for better maintainability and performance.
+This version is a **complete rewrite** of the autoverpod package. The previous complex form-focused architecture has been replaced with a simpler, more maintainable state widget approach.
 
-### Features
+#### Migration Notes
 
-- **New FormWidget annotation** - Introducing the `@FormWidget` annotation for simplified form state management with automatic provider generation
-- **Enhanced form validation** - Built-in form validation with automatic error handling and state management
-- **onStatusChanged callback** - Forms now support an `onStatusChanged` callback to react to form status changes (loading, success, error)
-- **Automatic form providers** - Generated form providers include:
-  - Form state provider
-  - Form mutation provider for submit operations
-  - Call status provider for tracking submission state
-- **Improved example applications** - Complete rewrite of example apps showcasing the new FormWidget system with:
-  - Counter example with mutation support
-  - Simple user form with validation
-  - Simple product form with validation
-  - Comprehensive test verification suite
+- **All previous APIs have been removed** - This is not a backwards-compatible update
+- **Generator changed from `build_runner` to `lean_builder`** - Run `dart run lean_builder` instead of `dart run build_runner`
+- **Form submission handling removed** - Users now handle form submission logic themselves
+- **Simpler annotation** - Use `@stateWidget` instead of `@FormWidget`
 
-### Improvements
+#### Why This Change?
 
-- **Updated dependencies** - All dependencies updated to latest stable versions:
-  - Riverpod 3.0.3
-  - Flutter SDK requirements updated
-  - Build and analyzer packages updated
-- **Better code generation** - Improved generator performance with better handling of:
-  - Generated file exclusion (.g.dart, .freezed.dart, .widget.dart)
-  - Import resolution and dependency management
-  - Error handling and validation
-- **Enhanced debugging** - Better error messages and debugging information during code generation
-- **Code cleanup** - Removed deprecated workflow files and cleaned up unused code
-- **Improved linting** - Added lint ignore directives and improved code formatting
+The previous version tried to be "too magic" with automatic form handling, mutations, and complex provider generation. This led to:
+- High maintenance burden (30+ generator files)
+- Difficult to debug generated code
+- Tight coupling to specific patterns
 
-### Examples
+The new version is:
+- **Simpler** - Only 5 generator files
+- **More flexible** - Users control form submission
+- **Easier to maintain** - Uses lean_builder for cleaner code generation
+- **Future-proof** - Generates scope widgets even for non-family providers
 
-- **Complete form examples** - New comprehensive examples showing:
-  - Form creation with `@FormWidget`
-  - Field validation and error handling
-  - Submit operations with loading states
-  - Status callbacks and reactive UI updates
-- **Test verification** - Added automated test verification suite to ensure generated code works correctly
+### New Features
 
-## 0.0.5 - Previous Version
+- **`@stateWidget` annotation** - Simple annotation for generating state field widgets
+- **Auto text controller sync** - StringField helper handles TextEditingController synchronization
+- **Scope widgets** - InheritedWidget-based scoping for family parameters
+- **Field widgets** - Generated field widgets with update methods
+- **Select widgets** - Optimized widgets that only rebuild on selected value changes
 
-- Initial release with basic StateWidget functionality
-- Basic provider generation for state management
+### What's Generated
+
+For a provider annotated with `@stateWidget`:
+- Field updater extension methods
+- Scope widget (for family parameter passing)
+- State widget (rebuilds on any state change)
+- Select widget (rebuilds on selected value only)
+- Individual field widgets with auto text controller sync (for String fields)
+
+### Dependencies
+
+- Uses `lean_builder` instead of `build_runner`
+- Requires `flutter_riverpod: >=3.0.0 <4.0.0`
+- Dart SDK: `^3.6.0`
+
+---
+
+## Previous Versions (Deprecated)
+
+All versions before 0.1.0 used a different architecture and are no longer supported. Please migrate to 0.1.0.

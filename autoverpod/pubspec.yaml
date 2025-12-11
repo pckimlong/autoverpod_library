@@ -1,17 +1,24 @@
 name: autoverpod
-description: Annotations for Riverpod widgets to simplify code generation and automate widget creation.
-version: 0.0.6
+description: Flutter widgets and helpers for autoverpod - automatic widget generation for Riverpod providers.
+version: 0.1.0
 repository: https://github.com/pckimlong/autoverpod_library
 homepage: https://github.com/pckimlong/autoverpod_library
 issue_tracker: https://github.com/pckimlong/autoverpod_library/issues
 
 environment:
-  sdk: ^3.9.2
+  sdk: ^3.6.0
+  flutter: ">=3.0.0"
+
 resolution: workspace
 
 dependencies:
-  meta: ^1.16.0
-  riverpod: ^3.0.3
+  flutter:
+    sdk: flutter
+  autoverpod_annotation:
+    path: ../autoverpod_annotation
+  flutter_riverpod: ">=3.0.0 <4.0.0"
+  meta: ^1.17.0
 
 dev_dependencies:
-  lints: ^6.0.0
+  flutter_test:
+    sdk: flutter

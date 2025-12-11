@@ -1,11 +1,10 @@
 /// Autoverpod library
 ///
-/// This library provides annotations for Riverpod widgets to simplify
-/// code generation and widget creation.
+/// Provides annotations and helpers for generating state field widgets from Riverpod providers.
 library;
 
+export 'package:autoverpod_annotation/autoverpod_annotation.dart';
+export 'package:flutter_riverpod/flutter_riverpod.dart';
 export 'package:meta/meta.dart' show nonVirtual, protected;
-export 'package:riverpod/experimental/mutation.dart' show Mutation, MutationTransaction;
 
-export 'src/annotations.dart';
-export 'src/helpers.dart';
+export 'src/string_field.dart';

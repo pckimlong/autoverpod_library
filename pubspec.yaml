@@ -2,10 +2,12 @@ name: autoverpod_library
 repository: https://github.com/pckimlong/autoverpod_library
 publish_to: none
 environment:
-  sdk: ^3.9.2
+  sdk: ^3.6.0
 
 workspace:
   - autoverpod
+  - autoverpod_annotation
   - autoverpod_generator
+  - example
 
 
