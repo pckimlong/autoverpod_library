@@ -42,7 +42,8 @@ class ProviderDefinition {
     final returnType = buildMethod.returnType;
     final wrapperType =
         returnType is InterfaceType ? returnType.element.name : null;
-    final isAsyncValue = ['Future', 'Stream', 'FutureOr'].contains(wrapperType);
+    final isAsyncValue =
+        ['Future', 'Stream', 'FutureOr', 'AsyncValue'].contains(wrapperType);
 
     // Get base type (unwrap Future/Stream if needed)
     String baseType;

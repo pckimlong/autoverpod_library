@@ -9,6 +9,99 @@ part of 'user_profile.dart';
 // GENERATED CODE - DO NOT MODIFY BY HAND
 // ignore_for_file: type=lint, type=warning
 
+@ProviderFor(AsyncUserProfile)
+@stateWidget
+const asyncUserProfileProvider = AsyncUserProfileFamily._();
+
+@stateWidget
+final class AsyncUserProfileProvider
+    extends $AsyncNotifierProvider<AsyncUserProfile, UserProfileState> {
+  const AsyncUserProfileProvider._(
+      {required AsyncUserProfileFamily super.from, required int super.argument})
+      : super(
+          retry: null,
+          name: r'asyncUserProfileProvider',
+          isAutoDispose: true,
+          dependencies: null,
+          $allTransitiveDependencies: null,
+        );
+
+  @override
+  String debugGetCreateSourceHash() => _$asyncUserProfileHash();
+
+  @override
+  String toString() {
+    return r'asyncUserProfileProvider'
+        ''
+        '($argument)';
+  }
+
+  @$internal
+  @override
+  AsyncUserProfile create() => AsyncUserProfile();
+
+  @override
+  bool operator ==(Object other) {
+    return other is AsyncUserProfileProvider && other.argument == argument;
+  }
+
+  @override
+  int get hashCode {
+    return argument.hashCode;
+  }
+}
+
+String _$asyncUserProfileHash() => r'20a71b236dd3809644b472794a6c621ecf8534a7';
+
+@stateWidget
+final class AsyncUserProfileFamily extends $Family
+    with
+        $ClassFamilyOverride<AsyncUserProfile, AsyncValue<UserProfileState>,
+            UserProfileState, FutureOr<UserProfileState>, int> {
+  const AsyncUserProfileFamily._()
+      : super(
+          retry: null,
+          name: r'asyncUserProfileProvider',
+          dependencies: null,
+          $allTransitiveDependencies: null,
+          isAutoDispose: true,
+        );
+
+  @stateWidget
+  AsyncUserProfileProvider call(
+    int id,
+  ) =>
+      AsyncUserProfileProvider._(argument: id, from: this);
+
+  @override
+  String toString() => r'asyncUserProfileProvider';
+}
+
+@stateWidget
+abstract class _$AsyncUserProfile extends $AsyncNotifier<UserProfileState> {
+  late final _$args = ref.$arg as int;
+  int get id => _$args;
+
+  FutureOr<UserProfileState> build(
+    int id,
+  );
+  @$mustCallSuper
+  @override
+  void runBuild() {
+    final created = build(
+      _$args,
+    );
+    final ref =
+        this.ref as $Ref<AsyncValue<UserProfileState>, UserProfileState>;
+    final element = ref.element as $ClassProviderElement<
+        AnyNotifier<AsyncValue<UserProfileState>, UserProfileState>,
+        AsyncValue<UserProfileState>,
+        Object?,
+        Object?>;
+    element.handleValue(ref, created);
+  }
+}
+
 @ProviderFor(UserProfile)
 @stateWidget
 const userProfileProvider = UserProfileFamily._();

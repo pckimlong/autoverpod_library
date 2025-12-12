@@ -51,6 +51,11 @@ class StateWidgetGenerator extends GeneratorForAnnotatedClass<StateWidget> {
     // Base proxy widget ref
     pieces.add(_generateProxyWidgetRef(provider));
 
+    // Debug check helper for family scope usage
+    if (provider.hasFamily) {
+      pieces.add(_generateDebugCheckHasScope(provider));
+    }
+
     // State widget
     pieces.add(_generateStateWidget(provider));
 
@@ -229,40 +234,119 @@ class StateWidgetGenerator extends GeneratorForAnnotatedClass<StateWidget> {
     buffer.writeln();
 
     // Scope widget
-    if (provider.hasFamily) {
+    if (provider.isAsyncValue) {
       buffer.writeln(
-          '/// Scope widget to provide family parameters to child widgets.');
-    } else {
-      buffer.writeln(
-          '/// Scope widget placeholder for future family parameters.');
-      buffer.writeln(
-        '/// Wrap your widget tree with this to future-proof for family provider migration.',
+        '/// Scope widget to provide family parameters and handle async state.',
       );
+      buffer.writeln(
+          'class ${provider.baseName}Scope extends ConsumerWidget {');
+      buffer.writeln('  const ${provider.baseName}Scope({');
+      buffer.writeln('    super.key,');
+      for (final param in provider.familyParameters) {
+        buffer.writeln('    required this.${param.name},');
+      }
+      buffer.writeln('    required this.child,');
+      buffer.writeln('    required this.loading,');
+      buffer.writeln('    required this.error,');
+      buffer.writeln('    this.builder,');
+      buffer.writeln('    this.onStateChanged,');
+      buffer.writeln(
+        '  }) : assert(builder != null || (loading != null && error != null));',
+      );
+      buffer.writeln();
+      for (final param in provider.familyParameters) {
+        buffer.writeln('  final ${param.type} ${param.name};');
+      }
+      buffer.writeln('  final Widget child;');
+      buffer.writeln('  final Widget? loading;');
+      buffer.writeln(
+          '  final Widget Function(Object error, StackTrace stackTrace)? error;');
+      buffer.writeln(
+        '  final Widget Function(BuildContext context, AsyncValue<${provider.baseType}> asyncValue, Widget child)? builder;',
+      );
+      buffer.writeln(
+        '  final void Function(AsyncValue<${provider.baseType}>? previous, AsyncValue<${provider.baseType}> next)? onStateChanged;',
+      );
+      buffer.writeln();
+      buffer.writeln('  @override');
+      buffer.writeln('  Widget build(BuildContext context, WidgetRef ref) {');
+      if (provider.hasFamily) {
+        buffer.writeln('    final params = (');
+        for (final param in provider.familyParameters) {
+          buffer.writeln('      ${param.name}: ${param.name},');
+        }
+        buffer.writeln('    );');
+      }
+      buffer.writeln('    if (onStateChanged != null) {');
+      buffer.writeln(
+        '      ref.listen(${provider.providerNameWithFamily(prefix: 'params')}, (prev, next) {',
+      );
+      buffer.writeln('        if (prev != next) onStateChanged!(prev, next);');
+      buffer.writeln('      });');
+      buffer.writeln('    }');
+      buffer.writeln(
+        '    final asyncValue = ref.watch(${provider.providerNameWithFamily(prefix: 'params')});',
+      );
+      buffer.writeln(
+        '    final scopedChild = _${provider.baseName}ParamsInheritedWidget(',
+      );
+      for (final param in provider.familyParameters) {
+        buffer.writeln('          ${param.name}: ${param.name},');
+      }
+      buffer.writeln('          child: child,');
+      buffer.writeln('        );');
+      buffer.writeln('    if (builder != null) {');
+      buffer.writeln(
+          '      return builder!(context, asyncValue, scopedChild);');
+      buffer.writeln('    }');
+      buffer.writeln('    return asyncValue.when(');
+      buffer.writeln('      data: (_) => scopedChild,');
+      buffer.writeln(
+        '      loading: () => loading ?? const SizedBox.shrink(),',
+      );
+      buffer.writeln(
+        '      error: (err, stack) => error?.call(err, stack) ?? const SizedBox.shrink(),',
+      );
+      buffer.writeln('    );');
+      buffer.writeln('  }');
+      buffer.writeln('}');
+    } else {
+      if (provider.hasFamily) {
+        buffer.writeln(
+            '/// Scope widget to provide family parameters to child widgets.');
+      } else {
+        buffer.writeln(
+            '/// Scope widget placeholder for future family parameters.');
+        buffer.writeln(
+          '/// Wrap your widget tree with this to future-proof for family provider migration.',
+        );
+      }
+      buffer.writeln(
+          'class ${provider.baseName}Scope extends StatelessWidget {');
+      buffer.writeln('  const ${provider.baseName}Scope({');
+      buffer.writeln('    super.key,');
+      for (final param in provider.familyParameters) {
+        buffer.writeln('    required this.${param.name},');
+      }
+      buffer.writeln('    required this.child,');
+      buffer.writeln('  });');
+      buffer.writeln();
+      for (final param in provider.familyParameters) {
+        buffer.writeln('  final ${param.type} ${param.name};');
+      }
+      buffer.writeln('  final Widget child;');
+      buffer.writeln();
+      buffer.writeln('  @override');
+      buffer.writeln('  Widget build(BuildContext context) {');
+      buffer.writeln('    return _${provider.baseName}ParamsInheritedWidget(');
+      for (final param in provider.familyParameters) {
+        buffer.writeln('      ${param.name}: ${param.name},');
+      }
+      buffer.writeln('      child: child,');
+      buffer.writeln('    );');
+      buffer.writeln('  }');
+      buffer.writeln('}');
     }
-    buffer.writeln('class ${provider.baseName}Scope extends StatelessWidget {');
-    buffer.writeln('  const ${provider.baseName}Scope({');
-    buffer.writeln('    super.key,');
-    for (final param in provider.familyParameters) {
-      buffer.writeln('    required this.${param.name},');
-    }
-    buffer.writeln('    required this.child,');
-    buffer.writeln('  });');
-    buffer.writeln();
-    for (final param in provider.familyParameters) {
-      buffer.writeln('  final ${param.type} ${param.name};');
-    }
-    buffer.writeln('  final Widget child;');
-    buffer.writeln();
-    buffer.writeln('  @override');
-    buffer.writeln('  Widget build(BuildContext context) {');
-    buffer.writeln('    return _${provider.baseName}ParamsInheritedWidget(');
-    for (final param in provider.familyParameters) {
-      buffer.writeln('      ${param.name}: ${param.name},');
-    }
-    buffer.writeln('      child: child,');
-    buffer.writeln('    );');
-    buffer.writeln('  }');
-    buffer.writeln('}');
 
     return buffer.toString();
   }
@@ -304,11 +388,11 @@ class StateWidgetGenerator extends GeneratorForAnnotatedClass<StateWidget> {
     );
     if (provider.hasFamily) {
       buffer.writeln(
-        '      _ref.watch(${provider.providerNameWithFamily(prefix: 'params!')}.select((value) => selector(value${provider.isAsyncValue ? '.valueOrNull!' : ''})));',
+        '      _ref.watch(${provider.providerNameWithFamily(prefix: 'params!')}.select((value) => selector(value${provider.isAsyncValue ? '.requireValue' : ''})));',
       );
     } else {
       buffer.writeln(
-        '      _ref.watch(${provider.providerName}.select((value) => selector(value${provider.isAsyncValue ? '.valueOrNull!' : ''})));',
+        '      _ref.watch(${provider.providerName}.select((value) => selector(value${provider.isAsyncValue ? '.requireValue' : ''})));',
       );
     }
     buffer.writeln();
@@ -325,6 +409,37 @@ class StateWidgetGenerator extends GeneratorForAnnotatedClass<StateWidget> {
     return buffer.toString();
   }
 
+  String _generateDebugCheckHasScope(ProviderDefinition provider) {
+    final buffer = StringBuffer();
+    buffer.writeln(
+        'bool _debugCheckHas${provider.baseName}Scope(BuildContext context) {');
+    buffer.writeln('  assert(() {');
+    buffer.writeln(
+        '    if (_${provider.baseName}ParamsInheritedWidget.maybeOf(context) == null) {');
+    buffer.writeln(
+        '      final isInNavigation = ModalRoute.of(context) != null;');
+    buffer.writeln('      if (!isInNavigation) {');
+    buffer.writeln('        throw FlutterError.fromParts(<DiagnosticsNode>[');
+    buffer.writeln(
+        "          ErrorSummary('No ${provider.baseName}Scope found'),");
+    buffer.writeln('          ErrorDescription(');
+    buffer.writeln(
+        "            '\${context.widget.runtimeType} widgets require a ${provider.baseName}Scope widget ancestor '");
+    buffer.writeln(
+        "            'or to be used in a navigation context with proper state management.',");
+    buffer.writeln('          ),');
+    buffer.writeln('        ]);');
+    buffer.writeln('      }');
+    buffer.writeln(
+        "      debugPrint('Widget \${context.widget.runtimeType} used in navigation without direct ${provider.baseName}Scope');");
+    buffer.writeln('    }');
+    buffer.writeln('    return true;');
+    buffer.writeln('  }());');
+    buffer.writeln('  return true;');
+    buffer.writeln('}');
+    return buffer.toString();
+  }
+
   String _generateStateWidget(ProviderDefinition provider) {
     final buffer = StringBuffer();
     final stateType = provider.isAsyncValue
@@ -335,20 +450,10 @@ class StateWidgetGenerator extends GeneratorForAnnotatedClass<StateWidget> {
     buffer.writeln('class ${provider.baseName}Widget extends ConsumerWidget {');
     buffer.writeln('  const ${provider.baseName}Widget({');
     buffer.writeln('    super.key,');
-    if (provider.hasFamily) {
-      for (final param in provider.familyParameters) {
-        buffer.writeln('    this.${param.name},');
-      }
-    }
     buffer.writeln('    required this.builder,');
     buffer.writeln('    this.onStateChanged,');
     buffer.writeln('  });');
     buffer.writeln();
-    if (provider.hasFamily) {
-      for (final param in provider.familyParameters) {
-        buffer.writeln('  final ${param.type}? ${param.name};');
-      }
-    }
     buffer.writeln(
       '  final Widget Function(BuildContext context, ${provider.baseName}ProxyWidgetRef ref, $stateType state) builder;',
     );
@@ -359,13 +464,10 @@ class StateWidgetGenerator extends GeneratorForAnnotatedClass<StateWidget> {
     buffer.writeln('  Widget build(BuildContext context, WidgetRef ref) {');
 
     if (provider.hasFamily) {
-      buffer.writeln('    final params = (');
-      for (final param in provider.familyParameters) {
-        buffer.writeln(
-          '      ${param.name}: ${param.name} ?? _${provider.baseName}ParamsInheritedWidget.of(context).${param.name},',
-        );
-      }
-      buffer.writeln('    );');
+      buffer.writeln(
+          '    assert(_debugCheckHas${provider.baseName}Scope(context));');
+      buffer.writeln(
+          '    final params = _${provider.baseName}ParamsInheritedWidget.of(context);');
     }
 
     buffer.writeln('    if (onStateChanged != null) {');
@@ -395,44 +497,40 @@ class StateWidgetGenerator extends GeneratorForAnnotatedClass<StateWidget> {
         'class ${provider.baseName}Select<Selected> extends ConsumerWidget {');
     buffer.writeln('  const ${provider.baseName}Select({');
     buffer.writeln('    super.key,');
-    if (provider.hasFamily) {
-      for (final param in provider.familyParameters) {
-        buffer.writeln('    this.${param.name},');
-      }
-    }
     buffer.writeln('    required this.selector,');
     buffer.writeln('    required this.builder,');
+    buffer.writeln('    this.onStateChanged,');
     buffer.writeln('  });');
     buffer.writeln();
-    if (provider.hasFamily) {
-      for (final param in provider.familyParameters) {
-        buffer.writeln('  final ${param.type}? ${param.name};');
-      }
-    }
     buffer.writeln(
         '  final Selected Function(${provider.baseType} state) selector;');
     buffer.writeln(
       '  final Widget Function(BuildContext context, ${provider.baseName}ProxyWidgetRef ref, Selected value) builder;',
     );
+    buffer.writeln(
+        '  final void Function(Selected? previous, Selected next)? onStateChanged;');
     buffer.writeln();
     buffer.writeln('  @override');
     buffer.writeln('  Widget build(BuildContext context, WidgetRef ref) {');
 
     if (provider.hasFamily) {
-      buffer.writeln('    final params = (');
-      for (final param in provider.familyParameters) {
-        buffer.writeln(
-          '      ${param.name}: ${param.name} ?? _${provider.baseName}ParamsInheritedWidget.of(context).${param.name},',
-        );
-      }
-      buffer.writeln('    );');
+      buffer.writeln(
+          '    assert(_debugCheckHas${provider.baseName}Scope(context));');
+      buffer.writeln(
+          '    final params = _${provider.baseName}ParamsInheritedWidget.of(context);');
     }
 
     final valueSelector =
-        provider.isAsyncValue ? 'value.valueOrNull!' : 'value';
+        provider.isAsyncValue ? 'value.requireValue' : 'value';
     buffer.writeln(
-      '    final selected = ref.watch(${provider.providerNameWithFamily(prefix: 'params')}.select((value) => selector($valueSelector)));',
+      '    final selectedProvider = ${provider.providerNameWithFamily(prefix: 'params')}.select((value) => selector($valueSelector));',
     );
+    buffer.writeln('    if (onStateChanged != null) {');
+    buffer.writeln('      ref.listen(selectedProvider, (prev, next) {');
+    buffer.writeln('        if (prev != next) onStateChanged!(prev, next);');
+    buffer.writeln('      });');
+    buffer.writeln('    }');
+    buffer.writeln('    final selected = ref.watch(selectedProvider);');
     buffer.writeln(
       '    return builder(context, ${provider.baseName}ProxyWidgetRef(ref), selected);',
     );
@@ -473,24 +571,18 @@ class StateWidgetGenerator extends GeneratorForAnnotatedClass<StateWidget> {
     buffer.writeln('class $widgetName extends ConsumerWidget {');
     buffer.writeln('  const $widgetName({');
     buffer.writeln('    super.key,');
-    if (provider.hasFamily) {
-      for (final param in provider.familyParameters) {
-        buffer.writeln('    this.${param.name},');
-      }
-    }
     buffer.writeln('    required this.builder,');
     buffer.writeln('  });');
     buffer.writeln();
-    if (provider.hasFamily) {
-      for (final param in provider.familyParameters) {
-        buffer.writeln('  final ${param.type}? ${param.name};');
-      }
-    }
     buffer.writeln(
         '  final Widget Function(BuildContext context, $proxyName ref) builder;');
     buffer.writeln();
     buffer.writeln('  @override');
     buffer.writeln('  Widget build(BuildContext context, WidgetRef ref) {');
+    if (provider.hasFamily) {
+      buffer.writeln(
+          '    assert(_debugCheckHas${provider.baseName}Scope(context));');
+    }
 
     // Note: We don't need params here because the ProxyWidgetRef handles it internally
     // The ProxyWidgetRef uses select() which already accesses the correct provider
@@ -510,7 +602,7 @@ class StateWidgetGenerator extends GeneratorForAnnotatedClass<StateWidget> {
     String widgetName,
   ) {
     final buffer = StringBuffer();
-    final valueAccess = provider.isAsyncValue ? '.valueOrNull?' : '';
+    final valueAccess = provider.isAsyncValue ? '.requireValue' : '';
     final proxyName =
         '${provider.baseName}${field.name.pascalCase}ProxyWidgetRef';
 
@@ -538,20 +630,10 @@ class StateWidgetGenerator extends GeneratorForAnnotatedClass<StateWidget> {
     buffer.writeln('class $widgetName extends ConsumerWidget {');
     buffer.writeln('  const $widgetName({');
     buffer.writeln('    super.key,');
-    if (provider.hasFamily) {
-      for (final param in provider.familyParameters) {
-        buffer.writeln('    this.${param.name},');
-      }
-    }
     buffer.writeln('    this.controller,');
     buffer.writeln('    required this.builder,');
     buffer.writeln('  });');
     buffer.writeln();
-    if (provider.hasFamily) {
-      for (final param in provider.familyParameters) {
-        buffer.writeln('  final ${param.type}? ${param.name};');
-      }
-    }
     buffer.writeln('  final TextEditingController? controller;');
     buffer.writeln(
         '  final Widget Function(BuildContext context, $proxyName ref) builder;');
@@ -560,13 +642,10 @@ class StateWidgetGenerator extends GeneratorForAnnotatedClass<StateWidget> {
     buffer.writeln('  Widget build(BuildContext context, WidgetRef ref) {');
 
     if (provider.hasFamily) {
-      buffer.writeln('    final params = (');
-      for (final param in provider.familyParameters) {
-        buffer.writeln(
-          '      ${param.name}: ${param.name} ?? _${provider.baseName}ParamsInheritedWidget.of(context).${param.name},',
-        );
-      }
-      buffer.writeln('    );');
+      buffer.writeln(
+          '    assert(_debugCheckHas${provider.baseName}Scope(context));');
+      buffer.writeln(
+          '    final params = _${provider.baseName}ParamsInheritedWidget.of(context);');
     }
 
     buffer.writeln('    final value = ref.watch(');
