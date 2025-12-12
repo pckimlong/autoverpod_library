@@ -18,11 +18,13 @@ class ParamDefinition {
     this.importPath,
   });
 
+  bool get isNullable => type.endsWith('?');
+
   factory ParamDefinition.fromElement(ParameterElement parameter) {
     String? importPath;
     final paramType = parameter.type;
     if (paramType.element != null) {
-      final uri = paramType.element!.librarySrc.uri.toString();
+      final uri = paramType.element!.librarySrc.shortUri.toString();
       if (!uri.startsWith('dart:')) {
         importPath = uri;
       }
@@ -39,6 +41,10 @@ class ParamDefinition {
 
   ClassField toClassField({bool isFinal = true}) {
     return ClassField(
-        name: name, type: type, isRequired: isRequired, isFinal: isFinal);
+      name: name,
+      type: type,
+      isRequired: isRequired,
+      isFinal: isFinal,
+    );
   }
 }

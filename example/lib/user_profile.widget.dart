@@ -5,14 +5,6 @@
 // StateWidgetGenerator
 // **************************************************************************
 
-// GENERATED CODE - DO NOT MODIFY BY HAND
-
-// dart format width=80
-
-// **************************************************************************
-
-// StateWidgetGenerator
-
 // ignore_for_file: type=lint, unused_element, deprecated_member_use, deprecated_member_use_from_same_package, use_function_type_syntax_for_parameters, unnecessary_const, avoid_init_to_null, invalid_override_different_default_values_named, prefer_expression_function_bodies, annotate_overrides, invalid_annotation_target, unnecessary_question_mark, invalid_use_of_visible_for_testing_member, invalid_use_of_protected_member, unnecessary_import, unused_import
 
 // coverage:ignore-file
@@ -46,7 +38,7 @@ import 'package:autoverpod_example/user_profile.dart';
 // Fields:
 // - NameField: ref.textController | ref.updateName(value)
 // - EmailField: ref.textController | ref.updateEmail(value)
-// - AgeField: ref.updateAge(value)
+// - AgeField: ref.textController | ref.updateAge(value)
 // - BioField: ref.textController | ref.updateBio(value)
 // - Bio2Field: ref.textController | ref.updateBio2(value)
 //
@@ -102,6 +94,16 @@ class _AsyncUserProfileParamsInheritedWidget extends InheritedWidget {
 }
 
 /// Scope widget to provide family parameters and handle async state.
+///
+/// **Usage:**
+/// ```dart
+/// AsyncUserProfileScope(
+///   id: id,
+///   loading: CircularProgressIndicator(),
+///   error: (e, s) => Text(e.toString()),
+///   child: // Your widget tree here,
+/// )
+/// ```
 class AsyncUserProfileScope extends ConsumerWidget {
   const AsyncUserProfileScope({
     super.key,
@@ -131,13 +133,13 @@ class AsyncUserProfileScope extends ConsumerWidget {
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
-    final params = (id: id);
+    final params = id;
     if (onStateChanged != null) {
-      ref.listen(asyncUserProfileProvider(params.id), (prev, next) {
+      ref.listen(asyncUserProfileProvider(params), (prev, next) {
         if (prev != next) onStateChanged!(prev, next);
       });
     }
-    final asyncValue = ref.watch(asyncUserProfileProvider(params.id));
+    final asyncValue = ref.watch(asyncUserProfileProvider(params));
     final scopedChild = _AsyncUserProfileParamsInheritedWidget(
       id: id,
       child: child,
@@ -155,12 +157,22 @@ class AsyncUserProfileScope extends ConsumerWidget {
 
 /// Proxy widget ref providing access to the provider.
 class AsyncUserProfileProxyWidgetRef {
-  AsyncUserProfileProxyWidgetRef(this._ref);
+  AsyncUserProfileProxyWidgetRef(this._ref, {this.id});
 
   final WidgetRef _ref;
 
+  final int? id;
+
+  /// Resolved family parameters from direct values or scope.
+  int get _params {
+    final scope = _AsyncUserProfileParamsInheritedWidget.maybeOf(_ref.context);
+    final idValue = id ?? scope?.id;
+    assert(idValue != null, 'No id provided for AsyncUserProfileProvider');
+    return idValue!;
+  }
+
   AsyncUserProfile get notifier =>
-      _ref.read(asyncUserProfileProvider(params!.id).notifier);
+      _ref.read(asyncUserProfileProvider(_params).notifier);
 
   /// Get params from scope (use within AsyncUserProfileScope).
   _AsyncUserProfileParamsInheritedWidget? get params =>
@@ -169,7 +181,7 @@ class AsyncUserProfileProxyWidgetRef {
   Selected select<Selected>(Selected Function(UserProfileState) selector) =>
       _ref.watch(
         asyncUserProfileProvider(
-          params!.id,
+          _params,
         ).select((value) => selector(value.requireValue)),
       );
 
@@ -183,19 +195,13 @@ class AsyncUserProfileProxyWidgetRef {
 bool _debugCheckHasAsyncUserProfileScope(BuildContext context) {
   assert(() {
     if (_AsyncUserProfileParamsInheritedWidget.maybeOf(context) == null) {
-      final isInNavigation = ModalRoute.of(context) != null;
-      if (!isInNavigation) {
-        throw FlutterError.fromParts(<DiagnosticsNode>[
-          ErrorSummary('No AsyncUserProfileScope found'),
-          ErrorDescription(
-            '${context.widget.runtimeType} widgets require a AsyncUserProfileScope widget ancestor '
-            'or to be used in a navigation context with proper state management.',
-          ),
-        ]);
-      }
-      debugPrint(
-        'Widget ${context.widget.runtimeType} used in navigation without direct AsyncUserProfileScope',
-      );
+      throw FlutterError.fromParts(<DiagnosticsNode>[
+        ErrorSummary('No AsyncUserProfileScope found'),
+        ErrorDescription(
+          '${context.widget.runtimeType} widgets require a AsyncUserProfileScope widget ancestor '
+          'or to be provided the family parameters directly.',
+        ),
+      ]);
     }
     return true;
   }());
@@ -203,12 +209,29 @@ bool _debugCheckHasAsyncUserProfileScope(BuildContext context) {
 }
 
 /// Widget that rebuilds when any state changes.
+///
+/// **Usage:**
+/// ```dart
+/// AsyncUserProfileWidget(
+///   id: id,
+///   builder: (context, ref, state) {
+///     return state.when(
+///       data: (data) => Text(data.toString()),
+///       loading: () => CircularProgressIndicator(),
+///       error: (e, s) => Text(e.toString()),
+///     );
+///   },
+/// )
+/// ```
 class AsyncUserProfileWidget extends ConsumerWidget {
   const AsyncUserProfileWidget({
     super.key,
+    this.id,
     required this.builder,
     this.onStateChanged,
   });
+
+  final int? id;
 
   final Widget Function(
     BuildContext context,
@@ -224,26 +247,46 @@ class AsyncUserProfileWidget extends ConsumerWidget {
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
-    assert(_debugCheckHasAsyncUserProfileScope(context));
-    final params = _AsyncUserProfileParamsInheritedWidget.of(context);
+    final needsScope = id == null;
+    if (needsScope) assert(_debugCheckHasAsyncUserProfileScope(context));
+    final scope = _AsyncUserProfileParamsInheritedWidget.maybeOf(context);
+    final idValue = id ?? scope?.id;
+    assert(idValue != null, 'No id provided for AsyncUserProfileProvider');
+    final params = idValue!;
     if (onStateChanged != null) {
-      ref.listen(asyncUserProfileProvider(params.id), (prev, next) {
+      ref.listen(asyncUserProfileProvider(params), (prev, next) {
         if (prev != next) onStateChanged!(prev, next);
       });
     }
-    final state = ref.watch(asyncUserProfileProvider(params.id));
-    return builder(context, AsyncUserProfileProxyWidgetRef(ref), state);
+    final state = ref.watch(asyncUserProfileProvider(params));
+    return builder(context, AsyncUserProfileProxyWidgetRef(ref, id: id), state);
   }
 }
 
 /// Widget that rebuilds only when selected value changes.
+///
+/// **Usage:**
+/// ```dart
+/// AsyncUserProfileSelect<String>(
+///   id: id,
+///   selector: (state) => state.name,
+///   builder: (context, ref, selectedValue) {
+///     return Text(selectedValue);
+///   },
+/// )
+/// ```
 class AsyncUserProfileSelect<Selected> extends ConsumerWidget {
   const AsyncUserProfileSelect({
     super.key,
+    this.id,
     required this.selector,
     required this.builder,
+    this.loading,
+    this.error,
     this.onStateChanged,
   });
+
+  final int? id;
 
   final Selected Function(UserProfileState state) selector;
   final Widget Function(
@@ -252,29 +295,88 @@ class AsyncUserProfileSelect<Selected> extends ConsumerWidget {
     Selected value,
   )
   builder;
+  final Widget? loading;
+  final Widget Function(Object error, StackTrace stackTrace)? error;
   final void Function(Selected? previous, Selected next)? onStateChanged;
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
-    assert(_debugCheckHasAsyncUserProfileScope(context));
-    final params = _AsyncUserProfileParamsInheritedWidget.of(context);
-    final selectedProvider = asyncUserProfileProvider(
-      params.id,
-    ).select((value) => selector(value.requireValue));
+    final needsScope = id == null;
+    if (needsScope) assert(_debugCheckHasAsyncUserProfileScope(context));
+    final scope = _AsyncUserProfileParamsInheritedWidget.maybeOf(context);
+    final idValue = id ?? scope?.id;
+    assert(idValue != null, 'No id provided for AsyncUserProfileProvider');
+    final params = idValue!;
+    final asyncValue = ref.watch(asyncUserProfileProvider(params));
     if (onStateChanged != null) {
-      ref.listen(selectedProvider, (prev, next) {
-        if (prev != next) onStateChanged!(prev, next);
+      ref.listen(asyncUserProfileProvider(params), (prev, next) {
+        final prevData = prev?.value;
+        final nextData = next.value;
+        if (prevData != null && nextData != null) {
+          final prevSelected = selector(prevData);
+          final nextSelected = selector(nextData);
+          if (prevSelected != nextSelected)
+            onStateChanged!(prevSelected, nextSelected);
+        }
       });
     }
-    final selected = ref.watch(selectedProvider);
-    return builder(context, AsyncUserProfileProxyWidgetRef(ref), selected);
+    return asyncValue.when(
+      data: (data) {
+        final selected = selector(data);
+        return builder(
+          context,
+          AsyncUserProfileProxyWidgetRef(ref, id: id),
+          selected,
+        );
+      },
+      loading: () => loading ?? const SizedBox.shrink(),
+      error: (err, stack) => error?.call(err, stack) ?? const SizedBox.shrink(),
+    );
+  }
+}
+
+/// Widget that provides family parameters from scope with full provider access.
+/// Use this to access params passed down through AsyncUserProfileScope.
+///
+/// **Usage:**
+/// ```dart
+/// AsyncUserProfileScope(
+///   id: id,
+///   child: AsyncUserProfileParamsBuilder(
+///     builder: (context, ref, params) {
+///       // params is int
+///       return Text(ref.select((s) => s.name));
+///     },
+///   ),
+/// )
+/// ```
+class AsyncUserProfileParamsBuilder extends ConsumerWidget {
+  const AsyncUserProfileParamsBuilder({super.key, required this.builder});
+
+  final Widget Function(
+    BuildContext context,
+    AsyncUserProfileProxyWidgetRef ref,
+    int params,
+  )
+  builder;
+
+  @override
+  Widget build(BuildContext context, WidgetRef ref) {
+    assert(_debugCheckHasAsyncUserProfileScope(context));
+    final scope = _AsyncUserProfileParamsInheritedWidget.of(context);
+    final params = scope.id;
+    return builder(context, AsyncUserProfileProxyWidgetRef(ref), params);
   }
 }
 
 /// Proxy ref for the name string field with text controller access.
 class AsyncUserProfileNameProxyWidgetRef
     extends AsyncUserProfileProxyWidgetRef {
-  AsyncUserProfileNameProxyWidgetRef(super._ref, this._stringFieldRef);
+  AsyncUserProfileNameProxyWidgetRef(
+    super._ref,
+    this._stringFieldRef, {
+    super.id,
+  });
 
   final StringFieldRef _stringFieldRef;
 
@@ -284,12 +386,26 @@ class AsyncUserProfileNameProxyWidgetRef
 }
 
 /// Widget for the name field with auto text controller sync.
+///
+/// **Usage:**
+/// ```dart
+/// AsyncUserProfileNameField(
+///   builder: (context, ref) {
+///     return TextField(controller: ref.textController);
+///   },
+/// )
+/// ```
 class AsyncUserProfileNameField extends ConsumerWidget {
   const AsyncUserProfileNameField({
     super.key,
+    this.id,
     this.controller,
     required this.builder,
+    this.loading,
+    this.error,
   });
+
+  final int? id;
 
   final TextEditingController? controller;
   final Widget Function(
@@ -297,26 +413,36 @@ class AsyncUserProfileNameField extends ConsumerWidget {
     AsyncUserProfileNameProxyWidgetRef ref,
   )
   builder;
+  final Widget? loading;
+  final Widget Function(Object error, StackTrace stackTrace)? error;
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
-    assert(_debugCheckHasAsyncUserProfileScope(context));
-    final params = _AsyncUserProfileParamsInheritedWidget.of(context);
-    final value = ref.watch(
-      asyncUserProfileProvider(params.id).select((s) => s.requireValue.name),
-    );
-
-    return StringField(
-      value: value,
-      controller: controller,
-      onChanged: (v) =>
-          ref.read(asyncUserProfileProvider(params.id).notifier).updateName(v),
-      builder: (context, stringFieldRef) {
-        return builder(
-          context,
-          AsyncUserProfileNameProxyWidgetRef(ref, stringFieldRef),
+    final needsScope = id == null;
+    if (needsScope) assert(_debugCheckHasAsyncUserProfileScope(context));
+    final scope = _AsyncUserProfileParamsInheritedWidget.maybeOf(context);
+    final idValue = id ?? scope?.id;
+    assert(idValue != null, 'No id provided for AsyncUserProfileProvider');
+    final params = idValue!;
+    final asyncValue = ref.watch(asyncUserProfileProvider(params));
+    return asyncValue.when(
+      data: (data) {
+        final value = data.name;
+        return StringField(
+          value: value,
+          controller: controller,
+          onChanged: (v) =>
+              ref.read(asyncUserProfileProvider(params).notifier).updateName(v),
+          builder: (context, stringFieldRef) {
+            return builder(
+              context,
+              AsyncUserProfileNameProxyWidgetRef(ref, stringFieldRef, id: id),
+            );
+          },
         );
       },
+      loading: () => loading ?? const SizedBox.shrink(),
+      error: (err, stack) => error?.call(err, stack) ?? const SizedBox.shrink(),
     );
   }
 }
@@ -324,7 +450,11 @@ class AsyncUserProfileNameField extends ConsumerWidget {
 /// Proxy ref for the email string field with text controller access.
 class AsyncUserProfileEmailProxyWidgetRef
     extends AsyncUserProfileProxyWidgetRef {
-  AsyncUserProfileEmailProxyWidgetRef(super._ref, this._stringFieldRef);
+  AsyncUserProfileEmailProxyWidgetRef(
+    super._ref,
+    this._stringFieldRef, {
+    super.id,
+  });
 
   final StringFieldRef _stringFieldRef;
 
@@ -334,12 +464,26 @@ class AsyncUserProfileEmailProxyWidgetRef
 }
 
 /// Widget for the email field with auto text controller sync.
+///
+/// **Usage:**
+/// ```dart
+/// AsyncUserProfileEmailField(
+///   builder: (context, ref) {
+///     return TextField(controller: ref.textController);
+///   },
+/// )
+/// ```
 class AsyncUserProfileEmailField extends ConsumerWidget {
   const AsyncUserProfileEmailField({
     super.key,
+    this.id,
     this.controller,
     required this.builder,
+    this.loading,
+    this.error,
   });
+
+  final int? id;
 
   final TextEditingController? controller;
   final Widget Function(
@@ -347,56 +491,127 @@ class AsyncUserProfileEmailField extends ConsumerWidget {
     AsyncUserProfileEmailProxyWidgetRef ref,
   )
   builder;
+  final Widget? loading;
+  final Widget Function(Object error, StackTrace stackTrace)? error;
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
-    assert(_debugCheckHasAsyncUserProfileScope(context));
-    final params = _AsyncUserProfileParamsInheritedWidget.of(context);
-    final value = ref.watch(
-      asyncUserProfileProvider(params.id).select((s) => s.requireValue.email),
-    );
-
-    return StringField(
-      value: value,
-      controller: controller,
-      onChanged: (v) =>
-          ref.read(asyncUserProfileProvider(params.id).notifier).updateEmail(v),
-      builder: (context, stringFieldRef) {
-        return builder(
-          context,
-          AsyncUserProfileEmailProxyWidgetRef(ref, stringFieldRef),
+    final needsScope = id == null;
+    if (needsScope) assert(_debugCheckHasAsyncUserProfileScope(context));
+    final scope = _AsyncUserProfileParamsInheritedWidget.maybeOf(context);
+    final idValue = id ?? scope?.id;
+    assert(idValue != null, 'No id provided for AsyncUserProfileProvider');
+    final params = idValue!;
+    final asyncValue = ref.watch(asyncUserProfileProvider(params));
+    return asyncValue.when(
+      data: (data) {
+        final value = data.email;
+        return StringField(
+          value: value,
+          controller: controller,
+          onChanged: (v) => ref
+              .read(asyncUserProfileProvider(params).notifier)
+              .updateEmail(v),
+          builder: (context, stringFieldRef) {
+            return builder(
+              context,
+              AsyncUserProfileEmailProxyWidgetRef(ref, stringFieldRef, id: id),
+            );
+          },
         );
       },
+      loading: () => loading ?? const SizedBox.shrink(),
+      error: (err, stack) => error?.call(err, stack) ?? const SizedBox.shrink(),
     );
   }
 }
 
+/// Proxy ref for the age number field with text controller access.
 class AsyncUserProfileAgeProxyWidgetRef extends AsyncUserProfileProxyWidgetRef {
-  AsyncUserProfileAgeProxyWidgetRef(super._ref);
+  AsyncUserProfileAgeProxyWidgetRef(
+    super._ref,
+    this._numberFieldRef, {
+    super.id,
+  });
+
+  final NumberFieldRef<int> _numberFieldRef;
 
   int get age => select((s) => s.age);
   void updateAge(int value) => notifier.updateAge(value);
+  TextEditingController get textController => _numberFieldRef.controller;
 }
 
+/// Widget for the age field with auto number controller sync.
+///
+/// **Usage:**
+/// ```dart
+/// AsyncUserProfileAgeField(
+///   builder: (context, ref) {
+///     return TextField(controller: ref.textController);
+///   },
+/// )
+/// ```
 class AsyncUserProfileAgeField extends ConsumerWidget {
-  const AsyncUserProfileAgeField({super.key, required this.builder});
+  const AsyncUserProfileAgeField({
+    super.key,
+    this.id,
+    this.controller,
+    required this.builder,
+    this.loading,
+    this.error,
+  });
 
+  final int? id;
+
+  final TextEditingController? controller;
   final Widget Function(
     BuildContext context,
     AsyncUserProfileAgeProxyWidgetRef ref,
   )
   builder;
+  final Widget? loading;
+  final Widget Function(Object error, StackTrace stackTrace)? error;
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
-    assert(_debugCheckHasAsyncUserProfileScope(context));
-    return builder(context, AsyncUserProfileAgeProxyWidgetRef(ref));
+    final needsScope = id == null;
+    if (needsScope) assert(_debugCheckHasAsyncUserProfileScope(context));
+    final scope = _AsyncUserProfileParamsInheritedWidget.maybeOf(context);
+    final idValue = id ?? scope?.id;
+    assert(idValue != null, 'No id provided for AsyncUserProfileProvider');
+    final params = idValue!;
+    final asyncValue = ref.watch(asyncUserProfileProvider(params));
+    return asyncValue.when(
+      data: (data) {
+        final value = data.age;
+        return NumberField<int>(
+          value: value,
+          controller: controller,
+          onChanged: (v) {
+            if (v != null)
+              ref.read(asyncUserProfileProvider(params).notifier).updateAge(v);
+          },
+          builder: (context, numberFieldRef) {
+            return builder(
+              context,
+              AsyncUserProfileAgeProxyWidgetRef(ref, numberFieldRef, id: id),
+            );
+          },
+        );
+      },
+      loading: () => loading ?? const SizedBox.shrink(),
+      error: (err, stack) => error?.call(err, stack) ?? const SizedBox.shrink(),
+    );
   }
 }
 
 /// Proxy ref for the bio string field with text controller access.
 class AsyncUserProfileBioProxyWidgetRef extends AsyncUserProfileProxyWidgetRef {
-  AsyncUserProfileBioProxyWidgetRef(super._ref, this._stringFieldRef);
+  AsyncUserProfileBioProxyWidgetRef(
+    super._ref,
+    this._stringFieldRef, {
+    super.id,
+  });
 
   final StringFieldRef _stringFieldRef;
 
@@ -406,12 +621,26 @@ class AsyncUserProfileBioProxyWidgetRef extends AsyncUserProfileProxyWidgetRef {
 }
 
 /// Widget for the bio field with auto text controller sync.
+///
+/// **Usage:**
+/// ```dart
+/// AsyncUserProfileBioField(
+///   builder: (context, ref) {
+///     return TextField(controller: ref.textController);
+///   },
+/// )
+/// ```
 class AsyncUserProfileBioField extends ConsumerWidget {
   const AsyncUserProfileBioField({
     super.key,
+    this.id,
     this.controller,
     required this.builder,
+    this.loading,
+    this.error,
   });
+
+  final int? id;
 
   final TextEditingController? controller;
   final Widget Function(
@@ -419,26 +648,36 @@ class AsyncUserProfileBioField extends ConsumerWidget {
     AsyncUserProfileBioProxyWidgetRef ref,
   )
   builder;
+  final Widget? loading;
+  final Widget Function(Object error, StackTrace stackTrace)? error;
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
-    assert(_debugCheckHasAsyncUserProfileScope(context));
-    final params = _AsyncUserProfileParamsInheritedWidget.of(context);
-    final value = ref.watch(
-      asyncUserProfileProvider(params.id).select((s) => s.requireValue.bio),
-    );
-
-    return StringField(
-      value: value,
-      controller: controller,
-      onChanged: (v) =>
-          ref.read(asyncUserProfileProvider(params.id).notifier).updateBio(v),
-      builder: (context, stringFieldRef) {
-        return builder(
-          context,
-          AsyncUserProfileBioProxyWidgetRef(ref, stringFieldRef),
+    final needsScope = id == null;
+    if (needsScope) assert(_debugCheckHasAsyncUserProfileScope(context));
+    final scope = _AsyncUserProfileParamsInheritedWidget.maybeOf(context);
+    final idValue = id ?? scope?.id;
+    assert(idValue != null, 'No id provided for AsyncUserProfileProvider');
+    final params = idValue!;
+    final asyncValue = ref.watch(asyncUserProfileProvider(params));
+    return asyncValue.when(
+      data: (data) {
+        final value = data.bio;
+        return StringField(
+          value: value,
+          controller: controller,
+          onChanged: (v) =>
+              ref.read(asyncUserProfileProvider(params).notifier).updateBio(v),
+          builder: (context, stringFieldRef) {
+            return builder(
+              context,
+              AsyncUserProfileBioProxyWidgetRef(ref, stringFieldRef, id: id),
+            );
+          },
         );
       },
+      loading: () => loading ?? const SizedBox.shrink(),
+      error: (err, stack) => error?.call(err, stack) ?? const SizedBox.shrink(),
     );
   }
 }
@@ -446,7 +685,11 @@ class AsyncUserProfileBioField extends ConsumerWidget {
 /// Proxy ref for the bio2 string field with text controller access.
 class AsyncUserProfileBio2ProxyWidgetRef
     extends AsyncUserProfileProxyWidgetRef {
-  AsyncUserProfileBio2ProxyWidgetRef(super._ref, this._stringFieldRef);
+  AsyncUserProfileBio2ProxyWidgetRef(
+    super._ref,
+    this._stringFieldRef, {
+    super.id,
+  });
 
   final StringFieldRef _stringFieldRef;
 
@@ -456,12 +699,26 @@ class AsyncUserProfileBio2ProxyWidgetRef
 }
 
 /// Widget for the bio2 field with auto text controller sync.
+///
+/// **Usage:**
+/// ```dart
+/// AsyncUserProfileBio2Field(
+///   builder: (context, ref) {
+///     return TextField(controller: ref.textController);
+///   },
+/// )
+/// ```
 class AsyncUserProfileBio2Field extends ConsumerWidget {
   const AsyncUserProfileBio2Field({
     super.key,
+    this.id,
     this.controller,
     required this.builder,
+    this.loading,
+    this.error,
   });
+
+  final int? id;
 
   final TextEditingController? controller;
   final Widget Function(
@@ -469,26 +726,36 @@ class AsyncUserProfileBio2Field extends ConsumerWidget {
     AsyncUserProfileBio2ProxyWidgetRef ref,
   )
   builder;
+  final Widget? loading;
+  final Widget Function(Object error, StackTrace stackTrace)? error;
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
-    assert(_debugCheckHasAsyncUserProfileScope(context));
-    final params = _AsyncUserProfileParamsInheritedWidget.of(context);
-    final value = ref.watch(
-      asyncUserProfileProvider(params.id).select((s) => s.requireValue.bio2),
-    );
-
-    return StringField(
-      value: value,
-      controller: controller,
-      onChanged: (v) =>
-          ref.read(asyncUserProfileProvider(params.id).notifier).updateBio2(v),
-      builder: (context, stringFieldRef) {
-        return builder(
-          context,
-          AsyncUserProfileBio2ProxyWidgetRef(ref, stringFieldRef),
+    final needsScope = id == null;
+    if (needsScope) assert(_debugCheckHasAsyncUserProfileScope(context));
+    final scope = _AsyncUserProfileParamsInheritedWidget.maybeOf(context);
+    final idValue = id ?? scope?.id;
+    assert(idValue != null, 'No id provided for AsyncUserProfileProvider');
+    final params = idValue!;
+    final asyncValue = ref.watch(asyncUserProfileProvider(params));
+    return asyncValue.when(
+      data: (data) {
+        final value = data.bio2;
+        return StringField(
+          value: value,
+          controller: controller,
+          onChanged: (v) =>
+              ref.read(asyncUserProfileProvider(params).notifier).updateBio2(v),
+          builder: (context, stringFieldRef) {
+            return builder(
+              context,
+              AsyncUserProfileBio2ProxyWidgetRef(ref, stringFieldRef, id: id),
+            );
+          },
         );
       },
+      loading: () => loading ?? const SizedBox.shrink(),
+      error: (err, stack) => error?.call(err, stack) ?? const SizedBox.shrink(),
     );
   }
 }
@@ -505,7 +772,7 @@ class AsyncUserProfileBio2Field extends ConsumerWidget {
 // Fields:
 // - NameField: ref.textController | ref.updateName(value)
 // - EmailField: ref.textController | ref.updateEmail(value)
-// - AgeField: ref.updateAge(value)
+// - AgeField: ref.textController | ref.updateAge(value)
 // - BioField: ref.textController | ref.updateBio(value)
 // - Bio2Field: ref.textController | ref.updateBio2(value)
 //
@@ -556,6 +823,14 @@ class _UserProfileParamsInheritedWidget extends InheritedWidget {
 }
 
 /// Scope widget to provide family parameters to child widgets.
+///
+/// **Usage:**
+/// ```dart
+/// UserProfileScope(
+///   id: id,
+///   child: // Your widget tree here,
+/// )
+/// ```
 class UserProfileScope extends StatelessWidget {
   const UserProfileScope({super.key, required this.id, required this.child});
 
@@ -570,12 +845,21 @@ class UserProfileScope extends StatelessWidget {
 
 /// Proxy widget ref providing access to the provider.
 class UserProfileProxyWidgetRef {
-  UserProfileProxyWidgetRef(this._ref);
+  UserProfileProxyWidgetRef(this._ref, {this.id});
 
   final WidgetRef _ref;
 
-  UserProfile get notifier =>
-      _ref.read(userProfileProvider(params!.id).notifier);
+  final int? id;
+
+  /// Resolved family parameters from direct values or scope.
+  int get _params {
+    final scope = _UserProfileParamsInheritedWidget.maybeOf(_ref.context);
+    final idValue = id ?? scope?.id;
+    assert(idValue != null, 'No id provided for UserProfileProvider');
+    return idValue!;
+  }
+
+  UserProfile get notifier => _ref.read(userProfileProvider(_params).notifier);
 
   /// Get params from scope (use within UserProfileScope).
   _UserProfileParamsInheritedWidget? get params =>
@@ -583,7 +867,7 @@ class UserProfileProxyWidgetRef {
 
   Selected select<Selected>(Selected Function(UserProfileState) selector) =>
       _ref.watch(
-        userProfileProvider(params!.id).select((value) => selector(value)),
+        userProfileProvider(_params).select((value) => selector(value)),
       );
 
   BuildContext get context => _ref.context;
@@ -596,19 +880,13 @@ class UserProfileProxyWidgetRef {
 bool _debugCheckHasUserProfileScope(BuildContext context) {
   assert(() {
     if (_UserProfileParamsInheritedWidget.maybeOf(context) == null) {
-      final isInNavigation = ModalRoute.of(context) != null;
-      if (!isInNavigation) {
-        throw FlutterError.fromParts(<DiagnosticsNode>[
-          ErrorSummary('No UserProfileScope found'),
-          ErrorDescription(
-            '${context.widget.runtimeType} widgets require a UserProfileScope widget ancestor '
-            'or to be used in a navigation context with proper state management.',
-          ),
-        ]);
-      }
-      debugPrint(
-        'Widget ${context.widget.runtimeType} used in navigation without direct UserProfileScope',
-      );
+      throw FlutterError.fromParts(<DiagnosticsNode>[
+        ErrorSummary('No UserProfileScope found'),
+        ErrorDescription(
+          '${context.widget.runtimeType} widgets require a UserProfileScope widget ancestor '
+          'or to be provided the family parameters directly.',
+        ),
+      ]);
     }
     return true;
   }());
@@ -616,12 +894,25 @@ bool _debugCheckHasUserProfileScope(BuildContext context) {
 }
 
 /// Widget that rebuilds when any state changes.
+///
+/// **Usage:**
+/// ```dart
+/// UserProfileWidget(
+///   id: id,
+///   builder: (context, ref, state) {
+///     return Text(state.toString());
+///   },
+/// )
+/// ```
 class UserProfileWidget extends ConsumerWidget {
   const UserProfileWidget({
     super.key,
+    this.id,
     required this.builder,
     this.onStateChanged,
   });
+
+  final int? id;
 
   final Widget Function(
     BuildContext context,
@@ -634,26 +925,44 @@ class UserProfileWidget extends ConsumerWidget {
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
-    assert(_debugCheckHasUserProfileScope(context));
-    final params = _UserProfileParamsInheritedWidget.of(context);
+    final needsScope = id == null;
+    if (needsScope) assert(_debugCheckHasUserProfileScope(context));
+    final scope = _UserProfileParamsInheritedWidget.maybeOf(context);
+    final idValue = id ?? scope?.id;
+    assert(idValue != null, 'No id provided for UserProfileProvider');
+    final params = idValue!;
     if (onStateChanged != null) {
-      ref.listen(userProfileProvider(params.id), (prev, next) {
+      ref.listen(userProfileProvider(params), (prev, next) {
         if (prev != next) onStateChanged!(prev, next);
       });
     }
-    final state = ref.watch(userProfileProvider(params.id));
-    return builder(context, UserProfileProxyWidgetRef(ref), state);
+    final state = ref.watch(userProfileProvider(params));
+    return builder(context, UserProfileProxyWidgetRef(ref, id: id), state);
   }
 }
 
 /// Widget that rebuilds only when selected value changes.
+///
+/// **Usage:**
+/// ```dart
+/// UserProfileSelect<String>(
+///   id: id,
+///   selector: (state) => state.name,
+///   builder: (context, ref, selectedValue) {
+///     return Text(selectedValue);
+///   },
+/// )
+/// ```
 class UserProfileSelect<Selected> extends ConsumerWidget {
   const UserProfileSelect({
     super.key,
+    this.id,
     required this.selector,
     required this.builder,
     this.onStateChanged,
   });
+
+  final int? id;
 
   final Selected Function(UserProfileState state) selector;
   final Widget Function(
@@ -666,10 +975,14 @@ class UserProfileSelect<Selected> extends ConsumerWidget {
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
-    assert(_debugCheckHasUserProfileScope(context));
-    final params = _UserProfileParamsInheritedWidget.of(context);
+    final needsScope = id == null;
+    if (needsScope) assert(_debugCheckHasUserProfileScope(context));
+    final scope = _UserProfileParamsInheritedWidget.maybeOf(context);
+    final idValue = id ?? scope?.id;
+    assert(idValue != null, 'No id provided for UserProfileProvider');
+    final params = idValue!;
     final selectedProvider = userProfileProvider(
-      params.id,
+      params,
     ).select((value) => selector(value));
     if (onStateChanged != null) {
       ref.listen(selectedProvider, (prev, next) {
@@ -677,13 +990,47 @@ class UserProfileSelect<Selected> extends ConsumerWidget {
       });
     }
     final selected = ref.watch(selectedProvider);
-    return builder(context, UserProfileProxyWidgetRef(ref), selected);
+    return builder(context, UserProfileProxyWidgetRef(ref, id: id), selected);
+  }
+}
+
+/// Widget that provides family parameters from scope with full provider access.
+/// Use this to access params passed down through UserProfileScope.
+///
+/// **Usage:**
+/// ```dart
+/// UserProfileScope(
+///   id: id,
+///   child: UserProfileParamsBuilder(
+///     builder: (context, ref, params) {
+///       // params is int
+///       return Text(ref.select((s) => s.name));
+///     },
+///   ),
+/// )
+/// ```
+class UserProfileParamsBuilder extends ConsumerWidget {
+  const UserProfileParamsBuilder({super.key, required this.builder});
+
+  final Widget Function(
+    BuildContext context,
+    UserProfileProxyWidgetRef ref,
+    int params,
+  )
+  builder;
+
+  @override
+  Widget build(BuildContext context, WidgetRef ref) {
+    assert(_debugCheckHasUserProfileScope(context));
+    final scope = _UserProfileParamsInheritedWidget.of(context);
+    final params = scope.id;
+    return builder(context, UserProfileProxyWidgetRef(ref), params);
   }
 }
 
 /// Proxy ref for the name string field with text controller access.
 class UserProfileNameProxyWidgetRef extends UserProfileProxyWidgetRef {
-  UserProfileNameProxyWidgetRef(super._ref, this._stringFieldRef);
+  UserProfileNameProxyWidgetRef(super._ref, this._stringFieldRef, {super.id});
 
   final StringFieldRef _stringFieldRef;
 
@@ -693,12 +1040,24 @@ class UserProfileNameProxyWidgetRef extends UserProfileProxyWidgetRef {
 }
 
 /// Widget for the name field with auto text controller sync.
+///
+/// **Usage:**
+/// ```dart
+/// UserProfileNameField(
+///   builder: (context, ref) {
+///     return TextField(controller: ref.textController);
+///   },
+/// )
+/// ```
 class UserProfileNameField extends ConsumerWidget {
   const UserProfileNameField({
     super.key,
+    this.id,
     this.controller,
     required this.builder,
   });
+
+  final int? id;
 
   final TextEditingController? controller;
   final Widget Function(BuildContext context, UserProfileNameProxyWidgetRef ref)
@@ -706,21 +1065,23 @@ class UserProfileNameField extends ConsumerWidget {
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
-    assert(_debugCheckHasUserProfileScope(context));
-    final params = _UserProfileParamsInheritedWidget.of(context);
-    final value = ref.watch(
-      userProfileProvider(params.id).select((s) => s.name),
-    );
+    final needsScope = id == null;
+    if (needsScope) assert(_debugCheckHasUserProfileScope(context));
+    final scope = _UserProfileParamsInheritedWidget.maybeOf(context);
+    final idValue = id ?? scope?.id;
+    assert(idValue != null, 'No id provided for UserProfileProvider');
+    final params = idValue!;
+    final value = ref.watch(userProfileProvider(params).select((s) => s.name));
 
     return StringField(
       value: value,
       controller: controller,
       onChanged: (v) =>
-          ref.read(userProfileProvider(params.id).notifier).updateName(v),
+          ref.read(userProfileProvider(params).notifier).updateName(v),
       builder: (context, stringFieldRef) {
         return builder(
           context,
-          UserProfileNameProxyWidgetRef(ref, stringFieldRef),
+          UserProfileNameProxyWidgetRef(ref, stringFieldRef, id: id),
         );
       },
     );
@@ -729,7 +1090,7 @@ class UserProfileNameField extends ConsumerWidget {
 
 /// Proxy ref for the email string field with text controller access.
 class UserProfileEmailProxyWidgetRef extends UserProfileProxyWidgetRef {
-  UserProfileEmailProxyWidgetRef(super._ref, this._stringFieldRef);
+  UserProfileEmailProxyWidgetRef(super._ref, this._stringFieldRef, {super.id});
 
   final StringFieldRef _stringFieldRef;
 
@@ -739,12 +1100,24 @@ class UserProfileEmailProxyWidgetRef extends UserProfileProxyWidgetRef {
 }
 
 /// Widget for the email field with auto text controller sync.
+///
+/// **Usage:**
+/// ```dart
+/// UserProfileEmailField(
+///   builder: (context, ref) {
+///     return TextField(controller: ref.textController);
+///   },
+/// )
+/// ```
 class UserProfileEmailField extends ConsumerWidget {
   const UserProfileEmailField({
     super.key,
+    this.id,
     this.controller,
     required this.builder,
   });
+
+  final int? id;
 
   final TextEditingController? controller;
   final Widget Function(
@@ -755,50 +1128,94 @@ class UserProfileEmailField extends ConsumerWidget {
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
-    assert(_debugCheckHasUserProfileScope(context));
-    final params = _UserProfileParamsInheritedWidget.of(context);
-    final value = ref.watch(
-      userProfileProvider(params.id).select((s) => s.email),
-    );
+    final needsScope = id == null;
+    if (needsScope) assert(_debugCheckHasUserProfileScope(context));
+    final scope = _UserProfileParamsInheritedWidget.maybeOf(context);
+    final idValue = id ?? scope?.id;
+    assert(idValue != null, 'No id provided for UserProfileProvider');
+    final params = idValue!;
+    final value = ref.watch(userProfileProvider(params).select((s) => s.email));
 
     return StringField(
       value: value,
       controller: controller,
       onChanged: (v) =>
-          ref.read(userProfileProvider(params.id).notifier).updateEmail(v),
+          ref.read(userProfileProvider(params).notifier).updateEmail(v),
       builder: (context, stringFieldRef) {
         return builder(
           context,
-          UserProfileEmailProxyWidgetRef(ref, stringFieldRef),
+          UserProfileEmailProxyWidgetRef(ref, stringFieldRef, id: id),
         );
       },
     );
   }
 }
 
+/// Proxy ref for the age number field with text controller access.
 class UserProfileAgeProxyWidgetRef extends UserProfileProxyWidgetRef {
-  UserProfileAgeProxyWidgetRef(super._ref);
+  UserProfileAgeProxyWidgetRef(super._ref, this._numberFieldRef, {super.id});
+
+  final NumberFieldRef<int> _numberFieldRef;
 
   int get age => select((s) => s.age);
   void updateAge(int value) => notifier.updateAge(value);
+  TextEditingController get textController => _numberFieldRef.controller;
 }
 
+/// Widget for the age field with auto number controller sync.
+///
+/// **Usage:**
+/// ```dart
+/// UserProfileAgeField(
+///   builder: (context, ref) {
+///     return TextField(controller: ref.textController);
+///   },
+/// )
+/// ```
 class UserProfileAgeField extends ConsumerWidget {
-  const UserProfileAgeField({super.key, required this.builder});
+  const UserProfileAgeField({
+    super.key,
+    this.id,
+    this.controller,
+    required this.builder,
+  });
 
+  final int? id;
+
+  final TextEditingController? controller;
   final Widget Function(BuildContext context, UserProfileAgeProxyWidgetRef ref)
   builder;
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
-    assert(_debugCheckHasUserProfileScope(context));
-    return builder(context, UserProfileAgeProxyWidgetRef(ref));
+    final needsScope = id == null;
+    if (needsScope) assert(_debugCheckHasUserProfileScope(context));
+    final scope = _UserProfileParamsInheritedWidget.maybeOf(context);
+    final idValue = id ?? scope?.id;
+    assert(idValue != null, 'No id provided for UserProfileProvider');
+    final params = idValue!;
+    final value = ref.watch(userProfileProvider(params).select((s) => s.age));
+
+    return NumberField<int>(
+      value: value,
+      controller: controller,
+      onChanged: (v) {
+        if (v != null)
+          ref.read(userProfileProvider(params).notifier).updateAge(v);
+      },
+      builder: (context, numberFieldRef) {
+        return builder(
+          context,
+          UserProfileAgeProxyWidgetRef(ref, numberFieldRef, id: id),
+        );
+      },
+    );
   }
 }
 
 /// Proxy ref for the bio string field with text controller access.
 class UserProfileBioProxyWidgetRef extends UserProfileProxyWidgetRef {
-  UserProfileBioProxyWidgetRef(super._ref, this._stringFieldRef);
+  UserProfileBioProxyWidgetRef(super._ref, this._stringFieldRef, {super.id});
 
   final StringFieldRef _stringFieldRef;
 
@@ -808,12 +1225,24 @@ class UserProfileBioProxyWidgetRef extends UserProfileProxyWidgetRef {
 }
 
 /// Widget for the bio field with auto text controller sync.
+///
+/// **Usage:**
+/// ```dart
+/// UserProfileBioField(
+///   builder: (context, ref) {
+///     return TextField(controller: ref.textController);
+///   },
+/// )
+/// ```
 class UserProfileBioField extends ConsumerWidget {
   const UserProfileBioField({
     super.key,
+    this.id,
     this.controller,
     required this.builder,
   });
+
+  final int? id;
 
   final TextEditingController? controller;
   final Widget Function(BuildContext context, UserProfileBioProxyWidgetRef ref)
@@ -821,21 +1250,23 @@ class UserProfileBioField extends ConsumerWidget {
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
-    assert(_debugCheckHasUserProfileScope(context));
-    final params = _UserProfileParamsInheritedWidget.of(context);
-    final value = ref.watch(
-      userProfileProvider(params.id).select((s) => s.bio),
-    );
+    final needsScope = id == null;
+    if (needsScope) assert(_debugCheckHasUserProfileScope(context));
+    final scope = _UserProfileParamsInheritedWidget.maybeOf(context);
+    final idValue = id ?? scope?.id;
+    assert(idValue != null, 'No id provided for UserProfileProvider');
+    final params = idValue!;
+    final value = ref.watch(userProfileProvider(params).select((s) => s.bio));
 
     return StringField(
       value: value,
       controller: controller,
       onChanged: (v) =>
-          ref.read(userProfileProvider(params.id).notifier).updateBio(v),
+          ref.read(userProfileProvider(params).notifier).updateBio(v),
       builder: (context, stringFieldRef) {
         return builder(
           context,
-          UserProfileBioProxyWidgetRef(ref, stringFieldRef),
+          UserProfileBioProxyWidgetRef(ref, stringFieldRef, id: id),
         );
       },
     );
@@ -844,7 +1275,7 @@ class UserProfileBioField extends ConsumerWidget {
 
 /// Proxy ref for the bio2 string field with text controller access.
 class UserProfileBio2ProxyWidgetRef extends UserProfileProxyWidgetRef {
-  UserProfileBio2ProxyWidgetRef(super._ref, this._stringFieldRef);
+  UserProfileBio2ProxyWidgetRef(super._ref, this._stringFieldRef, {super.id});
 
   final StringFieldRef _stringFieldRef;
 
@@ -854,12 +1285,24 @@ class UserProfileBio2ProxyWidgetRef extends UserProfileProxyWidgetRef {
 }
 
 /// Widget for the bio2 field with auto text controller sync.
+///
+/// **Usage:**
+/// ```dart
+/// UserProfileBio2Field(
+///   builder: (context, ref) {
+///     return TextField(controller: ref.textController);
+///   },
+/// )
+/// ```
 class UserProfileBio2Field extends ConsumerWidget {
   const UserProfileBio2Field({
     super.key,
+    this.id,
     this.controller,
     required this.builder,
   });
+
+  final int? id;
 
   final TextEditingController? controller;
   final Widget Function(BuildContext context, UserProfileBio2ProxyWidgetRef ref)
@@ -867,21 +1310,23 @@ class UserProfileBio2Field extends ConsumerWidget {
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
-    assert(_debugCheckHasUserProfileScope(context));
-    final params = _UserProfileParamsInheritedWidget.of(context);
-    final value = ref.watch(
-      userProfileProvider(params.id).select((s) => s.bio2),
-    );
+    final needsScope = id == null;
+    if (needsScope) assert(_debugCheckHasUserProfileScope(context));
+    final scope = _UserProfileParamsInheritedWidget.maybeOf(context);
+    final idValue = id ?? scope?.id;
+    assert(idValue != null, 'No id provided for UserProfileProvider');
+    final params = idValue!;
+    final value = ref.watch(userProfileProvider(params).select((s) => s.bio2));
 
     return StringField(
       value: value,
       controller: controller,
       onChanged: (v) =>
-          ref.read(userProfileProvider(params.id).notifier).updateBio2(v),
+          ref.read(userProfileProvider(params).notifier).updateBio2(v),
       builder: (context, stringFieldRef) {
         return builder(
           context,
-          UserProfileBio2ProxyWidgetRef(ref, stringFieldRef),
+          UserProfileBio2ProxyWidgetRef(ref, stringFieldRef, id: id),
         );
       },
     );
@@ -900,7 +1345,7 @@ class UserProfileBio2Field extends ConsumerWidget {
 // Fields:
 // - NameField: ref.textController | ref.updateName(value)
 // - EmailField: ref.textController | ref.updateEmail(value)
-// - AgeField: ref.updateAge(value)
+// - AgeField: ref.textController | ref.updateAge(value)
 // - BioField: ref.textController | ref.updateBio(value)
 // - Bio2Field: ref.textController | ref.updateBio2(value)
 //
@@ -924,12 +1369,7 @@ extension SecondUserProfileFieldUpdater on SecondUserProfile {
 }
 
 class _SecondUserProfileParamsInheritedWidget extends InheritedWidget {
-  const _SecondUserProfileParamsInheritedWidget({
-    required this.id,
-    required super.child,
-  });
-
-  final int id;
+  const _SecondUserProfileParamsInheritedWidget({required super.child});
 
   static _SecondUserProfileParamsInheritedWidget? maybeOf(
     BuildContext context,
@@ -948,24 +1388,20 @@ class _SecondUserProfileParamsInheritedWidget extends InheritedWidget {
   bool updateShouldNotify(
     covariant _SecondUserProfileParamsInheritedWidget oldWidget,
   ) {
-    return id != oldWidget.id;
+    return false;
   }
 }
 
-/// Scope widget to provide family parameters to child widgets.
+/// Scope widget placeholder for future family parameters.
+/// Wrap your widget tree with this to future-proof for family provider migration.
 class SecondUserProfileScope extends StatelessWidget {
-  const SecondUserProfileScope({
-    super.key,
-    required this.id,
-    required this.child,
-  });
+  const SecondUserProfileScope({super.key, required this.child});
 
-  final int id;
   final Widget child;
 
   @override
   Widget build(BuildContext context) {
-    return _SecondUserProfileParamsInheritedWidget(id: id, child: child);
+    return _SecondUserProfileParamsInheritedWidget(child: child);
   }
 }
 
@@ -976,18 +1412,14 @@ class SecondUserProfileProxyWidgetRef {
   final WidgetRef _ref;
 
   SecondUserProfile get notifier =>
-      _ref.read(secondUserProfileProvider(params!.id).notifier);
+      _ref.read(secondUserProfileProvider.notifier);
 
   /// Get params from scope (use within SecondUserProfileScope).
   _SecondUserProfileParamsInheritedWidget? get params =>
       _SecondUserProfileParamsInheritedWidget.maybeOf(_ref.context);
 
   Selected select<Selected>(Selected Function(UserProfileState) selector) =>
-      _ref.watch(
-        secondUserProfileProvider(
-          params!.id,
-        ).select((value) => selector(value)),
-      );
+      _ref.watch(secondUserProfileProvider.select((value) => selector(value)));
 
   BuildContext get context => _ref.context;
 
@@ -996,29 +1428,16 @@ class SecondUserProfileProxyWidgetRef {
   void invalidate(ProviderOrFamily provider) => _ref.invalidate(provider);
 }
 
-bool _debugCheckHasSecondUserProfileScope(BuildContext context) {
-  assert(() {
-    if (_SecondUserProfileParamsInheritedWidget.maybeOf(context) == null) {
-      final isInNavigation = ModalRoute.of(context) != null;
-      if (!isInNavigation) {
-        throw FlutterError.fromParts(<DiagnosticsNode>[
-          ErrorSummary('No SecondUserProfileScope found'),
-          ErrorDescription(
-            '${context.widget.runtimeType} widgets require a SecondUserProfileScope widget ancestor '
-            'or to be used in a navigation context with proper state management.',
-          ),
-        ]);
-      }
-      debugPrint(
-        'Widget ${context.widget.runtimeType} used in navigation without direct SecondUserProfileScope',
-      );
-    }
-    return true;
-  }());
-  return true;
-}
-
 /// Widget that rebuilds when any state changes.
+///
+/// **Usage:**
+/// ```dart
+/// SecondUserProfileWidget(
+///   builder: (context, ref, state) {
+///     return Text(state.toString());
+///   },
+/// )
+/// ```
 class SecondUserProfileWidget extends ConsumerWidget {
   const SecondUserProfileWidget({
     super.key,
@@ -1037,19 +1456,27 @@ class SecondUserProfileWidget extends ConsumerWidget {
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
-    assert(_debugCheckHasSecondUserProfileScope(context));
-    final params = _SecondUserProfileParamsInheritedWidget.of(context);
     if (onStateChanged != null) {
-      ref.listen(secondUserProfileProvider(params.id), (prev, next) {
+      ref.listen(secondUserProfileProvider, (prev, next) {
         if (prev != next) onStateChanged!(prev, next);
       });
     }
-    final state = ref.watch(secondUserProfileProvider(params.id));
+    final state = ref.watch(secondUserProfileProvider);
     return builder(context, SecondUserProfileProxyWidgetRef(ref), state);
   }
 }
 
 /// Widget that rebuilds only when selected value changes.
+///
+/// **Usage:**
+/// ```dart
+/// SecondUserProfileSelect<String>(
+///   selector: (state) => state.name,
+///   builder: (context, ref, selectedValue) {
+///     return Text(selectedValue);
+///   },
+/// )
+/// ```
 class SecondUserProfileSelect<Selected> extends ConsumerWidget {
   const SecondUserProfileSelect({
     super.key,
@@ -1069,11 +1496,9 @@ class SecondUserProfileSelect<Selected> extends ConsumerWidget {
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
-    assert(_debugCheckHasSecondUserProfileScope(context));
-    final params = _SecondUserProfileParamsInheritedWidget.of(context);
-    final selectedProvider = secondUserProfileProvider(
-      params.id,
-    ).select((value) => selector(value));
+    final selectedProvider = secondUserProfileProvider.select(
+      (value) => selector(value),
+    );
     if (onStateChanged != null) {
       ref.listen(selectedProvider, (prev, next) {
         if (prev != next) onStateChanged!(prev, next);
@@ -1097,6 +1522,15 @@ class SecondUserProfileNameProxyWidgetRef
 }
 
 /// Widget for the name field with auto text controller sync.
+///
+/// **Usage:**
+/// ```dart
+/// SecondUserProfileNameField(
+///   builder: (context, ref) {
+///     return TextField(controller: ref.textController);
+///   },
+/// )
+/// ```
 class SecondUserProfileNameField extends ConsumerWidget {
   const SecondUserProfileNameField({
     super.key,
@@ -1113,17 +1547,13 @@ class SecondUserProfileNameField extends ConsumerWidget {
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
-    assert(_debugCheckHasSecondUserProfileScope(context));
-    final params = _SecondUserProfileParamsInheritedWidget.of(context);
-    final value = ref.watch(
-      secondUserProfileProvider(params.id).select((s) => s.name),
-    );
+    final value = ref.watch(secondUserProfileProvider.select((s) => s.name));
 
     return StringField(
       value: value,
       controller: controller,
       onChanged: (v) =>
-          ref.read(secondUserProfileProvider(params.id).notifier).updateName(v),
+          ref.read(secondUserProfileProvider.notifier).updateName(v),
       builder: (context, stringFieldRef) {
         return builder(
           context,
@@ -1147,6 +1577,15 @@ class SecondUserProfileEmailProxyWidgetRef
 }
 
 /// Widget for the email field with auto text controller sync.
+///
+/// **Usage:**
+/// ```dart
+/// SecondUserProfileEmailField(
+///   builder: (context, ref) {
+///     return TextField(controller: ref.textController);
+///   },
+/// )
+/// ```
 class SecondUserProfileEmailField extends ConsumerWidget {
   const SecondUserProfileEmailField({
     super.key,
@@ -1163,18 +1602,13 @@ class SecondUserProfileEmailField extends ConsumerWidget {
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
-    assert(_debugCheckHasSecondUserProfileScope(context));
-    final params = _SecondUserProfileParamsInheritedWidget.of(context);
-    final value = ref.watch(
-      secondUserProfileProvider(params.id).select((s) => s.email),
-    );
+    final value = ref.watch(secondUserProfileProvider.select((s) => s.email));
 
     return StringField(
       value: value,
       controller: controller,
-      onChanged: (v) => ref
-          .read(secondUserProfileProvider(params.id).notifier)
-          .updateEmail(v),
+      onChanged: (v) =>
+          ref.read(secondUserProfileProvider.notifier).updateEmail(v),
       builder: (context, stringFieldRef) {
         return builder(
           context,
@@ -1185,17 +1619,36 @@ class SecondUserProfileEmailField extends ConsumerWidget {
   }
 }
 
+/// Proxy ref for the age number field with text controller access.
 class SecondUserProfileAgeProxyWidgetRef
     extends SecondUserProfileProxyWidgetRef {
-  SecondUserProfileAgeProxyWidgetRef(super._ref);
+  SecondUserProfileAgeProxyWidgetRef(super._ref, this._numberFieldRef);
+
+  final NumberFieldRef<int> _numberFieldRef;
 
   int get age => select((s) => s.age);
   void updateAge(int value) => notifier.updateAge(value);
+  TextEditingController get textController => _numberFieldRef.controller;
 }
 
+/// Widget for the age field with auto number controller sync.
+///
+/// **Usage:**
+/// ```dart
+/// SecondUserProfileAgeField(
+///   builder: (context, ref) {
+///     return TextField(controller: ref.textController);
+///   },
+/// )
+/// ```
 class SecondUserProfileAgeField extends ConsumerWidget {
-  const SecondUserProfileAgeField({super.key, required this.builder});
+  const SecondUserProfileAgeField({
+    super.key,
+    this.controller,
+    required this.builder,
+  });
 
+  final TextEditingController? controller;
   final Widget Function(
     BuildContext context,
     SecondUserProfileAgeProxyWidgetRef ref,
@@ -1204,8 +1657,22 @@ class SecondUserProfileAgeField extends ConsumerWidget {
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
-    assert(_debugCheckHasSecondUserProfileScope(context));
-    return builder(context, SecondUserProfileAgeProxyWidgetRef(ref));
+    final value = ref.watch(secondUserProfileProvider.select((s) => s.age));
+
+    return NumberField<int>(
+      value: value,
+      controller: controller,
+      onChanged: (v) {
+        if (v != null)
+          ref.read(secondUserProfileProvider.notifier).updateAge(v);
+      },
+      builder: (context, numberFieldRef) {
+        return builder(
+          context,
+          SecondUserProfileAgeProxyWidgetRef(ref, numberFieldRef),
+        );
+      },
+    );
   }
 }
 
@@ -1222,6 +1689,15 @@ class SecondUserProfileBioProxyWidgetRef
 }
 
 /// Widget for the bio field with auto text controller sync.
+///
+/// **Usage:**
+/// ```dart
+/// SecondUserProfileBioField(
+///   builder: (context, ref) {
+///     return TextField(controller: ref.textController);
+///   },
+/// )
+/// ```
 class SecondUserProfileBioField extends ConsumerWidget {
   const SecondUserProfileBioField({
     super.key,
@@ -1238,17 +1714,13 @@ class SecondUserProfileBioField extends ConsumerWidget {
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
-    assert(_debugCheckHasSecondUserProfileScope(context));
-    final params = _SecondUserProfileParamsInheritedWidget.of(context);
-    final value = ref.watch(
-      secondUserProfileProvider(params.id).select((s) => s.bio),
-    );
+    final value = ref.watch(secondUserProfileProvider.select((s) => s.bio));
 
     return StringField(
       value: value,
       controller: controller,
       onChanged: (v) =>
-          ref.read(secondUserProfileProvider(params.id).notifier).updateBio(v),
+          ref.read(secondUserProfileProvider.notifier).updateBio(v),
       builder: (context, stringFieldRef) {
         return builder(
           context,
@@ -1272,6 +1744,15 @@ class SecondUserProfileBio2ProxyWidgetRef
 }
 
 /// Widget for the bio2 field with auto text controller sync.
+///
+/// **Usage:**
+/// ```dart
+/// SecondUserProfileBio2Field(
+///   builder: (context, ref) {
+///     return TextField(controller: ref.textController);
+///   },
+/// )
+/// ```
 class SecondUserProfileBio2Field extends ConsumerWidget {
   const SecondUserProfileBio2Field({
     super.key,
@@ -1288,17 +1769,13 @@ class SecondUserProfileBio2Field extends ConsumerWidget {
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
-    assert(_debugCheckHasSecondUserProfileScope(context));
-    final params = _SecondUserProfileParamsInheritedWidget.of(context);
-    final value = ref.watch(
-      secondUserProfileProvider(params.id).select((s) => s.bio2),
-    );
+    final value = ref.watch(secondUserProfileProvider.select((s) => s.bio2));
 
     return StringField(
       value: value,
       controller: controller,
       onChanged: (v) =>
-          ref.read(secondUserProfileProvider(params.id).notifier).updateBio2(v),
+          ref.read(secondUserProfileProvider.notifier).updateBio2(v),
       builder: (context, stringFieldRef) {
         return builder(
           context,

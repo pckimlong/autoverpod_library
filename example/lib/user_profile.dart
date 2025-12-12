@@ -45,7 +45,7 @@ class UserProfile extends _$UserProfile {
 @riverpod
 class SecondUserProfile extends _$SecondUserProfile {
   @override
-  UserProfileState build(int id) => const UserProfileState(
+  UserProfileState build() => const UserProfileState(
         name: 'Second',
       );
 }

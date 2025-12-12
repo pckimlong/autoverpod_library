@@ -11,6 +11,7 @@ class ProviderDefinition {
   final String providerName;
   final bool isAsyncValue;
   final String baseType;
+  final bool hasCopyWith;
   final List<ParamDefinition> familyParameters;
   final List<FieldDefinition> fields;
 
@@ -19,6 +20,7 @@ class ProviderDefinition {
     required this.providerName,
     required this.isAsyncValue,
     required this.baseType,
+    required this.hasCopyWith,
     required this.familyParameters,
     required this.fields,
   });
@@ -35,22 +37,19 @@ class ProviderDefinition {
     final buildMethod = element.methods.firstWhere(
       (m) => m.name == 'build',
       orElse: () => throw StateError(
-          'Provider class ${element.name} must have a build method'),
+        'Provider class ${element.name} must have a build method',
+      ),
     );
 
     // Parse return type
     final returnType = buildMethod.returnType;
-    final wrapperType =
-        returnType is InterfaceType ? returnType.element.name : null;
-    final isAsyncValue =
-        ['Future', 'Stream', 'FutureOr', 'AsyncValue'].contains(wrapperType);
+    final wrapperType = returnType is InterfaceType ? returnType.element.name : null;
+    final isAsyncValue = ['Future', 'Stream', 'FutureOr', 'AsyncValue'].contains(wrapperType);
 
     // Get base type (unwrap Future/Stream if needed)
     String baseType;
     DartType stateType;
-    if (isAsyncValue &&
-        returnType is ParameterizedType &&
-        returnType.typeArguments.isNotEmpty) {
+    if (isAsyncValue && returnType is ParameterizedType && returnType.typeArguments.isNotEmpty) {
       stateType = returnType.typeArguments.first;
       baseType = stateType.toString();
     } else {
@@ -58,10 +57,11 @@ class ProviderDefinition {
       baseType = returnType.toString();
     }
 
+    final hasCopyWith = _hasCopyWith(stateType);
+
     // Parse family parameters from build method
-    final familyParameters = buildMethod.parameters
-        .map((p) => ParamDefinition.fromElement(p))
-        .toList();
+    final familyParameters =
+        buildMethod.parameters.map((p) => ParamDefinition.fromElement(p)).toList();
 
     // Parse fields from return type's class
     final fields = _parseFields(stateType);
@@ -71,6 +71,7 @@ class ProviderDefinition {
       providerName: providerName,
       isAsyncValue: isAsyncValue,
       baseType: baseType,
+      hasCopyWith: hasCopyWith,
       familyParameters: familyParameters,
       fields: fields,
     );
@@ -84,10 +85,7 @@ class ProviderDefinition {
     final fields = <FieldDefinition>[];
 
     // Check if it's a Freezed class by multiple strategies
-    final isFreezed =
-        classElement.mixins.any((m) => m.toString().startsWith('_\$')) ||
-            classElement.mixins
-                .any((m) => m.element?.name.startsWith('_\$') ?? false);
+    final isFreezed = _isFreezedClass(classElement);
 
     if (isFreezed) {
       // Parse from factory constructor parameters for Freezed
@@ -109,12 +107,9 @@ class ProviderDefinition {
     // Fallback: if no fields found via factory, try public getters/fields
     // This handles cases where Freezed detection fails or non-Freezed classes
     if (fields.isEmpty) {
-      for (final field
-          in classElement.fields.where((f) => f.isPublic && !f.isStatic)) {
+      for (final field in classElement.fields.where((f) => f.isPublic && !f.isStatic)) {
         // Skip internal Freezed fields
-        if (field.name.startsWith('_') ||
-            field.name == 'copyWith' ||
-            field.name == 'hashCode') {
+        if (field.name.startsWith('_') || field.name == 'copyWith' || field.name == 'hashCode') {
           continue;
         }
         fields.add(FieldDefinition.fromField(field));
@@ -124,10 +119,32 @@ class ProviderDefinition {
     return fields;
   }
 
+  static bool _isFreezedClass(ClassElement classElement) {
+    return classElement.mixins.any((m) => m.toString().startsWith('_\$')) ||
+        classElement.mixins.any((m) => m.element?.name.startsWith('_\$') ?? false);
+  }
+
+  static bool _hasCopyWith(DartType type) {
+    if (type.element is! ClassElement) return false;
+    final classElement = type.element as ClassElement;
+    if (_isFreezedClass(classElement)) return true;
+    return classElement.accessors.any((a) => a.isGetter && a.name == 'copyWith') ||
+        classElement.methods.any((m) => m.name == 'copyWith');
+  }
+
   /// Get provider name with family parameters
   String providerNameWithFamily({String prefix = ''}) {
     if (!hasFamily) return providerName;
 
+    // For single param, prefix IS the value (no record field access needed)
+    if (familyParameters.length == 1) {
+      final p = familyParameters.first;
+      final value = prefix.isEmpty ? p.name : prefix;
+      final param = p.isNamed ? '${p.name}: $value' : value;
+      return '$providerName($param)';
+    }
+
+    // For multiple params, use record field access
     final params = familyParameters.map((p) {
       final value = prefix.isEmpty ? p.name : '$prefix.${p.name}';
       return p.isNamed ? '${p.name}: $value' : value;

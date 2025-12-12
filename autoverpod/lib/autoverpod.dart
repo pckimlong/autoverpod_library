@@ -8,3 +8,4 @@ export 'package:flutter_riverpod/flutter_riverpod.dart';
 export 'package:meta/meta.dart' show nonVirtual, protected;
 
 export 'src/string_field.dart';
+export 'src/number_field.dart';
