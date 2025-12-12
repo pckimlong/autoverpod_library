@@ -9,10 +9,11 @@ For each class-based `@riverpod` provider annotated with `@stateWidget`, the `au
 - `Scope` widget: `{ProviderName}Scope` to pass family parameters down the tree
 - `State` widget: `{ProviderName}Widget` that rebuilds when any part of the state changes
 - `Select` widget: `{ProviderName}Select<T>` that rebuilds only when a selected value changes
+- `ParamsBuilder` widget: `{ProviderName}ParamsBuilder` to access family params with full provider access (family providers only)
 - Field widgets: `{ProviderName}{FieldName}Field` for building per-field UI
 - Field updater extensions: methods like `updateName()` on the provider notifier
 
-String fields can use an optional helper that manages a `TextEditingController` and keeps it in sync with the field value.
+String and numeric fields can use optional helpers that manage a `TextEditingController` and keep it in sync with the field value.
 
 ## Typical use cases
 
@@ -35,6 +36,20 @@ UserProfileNameField(
 ```
 
 The field widget keeps the `TextEditingController` and the `name` value on the provider in sync, while other widgets on the screen may read the same provider through the generated `UserProfileWidget` or `UserProfileSelect`.
+
+Numeric fields (`int`, `double`, `num`) get the same treatment via `NumberField`:
+
+```dart
+UserProfileAgeField(
+  builder: (context, ref) {
+    return TextField(
+      controller: ref.textController,
+      keyboardType: TextInputType.number,
+      decoration: const InputDecoration(labelText: 'Age'),
+    );
+  },
+);
+```
 
 ## How to use
 
@@ -140,7 +155,37 @@ UserProfileScope(
 );
 ```
 
-The parameter can also be passed directly to an individual field widget instead of via a scope.
+You can also pass family parameters directly to any generated widget (state/select/field) instead of via a scope:
+
+```dart
+UserProfileNameField(
+  userId: 123,
+  builder: ...,
+);
+
+UserProfileSelect(
+  userId: 123,
+  selector: (state) => state.email,
+  builder: ...,
+);
+```
+
+### ParamsBuilder for custom flows
+
+When you need access to the family parameters passed through a scope along with full provider access, use `ParamsBuilder`:
+
+```dart
+UserProfileScope(
+  userId: 123,
+  child: UserProfileParamsBuilder(
+    builder: (context, ref, userId) {
+      // userId is the family parameter from scope
+      // ref.select() and ref.notifier are available
+      return Text('User $userId: ${ref.select((s) => s.name)}');
+    },
+  ),
+);
+```
 
 ### Builder ref API
 
@@ -159,7 +204,22 @@ UserProfileSelect(
 );
 ```
 
-In string field builders, a `StringFieldRef` is provided, which includes a `TextEditingController` and an `update` function corresponding to the field.
+In string and number field builders, the field-specific proxy ref includes a `textController` and an `update<Field>` helper.
+
+### State classes without `copyWith`
+
+Autoverpod generates `update<Field>` methods by calling `state.copyWith(...)`. If your state class does not expose a `copyWith` (for example, a plain Dart class), no updater extension is generated. In that case, each field widget adds a required `onChanged` callback so you can update the notifier manually:
+
+```dart
+CounterCountField(
+  onChanged: (notifier, value) => notifier.setCount(value),
+  builder: (context, ref) => TextField(controller: ref.textController),
+);
+```
+
+### Async providers
+
+For providers returning `Future`, `Stream`, or `AsyncValue`, generated field widgets and `{ProviderName}Select` accept optional `loading` and `error` builders for safe standalone use. Wrapping your subtree in `{ProviderName}Scope` will also gate descendants to `data` automatically.
 
 ## Packages
 

@@ -1,3 +1,24 @@
+## 0.1.1 - 2025-12-12
+
+### New Features
+
+- **ParamsBuilder widget** - New widget for family providers that exposes family parameters in a builder callback with full `select`/`notifier` access via `ProxyWidgetRef`
+- **Usage examples in doc comments** - All generated widgets now include `/// **Usage:**` code examples for better AI/IDE assistance
+
+### Bug Fixes
+
+- **Fixed `valueOrNull` compile error** - Changed to `value` for riverpod 3.x compatibility
+- **Fixed `getters` compile error** - Use `accessors.any((a) => a.isGetter)` for lean_builder compatibility
+- **Fixed duplicate header comments** - Removed duplicate header since lean_builder adds its own
+- **Fixed `file://` URI imports** - Use `shortUri` instead of `uri` to get proper `package://` imports
+
+### Improvements
+
+- **Single param optimization** - Family providers with single parameter now use simple type (`int`) instead of record (`({int id})`) for cleaner generated code
+- **Cleaner generated output** - Reduced boilerplate in generated widgets
+
+---
+
 ## 0.1.0 - 2025-12-11
 
 ### ⚠️ COMPLETE REWRITE - BREAKING CHANGES

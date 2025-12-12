@@ -19,7 +19,7 @@ class FieldDefinition {
     String? importPath;
     final paramType = param.type;
     if (paramType.element != null) {
-      final uri = paramType.element!.librarySrc.uri.toString();
+      final uri = paramType.element!.librarySrc.shortUri.toString();
       if (!uri.startsWith('dart:')) {
         importPath = uri;
       }
@@ -38,7 +38,7 @@ class FieldDefinition {
     String? importPath;
     final fieldType = field.type;
     if (fieldType.element != null) {
-      final uri = fieldType.element!.librarySrc.uri.toString();
+      final uri = fieldType.element!.librarySrc.shortUri.toString();
       if (!uri.startsWith('dart:')) {
         importPath = uri;
       }
@@ -55,7 +55,12 @@ class FieldDefinition {
   /// Check if this is a String field (for text controller generation)
   bool get isTextField => type == 'String' || type == 'String?';
 
+  /// Check if this is a numeric field (for NumberField generation)
+  bool get isNumberField {
+    final base = typeWithoutNullable;
+    return base == 'int' || base == 'double' || base == 'num';
+  }
+
   /// Get type without nullable suffix
-  String get typeWithoutNullable =>
-      isNullable ? type.substring(0, type.length - 1) : type;
+  String get typeWithoutNullable => isNullable ? type.substring(0, type.length - 1) : type;
 }

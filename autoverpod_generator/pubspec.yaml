@@ -1,6 +1,6 @@
 name: autoverpod_generator
 description: Code generator for autoverpod - generates state field widgets from Riverpod providers.
-version: 0.1.0
+version: 0.1.1
 repository: https://github.com/pckimlong/autoverpod_library
 homepage: https://github.com/pckimlong/autoverpod_library
 issue_tracker: https://github.com/pckimlong/autoverpod_library/issues
