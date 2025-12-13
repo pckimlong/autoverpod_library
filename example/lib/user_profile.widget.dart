@@ -400,6 +400,7 @@ class AsyncUserProfileNameField extends ConsumerWidget {
     super.key,
     this.id,
     this.controller,
+    this.debounceDuration,
     required this.builder,
     this.loading,
     this.error,
@@ -408,6 +409,7 @@ class AsyncUserProfileNameField extends ConsumerWidget {
   final int? id;
 
   final TextEditingController? controller;
+  final Duration? debounceDuration;
   final Widget Function(
     BuildContext context,
     AsyncUserProfileNameProxyWidgetRef ref,
@@ -431,8 +433,11 @@ class AsyncUserProfileNameField extends ConsumerWidget {
         return StringField(
           value: value,
           controller: controller,
-          onChanged: (v) =>
-              ref.read(asyncUserProfileProvider(params).notifier).updateName(v),
+          debounceDuration: debounceDuration,
+          onChanged: (v) {
+            if (v != null)
+              ref.read(asyncUserProfileProvider(params).notifier).updateName(v);
+          },
           builder: (context, stringFieldRef) {
             return builder(
               context,
@@ -478,6 +483,7 @@ class AsyncUserProfileEmailField extends ConsumerWidget {
     super.key,
     this.id,
     this.controller,
+    this.debounceDuration,
     required this.builder,
     this.loading,
     this.error,
@@ -486,6 +492,7 @@ class AsyncUserProfileEmailField extends ConsumerWidget {
   final int? id;
 
   final TextEditingController? controller;
+  final Duration? debounceDuration;
   final Widget Function(
     BuildContext context,
     AsyncUserProfileEmailProxyWidgetRef ref,
@@ -509,9 +516,13 @@ class AsyncUserProfileEmailField extends ConsumerWidget {
         return StringField(
           value: value,
           controller: controller,
-          onChanged: (v) => ref
-              .read(asyncUserProfileProvider(params).notifier)
-              .updateEmail(v),
+          debounceDuration: debounceDuration,
+          onChanged: (v) {
+            if (v != null)
+              ref
+                  .read(asyncUserProfileProvider(params).notifier)
+                  .updateEmail(v);
+          },
           builder: (context, stringFieldRef) {
             return builder(
               context,
@@ -556,6 +567,7 @@ class AsyncUserProfileAgeField extends ConsumerWidget {
     super.key,
     this.id,
     this.controller,
+    this.debounceDuration,
     required this.builder,
     this.loading,
     this.error,
@@ -564,6 +576,7 @@ class AsyncUserProfileAgeField extends ConsumerWidget {
   final int? id;
 
   final TextEditingController? controller;
+  final Duration? debounceDuration;
   final Widget Function(
     BuildContext context,
     AsyncUserProfileAgeProxyWidgetRef ref,
@@ -587,6 +600,7 @@ class AsyncUserProfileAgeField extends ConsumerWidget {
         return NumberField<int>(
           value: value,
           controller: controller,
+          debounceDuration: debounceDuration,
           onChanged: (v) {
             if (v != null)
               ref.read(asyncUserProfileProvider(params).notifier).updateAge(v);
@@ -635,6 +649,7 @@ class AsyncUserProfileBioField extends ConsumerWidget {
     super.key,
     this.id,
     this.controller,
+    this.debounceDuration,
     required this.builder,
     this.loading,
     this.error,
@@ -643,6 +658,7 @@ class AsyncUserProfileBioField extends ConsumerWidget {
   final int? id;
 
   final TextEditingController? controller;
+  final Duration? debounceDuration;
   final Widget Function(
     BuildContext context,
     AsyncUserProfileBioProxyWidgetRef ref,
@@ -666,6 +682,8 @@ class AsyncUserProfileBioField extends ConsumerWidget {
         return StringField(
           value: value,
           controller: controller,
+          emptyAsNull: true,
+          debounceDuration: debounceDuration,
           onChanged: (v) =>
               ref.read(asyncUserProfileProvider(params).notifier).updateBio(v),
           builder: (context, stringFieldRef) {
@@ -713,6 +731,7 @@ class AsyncUserProfileBio2Field extends ConsumerWidget {
     super.key,
     this.id,
     this.controller,
+    this.debounceDuration,
     required this.builder,
     this.loading,
     this.error,
@@ -721,6 +740,7 @@ class AsyncUserProfileBio2Field extends ConsumerWidget {
   final int? id;
 
   final TextEditingController? controller;
+  final Duration? debounceDuration;
   final Widget Function(
     BuildContext context,
     AsyncUserProfileBio2ProxyWidgetRef ref,
@@ -744,6 +764,8 @@ class AsyncUserProfileBio2Field extends ConsumerWidget {
         return StringField(
           value: value,
           controller: controller,
+          emptyAsNull: true,
+          debounceDuration: debounceDuration,
           onChanged: (v) =>
               ref.read(asyncUserProfileProvider(params).notifier).updateBio2(v),
           builder: (context, stringFieldRef) {
@@ -1054,12 +1076,14 @@ class UserProfileNameField extends ConsumerWidget {
     super.key,
     this.id,
     this.controller,
+    this.debounceDuration,
     required this.builder,
   });
 
   final int? id;
 
   final TextEditingController? controller;
+  final Duration? debounceDuration;
   final Widget Function(BuildContext context, UserProfileNameProxyWidgetRef ref)
   builder;
 
@@ -1076,8 +1100,11 @@ class UserProfileNameField extends ConsumerWidget {
     return StringField(
       value: value,
       controller: controller,
-      onChanged: (v) =>
-          ref.read(userProfileProvider(params).notifier).updateName(v),
+      debounceDuration: debounceDuration,
+      onChanged: (v) {
+        if (v != null)
+          ref.read(userProfileProvider(params).notifier).updateName(v);
+      },
       builder: (context, stringFieldRef) {
         return builder(
           context,
@@ -1114,12 +1141,14 @@ class UserProfileEmailField extends ConsumerWidget {
     super.key,
     this.id,
     this.controller,
+    this.debounceDuration,
     required this.builder,
   });
 
   final int? id;
 
   final TextEditingController? controller;
+  final Duration? debounceDuration;
   final Widget Function(
     BuildContext context,
     UserProfileEmailProxyWidgetRef ref,
@@ -1139,8 +1168,11 @@ class UserProfileEmailField extends ConsumerWidget {
     return StringField(
       value: value,
       controller: controller,
-      onChanged: (v) =>
-          ref.read(userProfileProvider(params).notifier).updateEmail(v),
+      debounceDuration: debounceDuration,
+      onChanged: (v) {
+        if (v != null)
+          ref.read(userProfileProvider(params).notifier).updateEmail(v);
+      },
       builder: (context, stringFieldRef) {
         return builder(
           context,
@@ -1177,12 +1209,14 @@ class UserProfileAgeField extends ConsumerWidget {
     super.key,
     this.id,
     this.controller,
+    this.debounceDuration,
     required this.builder,
   });
 
   final int? id;
 
   final TextEditingController? controller;
+  final Duration? debounceDuration;
   final Widget Function(BuildContext context, UserProfileAgeProxyWidgetRef ref)
   builder;
 
@@ -1199,6 +1233,7 @@ class UserProfileAgeField extends ConsumerWidget {
     return NumberField<int>(
       value: value,
       controller: controller,
+      debounceDuration: debounceDuration,
       onChanged: (v) {
         if (v != null)
           ref.read(userProfileProvider(params).notifier).updateAge(v);
@@ -1239,12 +1274,14 @@ class UserProfileBioField extends ConsumerWidget {
     super.key,
     this.id,
     this.controller,
+    this.debounceDuration,
     required this.builder,
   });
 
   final int? id;
 
   final TextEditingController? controller;
+  final Duration? debounceDuration;
   final Widget Function(BuildContext context, UserProfileBioProxyWidgetRef ref)
   builder;
 
@@ -1261,6 +1298,8 @@ class UserProfileBioField extends ConsumerWidget {
     return StringField(
       value: value,
       controller: controller,
+      emptyAsNull: true,
+      debounceDuration: debounceDuration,
       onChanged: (v) =>
           ref.read(userProfileProvider(params).notifier).updateBio(v),
       builder: (context, stringFieldRef) {
@@ -1299,12 +1338,14 @@ class UserProfileBio2Field extends ConsumerWidget {
     super.key,
     this.id,
     this.controller,
+    this.debounceDuration,
     required this.builder,
   });
 
   final int? id;
 
   final TextEditingController? controller;
+  final Duration? debounceDuration;
   final Widget Function(BuildContext context, UserProfileBio2ProxyWidgetRef ref)
   builder;
 
@@ -1321,6 +1362,8 @@ class UserProfileBio2Field extends ConsumerWidget {
     return StringField(
       value: value,
       controller: controller,
+      emptyAsNull: true,
+      debounceDuration: debounceDuration,
       onChanged: (v) =>
           ref.read(userProfileProvider(params).notifier).updateBio2(v),
       builder: (context, stringFieldRef) {
@@ -1535,10 +1578,12 @@ class SecondUserProfileNameField extends ConsumerWidget {
   const SecondUserProfileNameField({
     super.key,
     this.controller,
+    this.debounceDuration,
     required this.builder,
   });
 
   final TextEditingController? controller;
+  final Duration? debounceDuration;
   final Widget Function(
     BuildContext context,
     SecondUserProfileNameProxyWidgetRef ref,
@@ -1552,8 +1597,11 @@ class SecondUserProfileNameField extends ConsumerWidget {
     return StringField(
       value: value,
       controller: controller,
-      onChanged: (v) =>
-          ref.read(secondUserProfileProvider.notifier).updateName(v),
+      debounceDuration: debounceDuration,
+      onChanged: (v) {
+        if (v != null)
+          ref.read(secondUserProfileProvider.notifier).updateName(v);
+      },
       builder: (context, stringFieldRef) {
         return builder(
           context,
@@ -1590,10 +1638,12 @@ class SecondUserProfileEmailField extends ConsumerWidget {
   const SecondUserProfileEmailField({
     super.key,
     this.controller,
+    this.debounceDuration,
     required this.builder,
   });
 
   final TextEditingController? controller;
+  final Duration? debounceDuration;
   final Widget Function(
     BuildContext context,
     SecondUserProfileEmailProxyWidgetRef ref,
@@ -1607,8 +1657,11 @@ class SecondUserProfileEmailField extends ConsumerWidget {
     return StringField(
       value: value,
       controller: controller,
-      onChanged: (v) =>
-          ref.read(secondUserProfileProvider.notifier).updateEmail(v),
+      debounceDuration: debounceDuration,
+      onChanged: (v) {
+        if (v != null)
+          ref.read(secondUserProfileProvider.notifier).updateEmail(v);
+      },
       builder: (context, stringFieldRef) {
         return builder(
           context,
@@ -1645,10 +1698,12 @@ class SecondUserProfileAgeField extends ConsumerWidget {
   const SecondUserProfileAgeField({
     super.key,
     this.controller,
+    this.debounceDuration,
     required this.builder,
   });
 
   final TextEditingController? controller;
+  final Duration? debounceDuration;
   final Widget Function(
     BuildContext context,
     SecondUserProfileAgeProxyWidgetRef ref,
@@ -1662,6 +1717,7 @@ class SecondUserProfileAgeField extends ConsumerWidget {
     return NumberField<int>(
       value: value,
       controller: controller,
+      debounceDuration: debounceDuration,
       onChanged: (v) {
         if (v != null)
           ref.read(secondUserProfileProvider.notifier).updateAge(v);
@@ -1702,10 +1758,12 @@ class SecondUserProfileBioField extends ConsumerWidget {
   const SecondUserProfileBioField({
     super.key,
     this.controller,
+    this.debounceDuration,
     required this.builder,
   });
 
   final TextEditingController? controller;
+  final Duration? debounceDuration;
   final Widget Function(
     BuildContext context,
     SecondUserProfileBioProxyWidgetRef ref,
@@ -1719,6 +1777,8 @@ class SecondUserProfileBioField extends ConsumerWidget {
     return StringField(
       value: value,
       controller: controller,
+      emptyAsNull: true,
+      debounceDuration: debounceDuration,
       onChanged: (v) =>
           ref.read(secondUserProfileProvider.notifier).updateBio(v),
       builder: (context, stringFieldRef) {
@@ -1757,10 +1817,12 @@ class SecondUserProfileBio2Field extends ConsumerWidget {
   const SecondUserProfileBio2Field({
     super.key,
     this.controller,
+    this.debounceDuration,
     required this.builder,
   });
 
   final TextEditingController? controller;
+  final Duration? debounceDuration;
   final Widget Function(
     BuildContext context,
     SecondUserProfileBio2ProxyWidgetRef ref,
@@ -1774,6 +1836,8 @@ class SecondUserProfileBio2Field extends ConsumerWidget {
     return StringField(
       value: value,
       controller: controller,
+      emptyAsNull: true,
+      debounceDuration: debounceDuration,
       onChanged: (v) =>
           ref.read(secondUserProfileProvider.notifier).updateBio2(v),
       builder: (context, stringFieldRef) {

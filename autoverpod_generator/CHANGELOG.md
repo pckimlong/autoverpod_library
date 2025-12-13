@@ -1,3 +1,12 @@
+## 0.1.2 - 2025-12-13
+
+### Improvements
+
+- **Generated header fields** - Include `ref.textController` for number fields in generated header field summaries.
+- **Field widget support** - Update generation to better support numeric field widgets backed by `NumberField`.
+
+---
+
 ## 0.1.1 - 2025-12-12
 
 ### New Features

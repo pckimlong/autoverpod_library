@@ -1,3 +1,5 @@
+import 'dart:async';
+
 import 'package:flutter/widgets.dart';
 
 /// Reference object providing access to text controller and update function.
@@ -28,6 +30,7 @@ class NumberField<T extends num> extends StatefulWidget {
     this.controller,
     this.formatter,
     this.parser,
+    this.debounceDuration,
   });
 
   /// The current value to display. If null, treated as empty string.
@@ -47,6 +50,12 @@ class NumberField<T extends num> extends StatefulWidget {
   /// Optional parser to convert text to value.
   final T? Function(String text)? parser;
 
+  /// Optional debounce duration for [onChanged] callbacks.
+  ///
+  /// If `null` or [Duration.zero], changes are reported immediately.
+  /// Otherwise, changes are debounced by the specified duration.
+  final Duration? debounceDuration;
+
   /// Builder function that receives context and a ref with controller access.
   final Widget Function(BuildContext context, NumberFieldRef<T> ref) builder;
 
@@ -57,6 +66,7 @@ class NumberField<T extends num> extends StatefulWidget {
 class _NumberFieldState<T extends num> extends State<NumberField<T>> {
   late TextEditingController _controller;
   bool _isInternalController = false;
+  Timer? _debounceTimer;
 
   String _format(T? value) {
     if (value == null) return '';
@@ -99,6 +109,14 @@ class _NumberFieldState<T extends num> extends State<NumberField<T>> {
   void didUpdateWidget(NumberField<T> oldWidget) {
     super.didUpdateWidget(oldWidget);
 
+    final shouldCancelDebounce = widget.controller != oldWidget.controller ||
+        widget.value != oldWidget.value ||
+        widget.debounceDuration != oldWidget.debounceDuration;
+    if (shouldCancelDebounce) {
+      _debounceTimer?.cancel();
+      _debounceTimer = null;
+    }
+
     if (widget.controller != oldWidget.controller) {
       _controller.removeListener(_handleControllerChanged);
       if (_isInternalController) {
@@ -115,6 +133,7 @@ class _NumberFieldState<T extends num> extends State<NumberField<T>> {
 
   @override
   void dispose() {
+    _debounceTimer?.cancel();
     _controller.removeListener(_handleControllerChanged);
     if (_isInternalController) {
       _controller.dispose();
@@ -125,7 +144,13 @@ class _NumberFieldState<T extends num> extends State<NumberField<T>> {
   void _handleControllerChanged() {
     final parsed = _parse(_controller.text);
     if (parsed != widget.value) {
-      widget.onChanged(parsed);
+      final duration = widget.debounceDuration;
+      if (duration == null || duration == Duration.zero) {
+        widget.onChanged(parsed);
+      } else {
+        _debounceTimer?.cancel();
+        _debounceTimer = Timer(duration, () => widget.onChanged(parsed));
+      }
     }
   }
 
@@ -137,4 +162,3 @@ class _NumberFieldState<T extends num> extends State<NumberField<T>> {
     );
   }
 }
-

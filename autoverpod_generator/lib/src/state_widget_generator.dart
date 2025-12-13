@@ -1124,6 +1124,7 @@ class StateWidgetGenerator extends GeneratorForAnnotatedClass<StateWidget> {
       }
     }
     buffer.writeln('    this.controller,');
+    buffer.writeln('    this.debounceDuration,');
     if (!provider.hasCopyWith) {
       buffer.writeln('    required this.onChanged,');
     }
@@ -1142,6 +1143,7 @@ class StateWidgetGenerator extends GeneratorForAnnotatedClass<StateWidget> {
       buffer.writeln();
     }
     buffer.writeln('  final TextEditingController? controller;');
+    buffer.writeln('  final Duration? debounceDuration;');
     if (!provider.hasCopyWith) {
       buffer.writeln(
         '  final void Function(${provider.baseName} notifier, ${field.type} value) onChanged;',
@@ -1195,11 +1197,31 @@ class StateWidgetGenerator extends GeneratorForAnnotatedClass<StateWidget> {
       buffer.writeln('        return StringField(');
       buffer.writeln('          value: value,');
       buffer.writeln('          controller: controller,');
-      buffer.writeln(
-        provider.hasCopyWith
-            ? '          onChanged: (v) => ref.read(${provider.providerNameWithFamily(prefix: 'params')}.notifier).update${field.name.pascalCase}(v),'
-            : '          onChanged: (v) => onChanged(ref.read(${provider.providerNameWithFamily(prefix: 'params')}.notifier), v),',
-      );
+      if (field.isNullable) {
+        buffer.writeln('          emptyAsNull: true,');
+      }
+      buffer.writeln('          debounceDuration: debounceDuration,');
+      if (provider.hasCopyWith) {
+        if (field.isNullable) {
+          buffer.writeln(
+            '          onChanged: (v) => ref.read(${provider.providerNameWithFamily(prefix: 'params')}.notifier).update${field.name.pascalCase}(v),',
+          );
+        } else {
+          buffer.writeln(
+            '          onChanged: (v) { if (v != null) ref.read(${provider.providerNameWithFamily(prefix: 'params')}.notifier).update${field.name.pascalCase}(v); },',
+          );
+        }
+      } else {
+        if (field.isNullable) {
+          buffer.writeln(
+            '          onChanged: (v) => onChanged(ref.read(${provider.providerNameWithFamily(prefix: 'params')}.notifier), v),',
+          );
+        } else {
+          buffer.writeln(
+            '          onChanged: (v) { if (v != null) onChanged(ref.read(${provider.providerNameWithFamily(prefix: 'params')}.notifier), v); },',
+          );
+        }
+      }
       buffer.writeln('          builder: (context, stringFieldRef) {');
       buffer.writeln(
         '            return builder(context, $proxyName(ref, stringFieldRef$manualUpdateArg$proxyArgs));',
@@ -1224,11 +1246,31 @@ class StateWidgetGenerator extends GeneratorForAnnotatedClass<StateWidget> {
       buffer.writeln('    return StringField(');
       buffer.writeln('      value: value,');
       buffer.writeln('      controller: controller,');
-      buffer.writeln(
-        provider.hasCopyWith
-            ? '      onChanged: (v) => ref.read(${provider.providerNameWithFamily(prefix: 'params')}.notifier).update${field.name.pascalCase}(v),'
-            : '      onChanged: (v) => onChanged(ref.read(${provider.providerNameWithFamily(prefix: 'params')}.notifier), v),',
-      );
+      if (field.isNullable) {
+        buffer.writeln('      emptyAsNull: true,');
+      }
+      buffer.writeln('      debounceDuration: debounceDuration,');
+      if (provider.hasCopyWith) {
+        if (field.isNullable) {
+          buffer.writeln(
+            '      onChanged: (v) => ref.read(${provider.providerNameWithFamily(prefix: 'params')}.notifier).update${field.name.pascalCase}(v),',
+          );
+        } else {
+          buffer.writeln(
+            '      onChanged: (v) { if (v != null) ref.read(${provider.providerNameWithFamily(prefix: 'params')}.notifier).update${field.name.pascalCase}(v); },',
+          );
+        }
+      } else {
+        if (field.isNullable) {
+          buffer.writeln(
+            '      onChanged: (v) => onChanged(ref.read(${provider.providerNameWithFamily(prefix: 'params')}.notifier), v),',
+          );
+        } else {
+          buffer.writeln(
+            '      onChanged: (v) { if (v != null) onChanged(ref.read(${provider.providerNameWithFamily(prefix: 'params')}.notifier), v); },',
+          );
+        }
+      }
       buffer.writeln('      builder: (context, stringFieldRef) {');
       buffer.writeln(
         '        return builder(context, $proxyName(ref, stringFieldRef$manualUpdateArg$proxyArgs));',
@@ -1317,6 +1359,7 @@ class StateWidgetGenerator extends GeneratorForAnnotatedClass<StateWidget> {
       }
     }
     buffer.writeln('    this.controller,');
+    buffer.writeln('    this.debounceDuration,');
     if (!provider.hasCopyWith) {
       buffer.writeln('    required this.onChanged,');
     }
@@ -1335,6 +1378,7 @@ class StateWidgetGenerator extends GeneratorForAnnotatedClass<StateWidget> {
       buffer.writeln();
     }
     buffer.writeln('  final TextEditingController? controller;');
+    buffer.writeln('  final Duration? debounceDuration;');
     if (!provider.hasCopyWith) {
       buffer.writeln(
         '  final void Function(${provider.baseName} notifier, ${field.type} value) onChanged;',
@@ -1388,6 +1432,7 @@ class StateWidgetGenerator extends GeneratorForAnnotatedClass<StateWidget> {
       buffer.writeln('        return NumberField<$baseNumberType>(');
       buffer.writeln('          value: value,');
       buffer.writeln('          controller: controller,');
+      buffer.writeln('          debounceDuration: debounceDuration,');
       if (provider.hasCopyWith) {
         if (field.isNullable) {
           buffer.writeln(
@@ -1433,6 +1478,7 @@ class StateWidgetGenerator extends GeneratorForAnnotatedClass<StateWidget> {
       buffer.writeln('    return NumberField<$baseNumberType>(');
       buffer.writeln('      value: value,');
       buffer.writeln('      controller: controller,');
+      buffer.writeln('      debounceDuration: debounceDuration,');
       if (provider.hasCopyWith) {
         if (field.isNullable) {
           buffer.writeln(
