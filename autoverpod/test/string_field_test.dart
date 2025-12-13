@@ -238,6 +238,100 @@ void main() {
       });
     });
 
+    group('debounce', () {
+      testWidgets(
+          'cancels pending debounced onChanged when value prop changes',
+          (tester) async {
+        final changes = <String?>[];
+        TextEditingController? capturedController;
+
+        await tester.pumpWidget(
+          Directionality(
+            textDirection: TextDirection.ltr,
+            child: StringField(
+              value: '',
+              debounceDuration: const Duration(milliseconds: 100),
+              onChanged: changes.add,
+              builder: (context, ref) {
+                capturedController = ref.controller;
+                return const SizedBox();
+              },
+            ),
+          ),
+        );
+
+        capturedController!.text = 'user input';
+        await tester.pump();
+
+        // Parent-driven update arrives before the debounce fires.
+        await tester.pumpWidget(
+          Directionality(
+            textDirection: TextDirection.ltr,
+            child: StringField(
+              value: 'server update',
+              debounceDuration: const Duration(milliseconds: 100),
+              onChanged: changes.add,
+              builder: (context, ref) {
+                capturedController = ref.controller;
+                return const SizedBox();
+              },
+            ),
+          ),
+        );
+
+        expect(capturedController!.text, 'server update');
+
+        // If a pending debounce wasn't cancelled, this would emit the stale input
+        // after the parent update.
+        await tester.pump(const Duration(milliseconds: 150));
+        expect(changes, isEmpty);
+      });
+
+      testWidgets(
+          'cancels pending debounced onChanged when controller prop changes',
+          (tester) async {
+        final changes = <String?>[];
+        final controller1 = TextEditingController();
+        final controller2 = TextEditingController();
+
+        await tester.pumpWidget(
+          Directionality(
+            textDirection: TextDirection.ltr,
+            child: StringField(
+              value: '',
+              controller: controller1,
+              debounceDuration: const Duration(milliseconds: 100),
+              onChanged: changes.add,
+              builder: (context, ref) => const SizedBox(),
+            ),
+          ),
+        );
+
+        controller1.text = 'stale input';
+        await tester.pump();
+
+        // Swap controllers before debounce fires.
+        await tester.pumpWidget(
+          Directionality(
+            textDirection: TextDirection.ltr,
+            child: StringField(
+              value: 'new value',
+              controller: controller2,
+              debounceDuration: const Duration(milliseconds: 100),
+              onChanged: changes.add,
+              builder: (context, ref) => const SizedBox(),
+            ),
+          ),
+        );
+
+        await tester.pump(const Duration(milliseconds: 150));
+        expect(changes, isEmpty);
+
+        controller1.dispose();
+        controller2.dispose();
+      });
+    });
+
     group('controller lifecycle', () {
       testWidgets('disposes internal controller on widget dispose',
           (tester) async {
@@ -521,7 +615,7 @@ void main() {
     group('edge cases', () {
       testWidgets('handles rapid value changes', (tester) async {
         TextEditingController? capturedController;
-        final changes = <String>[];
+        final changes = <String?>[];
 
         await tester.pumpWidget(
           Directionality(

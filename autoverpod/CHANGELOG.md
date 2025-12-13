@@ -1,3 +1,12 @@
+## 0.1.1 - 2025-12-13
+
+### New Features
+
+- **NumberField helper** - Added `NumberField<T extends num>` for bidirectional `TextEditingController` sync with numeric state, including optional parsing/formatting and debounced updates.
+- **StringField improvements** - Added optional debounced updates and `emptyAsNull` support for nullable String fields.
+
+---
+
 ## 0.1.0 - 2025-12-11
 
 ### ⚠️ COMPLETE REWRITE - BREAKING CHANGES

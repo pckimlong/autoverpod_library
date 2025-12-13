@@ -1,3 +1,5 @@
+import 'dart:async';
+
 import 'package:flutter/widgets.dart';
 
 /// Reference object providing access to text controller and update function.
@@ -8,7 +10,10 @@ class StringFieldRef {
   final TextEditingController controller;
 
   /// Update function to sync value back to state.
-  final ValueChanged<String> update;
+  ///
+  /// For nullable fields with [StringField.emptyAsNull] enabled,
+  /// empty strings are converted to `null`.
+  final ValueChanged<String?> update;
 }
 
 /// A helper widget that handles TextEditingController synchronization
@@ -23,16 +28,36 @@ class StringField extends StatefulWidget {
     required this.onChanged,
     required this.builder,
     this.controller,
+    this.emptyAsNull = false,
+    this.debounceDuration,
   });
 
   /// The current value to display. If null, treated as empty string.
   final String? value;
 
   /// Called when the text changes.
-  final ValueChanged<String> onChanged;
+  ///
+  /// If [emptyAsNull] is true and the text is empty, `null` is passed.
+  /// Otherwise, the text value is always passed (never null when
+  /// [emptyAsNull] is false).
+  final ValueChanged<String?> onChanged;
 
   /// Optional external controller. If not provided, one is created internally.
   final TextEditingController? controller;
+
+  /// If true, empty strings are converted to `null` in [onChanged].
+  ///
+  /// This is useful for nullable String fields where an empty input
+  /// should be stored as `null` rather than an empty string.
+  ///
+  /// Defaults to `false`.
+  final bool emptyAsNull;
+
+  /// Optional debounce duration for [onChanged] callbacks.
+  ///
+  /// If `null` or [Duration.zero], changes are reported immediately.
+  /// Otherwise, changes are debounced by the specified duration.
+  final Duration? debounceDuration;
 
   /// Builder function that receives context and a ref with controller access.
   final Widget Function(BuildContext context, StringFieldRef ref) builder;
@@ -44,6 +69,7 @@ class StringField extends StatefulWidget {
 class _StringFieldState extends State<StringField> {
   late TextEditingController _controller;
   bool _isInternalController = false;
+  Timer? _debounceTimer;
 
   String get _effectiveValue => widget.value ?? '';
 
@@ -72,6 +98,15 @@ class _StringFieldState extends State<StringField> {
   void didUpdateWidget(StringField oldWidget) {
     super.didUpdateWidget(oldWidget);
 
+    final shouldCancelDebounce = widget.controller != oldWidget.controller ||
+        widget.value != oldWidget.value ||
+        widget.debounceDuration != oldWidget.debounceDuration ||
+        widget.emptyAsNull != oldWidget.emptyAsNull;
+    if (shouldCancelDebounce) {
+      _debounceTimer?.cancel();
+      _debounceTimer = null;
+    }
+
     // Handle controller change
     if (widget.controller != oldWidget.controller) {
       _controller.removeListener(_handleControllerChanged);
@@ -88,6 +123,7 @@ class _StringFieldState extends State<StringField> {
 
   @override
   void dispose() {
+    _debounceTimer?.cancel();
     _controller.removeListener(_handleControllerChanged);
     if (_isInternalController) {
       _controller.dispose();
@@ -97,8 +133,15 @@ class _StringFieldState extends State<StringField> {
 
   void _handleControllerChanged() {
     final text = _controller.text;
-    if (text != widget.value) {
-      widget.onChanged(text);
+    final valueToPass = (widget.emptyAsNull && text.isEmpty) ? null : text;
+    if (valueToPass != widget.value) {
+      final duration = widget.debounceDuration;
+      if (duration == null || duration == Duration.zero) {
+        widget.onChanged(valueToPass);
+      } else {
+        _debounceTimer?.cancel();
+        _debounceTimer = Timer(duration, () => widget.onChanged(valueToPass));
+      }
     }
   }
 
