@@ -1,5 +1,5 @@
 import 'package:autoverpod/autoverpod.dart';
-import 'package:flutter/widgets.dart';
+import 'package:flutter/material.dart';
 import 'package:flutter_test/flutter_test.dart';
 
 void main() {
@@ -91,7 +91,8 @@ void main() {
     });
 
     group('two-way synchronization', () {
-      testWidgets('calls onChanged when controller text changes', (tester) async {
+      testWidgets('calls onChanged when controller text changes',
+          (tester) async {
         int? changedValue;
         TextEditingController? capturedController;
 
@@ -265,5 +266,44 @@ void main() {
         controller2.dispose();
       });
     });
+
+    testWidgets('does not throw when syncing formatted value in Form',
+        (tester) async {
+      await tester.pumpWidget(
+        const MaterialApp(
+          home: Scaffold(
+            body: _NumberFieldFormHarness(),
+          ),
+        ),
+      );
+
+      await tester.enterText(find.byType(TextFormField), '1.');
+      await tester.pump();
+
+      expect(tester.takeException(), isNull);
+    });
   });
+}
+
+class _NumberFieldFormHarness extends StatefulWidget {
+  const _NumberFieldFormHarness();
+
+  @override
+  State<_NumberFieldFormHarness> createState() =>
+      _NumberFieldFormHarnessState();
+}
+
+class _NumberFieldFormHarnessState extends State<_NumberFieldFormHarness> {
+  double? _value;
+
+  @override
+  Widget build(BuildContext context) {
+    return Form(
+      child: NumberField<double>(
+        value: _value,
+        onChanged: (next) => setState(() => _value = next),
+        builder: (context, ref) => TextFormField(controller: ref.controller),
+      ),
+    );
+  }
 }
