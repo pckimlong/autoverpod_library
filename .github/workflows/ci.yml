@@ -14,24 +14,24 @@ jobs:
       - name: Checkout
         uses: actions/checkout@v4
 
-      - name: Setup Dart
-        uses: dart-lang/setup-dart@v1
+      - name: Setup Flutter
+        uses: subosito/flutter-action@v2
         with:
-          sdk: stable
+          channel: stable
 
       - name: Install dependencies (autoverpod_annotation)
-        run: dart pub get
+        run: flutter pub get
         working-directory: autoverpod_annotation
 
       - name: Install dependencies (autoverpod_generator)
-        run: dart pub get
+        run: flutter pub get
         working-directory: autoverpod_generator
 
       - name: Format check
         run: dart format --output=none --set-exit-if-changed autoverpod autoverpod_annotation autoverpod_generator example
 
       - name: Test autoverpod_annotation
-        run: dart test
+        run: flutter test
         working-directory: autoverpod_annotation
 
       - name: Test autoverpod_generator
