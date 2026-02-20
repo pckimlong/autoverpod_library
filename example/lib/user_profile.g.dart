@@ -11,12 +11,12 @@ part of 'user_profile.dart';
 
 @ProviderFor(AsyncUserProfile)
 @stateWidget
-const asyncUserProfileProvider = AsyncUserProfileFamily._();
+final asyncUserProfileProvider = AsyncUserProfileFamily._();
 
 @stateWidget
 final class AsyncUserProfileProvider
     extends $AsyncNotifierProvider<AsyncUserProfile, UserProfileState> {
-  const AsyncUserProfileProvider._(
+  AsyncUserProfileProvider._(
       {required AsyncUserProfileFamily super.from, required int super.argument})
       : super(
           retry: null,
@@ -58,7 +58,7 @@ final class AsyncUserProfileFamily extends $Family
     with
         $ClassFamilyOverride<AsyncUserProfile, AsyncValue<UserProfileState>,
             UserProfileState, FutureOr<UserProfileState>, int> {
-  const AsyncUserProfileFamily._()
+  AsyncUserProfileFamily._()
       : super(
           retry: null,
           name: r'asyncUserProfileProvider',
@@ -88,9 +88,6 @@ abstract class _$AsyncUserProfile extends $AsyncNotifier<UserProfileState> {
   @$mustCallSuper
   @override
   void runBuild() {
-    final created = build(
-      _$args,
-    );
     final ref =
         this.ref as $Ref<AsyncValue<UserProfileState>, UserProfileState>;
     final element = ref.element as $ClassProviderElement<
@@ -98,18 +95,22 @@ abstract class _$AsyncUserProfile extends $AsyncNotifier<UserProfileState> {
         AsyncValue<UserProfileState>,
         Object?,
         Object?>;
-    element.handleValue(ref, created);
+    element.handleCreate(
+        ref,
+        () => build(
+              _$args,
+            ));
   }
 }
 
 @ProviderFor(UserProfile)
 @stateWidget
-const userProfileProvider = UserProfileFamily._();
+final userProfileProvider = UserProfileFamily._();
 
 @stateWidget
 final class UserProfileProvider
     extends $NotifierProvider<UserProfile, UserProfileState> {
-  const UserProfileProvider._(
+  UserProfileProvider._(
       {required UserProfileFamily super.from, required int super.argument})
       : super(
           retry: null,
@@ -159,7 +160,7 @@ final class UserProfileFamily extends $Family
     with
         $ClassFamilyOverride<UserProfile, UserProfileState, UserProfileState,
             UserProfileState, int> {
-  const UserProfileFamily._()
+  UserProfileFamily._()
       : super(
           retry: null,
           name: r'userProfileProvider',
@@ -189,27 +190,28 @@ abstract class _$UserProfile extends $Notifier<UserProfileState> {
   @$mustCallSuper
   @override
   void runBuild() {
-    final created = build(
-      _$args,
-    );
     final ref = this.ref as $Ref<UserProfileState, UserProfileState>;
     final element = ref.element as $ClassProviderElement<
         AnyNotifier<UserProfileState, UserProfileState>,
         UserProfileState,
         Object?,
         Object?>;
-    element.handleValue(ref, created);
+    element.handleCreate(
+        ref,
+        () => build(
+              _$args,
+            ));
   }
 }
 
 @ProviderFor(SecondUserProfile)
 @stateWidget
-const secondUserProfileProvider = SecondUserProfileProvider._();
+final secondUserProfileProvider = SecondUserProfileProvider._();
 
 @stateWidget
 final class SecondUserProfileProvider
     extends $NotifierProvider<SecondUserProfile, UserProfileState> {
-  const SecondUserProfileProvider._()
+  SecondUserProfileProvider._()
       : super(
           from: null,
           argument: null,
@@ -244,13 +246,12 @@ abstract class _$SecondUserProfile extends $Notifier<UserProfileState> {
   @$mustCallSuper
   @override
   void runBuild() {
-    final created = build();
     final ref = this.ref as $Ref<UserProfileState, UserProfileState>;
     final element = ref.element as $ClassProviderElement<
         AnyNotifier<UserProfileState, UserProfileState>,
         UserProfileState,
         Object?,
         Object?>;
-    element.handleValue(ref, created);
+    element.handleCreate(ref, build);
   }
 }

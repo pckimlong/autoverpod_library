@@ -91,7 +91,8 @@ void main() {
     });
 
     group('two-way synchronization', () {
-      testWidgets('calls onChanged when controller text changes', (tester) async {
+      testWidgets('calls onChanged when controller text changes',
+          (tester) async {
         int? changedValue;
         TextEditingController? capturedController;
 

@@ -112,7 +112,9 @@ class StateWidgetGenerator extends GeneratorForAnnotatedClass<StateWidget> {
       if (field.importPath != null) {
         final uri = field.importPath!;
         // Skip dart core and already collected
-        if (uri.startsWith('dart:') || uri.contains('/sky_engine/') || collected.contains(uri)) {
+        if (uri.startsWith('dart:') ||
+            uri.contains('/sky_engine/') ||
+            collected.contains(uri)) {
           continue;
         }
         collected.add(uri);
@@ -123,7 +125,9 @@ class StateWidgetGenerator extends GeneratorForAnnotatedClass<StateWidget> {
     for (final param in provider.familyParameters) {
       if (param.importPath != null) {
         final uri = param.importPath!;
-        if (uri.startsWith('dart:') || uri.contains('/sky_engine/') || collected.contains(uri)) {
+        if (uri.startsWith('dart:') ||
+            uri.contains('/sky_engine/') ||
+            collected.contains(uri)) {
           continue;
         }
         collected.add(uri);
@@ -151,7 +155,8 @@ class StateWidgetGenerator extends GeneratorForAnnotatedClass<StateWidget> {
       buffer.writeln('    final params = (');
       for (final param in provider.familyParameters) {
         final bang = param.isNullable ? '' : '!';
-        final valueName = useValueSuffix ? '${param.name}Value$bang' : param.name;
+        final valueName =
+            useValueSuffix ? '${param.name}Value$bang' : param.name;
         buffer.writeln('      ${param.name}: $valueName,');
       }
       buffer.writeln('    );');
@@ -168,7 +173,8 @@ class StateWidgetGenerator extends GeneratorForAnnotatedClass<StateWidget> {
       '// ============================================================================',
     );
     buffer.writeln('//');
-    buffer.writeln('// Source: ${provider.providerName} → ${provider.baseType}');
+    buffer
+        .writeln('// Source: ${provider.providerName} → ${provider.baseType}');
     buffer.writeln('//');
     buffer.writeln(
       '// Widgets: ${provider.baseName}Widget, ${provider.baseName}Select',
@@ -177,8 +183,9 @@ class StateWidgetGenerator extends GeneratorForAnnotatedClass<StateWidget> {
     buffer.writeln('//');
     buffer.writeln('// Fields:');
     for (final field in provider.fields) {
-      final hasController =
-          (field.isTextField || field.isNumberField) ? 'ref.textController | ' : '';
+      final hasController = (field.isTextField || field.isNumberField)
+          ? 'ref.textController | '
+          : '';
       buffer.writeln(
         '// - ${field.name.pascalCase}Field: ${hasController}ref.update${field.name.pascalCase}(value)',
       );
@@ -250,8 +257,9 @@ class StateWidgetGenerator extends GeneratorForAnnotatedClass<StateWidget> {
       '  bool updateShouldNotify(covariant _${provider.baseName}ParamsInheritedWidget oldWidget) {',
     );
     if (provider.hasFamily) {
-      final conditions =
-          provider.familyParameters.map((p) => '${p.name} != oldWidget.${p.name}').join(' || ');
+      final conditions = provider.familyParameters
+          .map((p) => '${p.name} != oldWidget.${p.name}')
+          .join(' || ');
       buffer.writeln('    return $conditions;');
     } else {
       buffer.writeln('    return false;');
@@ -565,8 +573,9 @@ class StateWidgetGenerator extends GeneratorForAnnotatedClass<StateWidget> {
 
   String _generateStateWidget(ProviderDefinition provider) {
     final buffer = StringBuffer();
-    final stateType =
-        provider.isAsyncValue ? 'AsyncValue<${provider.baseType}>' : provider.baseType;
+    final stateType = provider.isAsyncValue
+        ? 'AsyncValue<${provider.baseType}>'
+        : provider.baseType;
     final proxyArgs = provider.hasFamily
         ? ', ${provider.familyParameters.map((p) => '${p.name}: ${p.name}').join(', ')}'
         : '';
@@ -576,7 +585,9 @@ class StateWidgetGenerator extends GeneratorForAnnotatedClass<StateWidget> {
     buffer.writeln('/// **Usage:**');
     buffer.writeln('/// ```dart');
     if (provider.hasFamily) {
-      final paramArgs = provider.familyParameters.map((p) => '${p.name}: ${p.name}').join(', ');
+      final paramArgs = provider.familyParameters
+          .map((p) => '${p.name}: ${p.name}')
+          .join(', ');
       buffer.writeln('/// ${provider.baseName}Widget(');
       buffer.writeln('///   $paramArgs,');
       buffer.writeln('///   builder: (context, ref, state) {');
@@ -626,9 +637,11 @@ class StateWidgetGenerator extends GeneratorForAnnotatedClass<StateWidget> {
     buffer.writeln('  Widget build(BuildContext context, WidgetRef ref) {');
 
     if (provider.hasFamily) {
-      final nonNullableParams = provider.familyParameters.where((p) => !p.isNullable).toList();
+      final nonNullableParams =
+          provider.familyParameters.where((p) => !p.isNullable).toList();
       if (nonNullableParams.isNotEmpty) {
-        final needsScopeConditions = nonNullableParams.map((p) => '${p.name} == null').join(' || ');
+        final needsScopeConditions =
+            nonNullableParams.map((p) => '${p.name} == null').join(' || ');
         buffer.writeln('    final needsScope = $needsScopeConditions;');
         buffer.writeln(
           '    if (needsScope) assert(_debugCheckHas${provider.baseName}Scope(context));',
@@ -675,12 +688,15 @@ class StateWidgetGenerator extends GeneratorForAnnotatedClass<StateWidget> {
         ? ', ${provider.familyParameters.map((p) => '${p.name}: ${p.name}').join(', ')}'
         : '';
 
-    buffer.writeln('/// Widget that rebuilds only when selected value changes.');
+    buffer
+        .writeln('/// Widget that rebuilds only when selected value changes.');
     buffer.writeln('///');
     buffer.writeln('/// **Usage:**');
     buffer.writeln('/// ```dart');
     if (provider.hasFamily) {
-      final paramArgs = provider.familyParameters.map((p) => '${p.name}: ${p.name}').join(', ');
+      final paramArgs = provider.familyParameters
+          .map((p) => '${p.name}: ${p.name}')
+          .join(', ');
       buffer.writeln('/// ${provider.baseName}Select<String>(');
       buffer.writeln('///   $paramArgs,');
     } else {
@@ -740,9 +756,11 @@ class StateWidgetGenerator extends GeneratorForAnnotatedClass<StateWidget> {
     buffer.writeln('  Widget build(BuildContext context, WidgetRef ref) {');
 
     if (provider.hasFamily) {
-      final nonNullableParams = provider.familyParameters.where((p) => !p.isNullable).toList();
+      final nonNullableParams =
+          provider.familyParameters.where((p) => !p.isNullable).toList();
       if (nonNullableParams.isNotEmpty) {
-        final needsScopeConditions = nonNullableParams.map((p) => '${p.name} == null').join(' || ');
+        final needsScopeConditions =
+            nonNullableParams.map((p) => '${p.name} == null').join(' || ');
         buffer.writeln('    final needsScope = $needsScopeConditions;');
         buffer.writeln(
           '    if (needsScope) assert(_debugCheckHas${provider.baseName}Scope(context));',
@@ -845,7 +863,8 @@ class StateWidgetGenerator extends GeneratorForAnnotatedClass<StateWidget> {
     buffer.writeln('///   child: ${provider.baseName}ParamsBuilder(');
     buffer.writeln('///     builder: (context, ref, params) {');
     if (provider.familyParameters.length == 1) {
-      buffer.writeln('///       // params is ${provider.familyParameters.first.type}');
+      buffer.writeln(
+          '///       // params is ${provider.familyParameters.first.type}');
     } else {
       buffer.writeln(
         '///       // params is (${provider.familyParameters.map((p) => '${p.name}: ${p.type}').join(', ')})',
@@ -918,7 +937,8 @@ class StateWidgetGenerator extends GeneratorForAnnotatedClass<StateWidget> {
     }
 
     // For other non-String fields, generate a simple ConsumerWidget
-    final proxyName = '${provider.baseName}${field.name.pascalCase}ProxyWidgetRef';
+    final proxyName =
+        '${provider.baseName}${field.name.pascalCase}ProxyWidgetRef';
     final proxyArgs = provider.hasFamily
         ? ', ${provider.familyParameters.map((p) => '${p.name}: ${p.name}').join(', ')}'
         : '';
@@ -999,9 +1019,11 @@ class StateWidgetGenerator extends GeneratorForAnnotatedClass<StateWidget> {
     buffer.writeln('  @override');
     buffer.writeln('  Widget build(BuildContext context, WidgetRef ref) {');
     if (provider.hasFamily) {
-      final nonNullableParams = provider.familyParameters.where((p) => !p.isNullable).toList();
+      final nonNullableParams =
+          provider.familyParameters.where((p) => !p.isNullable).toList();
       if (nonNullableParams.isNotEmpty) {
-        final needsScopeConditions = nonNullableParams.map((p) => '${p.name} == null').join(' || ');
+        final needsScopeConditions =
+            nonNullableParams.map((p) => '${p.name} == null').join(' || ');
         buffer.writeln('    final needsScope = $needsScopeConditions;');
         buffer.writeln(
           '    if (needsScope) assert(_debugCheckHas${provider.baseName}Scope(context));',
@@ -1057,7 +1079,8 @@ class StateWidgetGenerator extends GeneratorForAnnotatedClass<StateWidget> {
     String widgetName,
   ) {
     final buffer = StringBuffer();
-    final proxyName = '${provider.baseName}${field.name.pascalCase}ProxyWidgetRef';
+    final proxyName =
+        '${provider.baseName}${field.name.pascalCase}ProxyWidgetRef';
     final proxyArgs = provider.hasFamily
         ? ', ${provider.familyParameters.map((p) => '${p.name}: ${p.name}').join(', ')}'
         : '';
@@ -1074,7 +1097,8 @@ class StateWidgetGenerator extends GeneratorForAnnotatedClass<StateWidget> {
       'class $proxyName extends ${provider.baseName}ProxyWidgetRef {',
     );
     if (provider.hasCopyWith) {
-      buffer.writeln('  $proxyName(super._ref, this._stringFieldRef$superArgs);');
+      buffer
+          .writeln('  $proxyName(super._ref, this._stringFieldRef$superArgs);');
     } else {
       buffer.writeln(
         '  $proxyName(super._ref, this._stringFieldRef, this._manualUpdate$superArgs);',
@@ -1163,9 +1187,11 @@ class StateWidgetGenerator extends GeneratorForAnnotatedClass<StateWidget> {
     buffer.writeln('  Widget build(BuildContext context, WidgetRef ref) {');
 
     if (provider.hasFamily) {
-      final nonNullableParams = provider.familyParameters.where((p) => !p.isNullable).toList();
+      final nonNullableParams =
+          provider.familyParameters.where((p) => !p.isNullable).toList();
       if (nonNullableParams.isNotEmpty) {
-        final needsScopeConditions = nonNullableParams.map((p) => '${p.name} == null').join(' || ');
+        final needsScopeConditions =
+            nonNullableParams.map((p) => '${p.name} == null').join(' || ');
         buffer.writeln('    final needsScope = $needsScopeConditions;');
         buffer.writeln(
           '    if (needsScope) assert(_debugCheckHas${provider.baseName}Scope(context));',
@@ -1292,7 +1318,8 @@ class StateWidgetGenerator extends GeneratorForAnnotatedClass<StateWidget> {
     String widgetName,
   ) {
     final buffer = StringBuffer();
-    final proxyName = '${provider.baseName}${field.name.pascalCase}ProxyWidgetRef';
+    final proxyName =
+        '${provider.baseName}${field.name.pascalCase}ProxyWidgetRef';
     final baseNumberType = field.typeWithoutNullable;
     final proxyArgs = provider.hasFamily
         ? ', ${provider.familyParameters.map((p) => '${p.name}: ${p.name}').join(', ')}'
@@ -1309,7 +1336,8 @@ class StateWidgetGenerator extends GeneratorForAnnotatedClass<StateWidget> {
       'class $proxyName extends ${provider.baseName}ProxyWidgetRef {',
     );
     if (provider.hasCopyWith) {
-      buffer.writeln('  $proxyName(super._ref, this._numberFieldRef$superArgs);');
+      buffer
+          .writeln('  $proxyName(super._ref, this._numberFieldRef$superArgs);');
     } else {
       buffer.writeln(
         '  $proxyName(super._ref, this._numberFieldRef, this._manualUpdate$superArgs);',
@@ -1398,9 +1426,11 @@ class StateWidgetGenerator extends GeneratorForAnnotatedClass<StateWidget> {
     buffer.writeln('  Widget build(BuildContext context, WidgetRef ref) {');
 
     if (provider.hasFamily) {
-      final nonNullableParams = provider.familyParameters.where((p) => !p.isNullable).toList();
+      final nonNullableParams =
+          provider.familyParameters.where((p) => !p.isNullable).toList();
       if (nonNullableParams.isNotEmpty) {
-        final needsScopeConditions = nonNullableParams.map((p) => '${p.name} == null').join(' || ');
+        final needsScopeConditions =
+            nonNullableParams.map((p) => '${p.name} == null').join(' || ');
         buffer.writeln('    final needsScope = $needsScopeConditions;');
         buffer.writeln(
           '    if (needsScope) assert(_debugCheckHas${provider.baseName}Scope(context));',

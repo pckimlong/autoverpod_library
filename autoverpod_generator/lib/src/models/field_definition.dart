@@ -62,5 +62,6 @@ class FieldDefinition {
   }
 
   /// Get type without nullable suffix
-  String get typeWithoutNullable => isNullable ? type.substring(0, type.length - 1) : type;
+  String get typeWithoutNullable =>
+      isNullable ? type.substring(0, type.length - 1) : type;
 }
