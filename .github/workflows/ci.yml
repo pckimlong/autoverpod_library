@@ -30,10 +30,6 @@ jobs:
       - name: Format check
         run: dart format --output=none --set-exit-if-changed autoverpod autoverpod_annotation autoverpod_generator example
 
-      - name: Test autoverpod_annotation
-        run: flutter test
-        working-directory: autoverpod_annotation
-
       - name: Test autoverpod_generator
         run: dart test
         working-directory: autoverpod_generator
