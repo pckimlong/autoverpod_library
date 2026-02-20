@@ -31,8 +31,7 @@ sealed class UserProfileState with _$UserProfileState {
 @riverpod
 class AsyncUserProfile extends _$AsyncUserProfile {
   @override
-  Future<UserProfileState> build(int id) async =>
-      const UserProfileState(name: 'Second');
+  Future<UserProfileState> build(int id) async => const UserProfileState(name: 'Second');
 }
 
 @stateWidget

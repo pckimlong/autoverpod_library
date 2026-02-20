@@ -6,7 +6,7 @@ void main() {
   test('example generation produces expected output', () async {
     final result = await Process.run(
       'dart',
-      const ['run', 'build_runner', 'build', '-d'],
+      const ['run', 'lean_builder', 'build'],
       workingDirectory: '../example',
     );
 
