@@ -31,12 +31,15 @@ jobs:
         run: flutter pub get
         working-directory: example
 
-      - name: Format check
-        run: dart format --output=none --set-exit-if-changed autoverpod autoverpod_annotation autoverpod_generator example
-
       - name: Test autoverpod_generator
         run: dart test
         working-directory: autoverpod_generator
+
+      - name: Format code
+        run: dart format autoverpod autoverpod_annotation autoverpod_generator example
+
+      - name: Format check
+        run: dart format --output=none --set-exit-if-changed autoverpod autoverpod_annotation autoverpod_generator example
 
   flutter-package:
     name: Flutter package tests
