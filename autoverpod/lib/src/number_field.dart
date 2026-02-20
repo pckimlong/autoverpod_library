@@ -66,6 +66,9 @@ class NumberField<T extends num> extends StatefulWidget {
 class _NumberFieldState<T extends num> extends State<NumberField<T>> {
   late TextEditingController _controller;
   bool _isInternalController = false;
+  bool _isSyncingController = false;
+  bool _isSyncScheduled = false;
+  String? _pendingSyncedText;
   Timer? _debounceTimer;
 
   String _format(T? value) {
@@ -96,13 +99,38 @@ class _NumberFieldState<T extends num> extends State<NumberField<T>> {
       _controller = widget.controller!;
       _isInternalController = false;
       if (_controller.text.isEmpty && widget.value != null) {
-        _controller.text = _format(widget.value);
+        _syncControllerText(_format(widget.value));
       }
     } else {
       _controller = TextEditingController(text: _format(widget.value));
       _isInternalController = true;
     }
     _controller.addListener(_handleControllerChanged);
+  }
+
+  void _syncControllerText(String text) {
+    if (_controller.text == text) return;
+    _isSyncingController = true;
+    _controller.value = _controller.value.copyWith(
+      text: text,
+      selection: TextSelection.collapsed(offset: text.length),
+      composing: TextRange.empty,
+    );
+    _isSyncingController = false;
+  }
+
+  void _scheduleControllerSync(String text) {
+    _pendingSyncedText = text;
+    if (_isSyncScheduled) return;
+    _isSyncScheduled = true;
+    WidgetsBinding.instance.addPostFrameCallback((_) {
+      _isSyncScheduled = false;
+      if (!mounted) return;
+      final pendingText = _pendingSyncedText;
+      _pendingSyncedText = null;
+      if (pendingText == null) return;
+      _syncControllerText(pendingText);
+    });
   }
 
   @override
@@ -122,11 +150,12 @@ class _NumberFieldState<T extends num> extends State<NumberField<T>> {
       if (_isInternalController) {
         _controller.dispose();
       }
+      _pendingSyncedText = null;
       _initController();
     } else if (widget.value != oldWidget.value) {
       final formatted = _format(widget.value);
       if (formatted != _controller.text) {
-        _controller.text = formatted;
+        _scheduleControllerSync(formatted);
       }
     }
   }
@@ -135,6 +164,7 @@ class _NumberFieldState<T extends num> extends State<NumberField<T>> {
   void dispose() {
     _debounceTimer?.cancel();
     _controller.removeListener(_handleControllerChanged);
+    _pendingSyncedText = null;
     if (_isInternalController) {
       _controller.dispose();
     }
@@ -142,6 +172,7 @@ class _NumberFieldState<T extends num> extends State<NumberField<T>> {
   }
 
   void _handleControllerChanged() {
+    if (_isSyncingController) return;
     final parsed = _parse(_controller.text);
     if (parsed != widget.value) {
       final duration = widget.debounceDuration;
