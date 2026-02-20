@@ -10,7 +10,7 @@ dependencies:
   flutter:
     sdk: flutter
   flutter_riverpod: ^3.0.3
-  riverpod_annotation: ^3.0.3
+  riverpod_annotation: ^4.0.2
   freezed_annotation: ^3.1.0
   autoverpod:
     path: ../autoverpod
@@ -18,9 +18,9 @@ dependencies:
 dev_dependencies:
   flutter_test:
     sdk: flutter
-  riverpod_generator: ^3.0.3
+  riverpod_generator: ^4.0.3
   freezed: ^3.2.3
-  build_runner: 2.10.4
+  build_runner: ^2.4.14
   lean_builder: ^0.1.2
   autoverpod_generator:
     path: ../autoverpod_generator

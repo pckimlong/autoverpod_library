@@ -239,8 +239,7 @@ void main() {
     });
 
     group('debounce', () {
-      testWidgets(
-          'cancels pending debounced onChanged when value prop changes',
+      testWidgets('cancels pending debounced onChanged when value prop changes',
           (tester) async {
         final changes = <String?>[];
         TextEditingController? capturedController;

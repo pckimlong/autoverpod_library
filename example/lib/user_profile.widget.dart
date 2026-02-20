@@ -75,10 +75,8 @@ class _AsyncUserProfileParamsInheritedWidget extends InheritedWidget {
   final int id;
 
   static _AsyncUserProfileParamsInheritedWidget? maybeOf(BuildContext context) {
-    return context
-        .dependOnInheritedWidgetOfExactType<
-          _AsyncUserProfileParamsInheritedWidget
-        >();
+    return context.dependOnInheritedWidgetOfExactType<
+        _AsyncUserProfileParamsInheritedWidget>();
   }
 
   static _AsyncUserProfileParamsInheritedWidget of(BuildContext context) {
@@ -123,13 +121,11 @@ class AsyncUserProfileScope extends ConsumerWidget {
     BuildContext context,
     AsyncValue<UserProfileState> asyncValue,
     Widget child,
-  )?
-  builder;
+  )? builder;
   final void Function(
     AsyncValue<UserProfileState>? previous,
     AsyncValue<UserProfileState> next,
-  )?
-  onStateChanged;
+  )? onStateChanged;
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
@@ -237,13 +233,11 @@ class AsyncUserProfileWidget extends ConsumerWidget {
     BuildContext context,
     AsyncUserProfileProxyWidgetRef ref,
     AsyncValue<UserProfileState> state,
-  )
-  builder;
+  ) builder;
   final void Function(
     AsyncValue<UserProfileState>? previous,
     AsyncValue<UserProfileState> next,
-  )?
-  onStateChanged;
+  )? onStateChanged;
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
@@ -293,8 +287,7 @@ class AsyncUserProfileSelect<Selected> extends ConsumerWidget {
     BuildContext context,
     AsyncUserProfileProxyWidgetRef ref,
     Selected value,
-  )
-  builder;
+  ) builder;
   final Widget? loading;
   final Widget Function(Object error, StackTrace stackTrace)? error;
   final void Function(Selected? previous, Selected next)? onStateChanged;
@@ -357,8 +350,7 @@ class AsyncUserProfileParamsBuilder extends ConsumerWidget {
     BuildContext context,
     AsyncUserProfileProxyWidgetRef ref,
     int params,
-  )
-  builder;
+  ) builder;
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
@@ -413,8 +405,7 @@ class AsyncUserProfileNameField extends ConsumerWidget {
   final Widget Function(
     BuildContext context,
     AsyncUserProfileNameProxyWidgetRef ref,
-  )
-  builder;
+  ) builder;
   final Widget? loading;
   final Widget Function(Object error, StackTrace stackTrace)? error;
 
@@ -496,8 +487,7 @@ class AsyncUserProfileEmailField extends ConsumerWidget {
   final Widget Function(
     BuildContext context,
     AsyncUserProfileEmailProxyWidgetRef ref,
-  )
-  builder;
+  ) builder;
   final Widget? loading;
   final Widget Function(Object error, StackTrace stackTrace)? error;
 
@@ -580,8 +570,7 @@ class AsyncUserProfileAgeField extends ConsumerWidget {
   final Widget Function(
     BuildContext context,
     AsyncUserProfileAgeProxyWidgetRef ref,
-  )
-  builder;
+  ) builder;
   final Widget? loading;
   final Widget Function(Object error, StackTrace stackTrace)? error;
 
@@ -662,8 +651,7 @@ class AsyncUserProfileBioField extends ConsumerWidget {
   final Widget Function(
     BuildContext context,
     AsyncUserProfileBioProxyWidgetRef ref,
-  )
-  builder;
+  ) builder;
   final Widget? loading;
   final Widget Function(Object error, StackTrace stackTrace)? error;
 
@@ -744,8 +732,7 @@ class AsyncUserProfileBio2Field extends ConsumerWidget {
   final Widget Function(
     BuildContext context,
     AsyncUserProfileBio2ProxyWidgetRef ref,
-  )
-  builder;
+  ) builder;
   final Widget? loading;
   final Widget Function(Object error, StackTrace stackTrace)? error;
 
@@ -826,10 +813,8 @@ class _UserProfileParamsInheritedWidget extends InheritedWidget {
   final int id;
 
   static _UserProfileParamsInheritedWidget? maybeOf(BuildContext context) {
-    return context
-        .dependOnInheritedWidgetOfExactType<
-          _UserProfileParamsInheritedWidget
-        >();
+    return context.dependOnInheritedWidgetOfExactType<
+        _UserProfileParamsInheritedWidget>();
   }
 
   static _UserProfileParamsInheritedWidget of(BuildContext context) {
@@ -940,10 +925,9 @@ class UserProfileWidget extends ConsumerWidget {
     BuildContext context,
     UserProfileProxyWidgetRef ref,
     UserProfileState state,
-  )
-  builder;
+  ) builder;
   final void Function(UserProfileState? previous, UserProfileState next)?
-  onStateChanged;
+      onStateChanged;
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
@@ -991,8 +975,7 @@ class UserProfileSelect<Selected> extends ConsumerWidget {
     BuildContext context,
     UserProfileProxyWidgetRef ref,
     Selected value,
-  )
-  builder;
+  ) builder;
   final void Function(Selected? previous, Selected next)? onStateChanged;
 
   @override
@@ -1038,8 +1021,7 @@ class UserProfileParamsBuilder extends ConsumerWidget {
     BuildContext context,
     UserProfileProxyWidgetRef ref,
     int params,
-  )
-  builder;
+  ) builder;
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
@@ -1085,7 +1067,7 @@ class UserProfileNameField extends ConsumerWidget {
   final TextEditingController? controller;
   final Duration? debounceDuration;
   final Widget Function(BuildContext context, UserProfileNameProxyWidgetRef ref)
-  builder;
+      builder;
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
@@ -1152,8 +1134,7 @@ class UserProfileEmailField extends ConsumerWidget {
   final Widget Function(
     BuildContext context,
     UserProfileEmailProxyWidgetRef ref,
-  )
-  builder;
+  ) builder;
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
@@ -1218,7 +1199,7 @@ class UserProfileAgeField extends ConsumerWidget {
   final TextEditingController? controller;
   final Duration? debounceDuration;
   final Widget Function(BuildContext context, UserProfileAgeProxyWidgetRef ref)
-  builder;
+      builder;
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
@@ -1283,7 +1264,7 @@ class UserProfileBioField extends ConsumerWidget {
   final TextEditingController? controller;
   final Duration? debounceDuration;
   final Widget Function(BuildContext context, UserProfileBioProxyWidgetRef ref)
-  builder;
+      builder;
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
@@ -1347,7 +1328,7 @@ class UserProfileBio2Field extends ConsumerWidget {
   final TextEditingController? controller;
   final Duration? debounceDuration;
   final Widget Function(BuildContext context, UserProfileBio2ProxyWidgetRef ref)
-  builder;
+      builder;
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
@@ -1417,10 +1398,8 @@ class _SecondUserProfileParamsInheritedWidget extends InheritedWidget {
   static _SecondUserProfileParamsInheritedWidget? maybeOf(
     BuildContext context,
   ) {
-    return context
-        .dependOnInheritedWidgetOfExactType<
-          _SecondUserProfileParamsInheritedWidget
-        >();
+    return context.dependOnInheritedWidgetOfExactType<
+        _SecondUserProfileParamsInheritedWidget>();
   }
 
   static _SecondUserProfileParamsInheritedWidget of(BuildContext context) {
@@ -1492,10 +1471,9 @@ class SecondUserProfileWidget extends ConsumerWidget {
     BuildContext context,
     SecondUserProfileProxyWidgetRef ref,
     UserProfileState state,
-  )
-  builder;
+  ) builder;
   final void Function(UserProfileState? previous, UserProfileState next)?
-  onStateChanged;
+      onStateChanged;
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
@@ -1533,8 +1511,7 @@ class SecondUserProfileSelect<Selected> extends ConsumerWidget {
     BuildContext context,
     SecondUserProfileProxyWidgetRef ref,
     Selected value,
-  )
-  builder;
+  ) builder;
   final void Function(Selected? previous, Selected next)? onStateChanged;
 
   @override
@@ -1587,8 +1564,7 @@ class SecondUserProfileNameField extends ConsumerWidget {
   final Widget Function(
     BuildContext context,
     SecondUserProfileNameProxyWidgetRef ref,
-  )
-  builder;
+  ) builder;
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
@@ -1647,8 +1623,7 @@ class SecondUserProfileEmailField extends ConsumerWidget {
   final Widget Function(
     BuildContext context,
     SecondUserProfileEmailProxyWidgetRef ref,
-  )
-  builder;
+  ) builder;
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
@@ -1707,8 +1682,7 @@ class SecondUserProfileAgeField extends ConsumerWidget {
   final Widget Function(
     BuildContext context,
     SecondUserProfileAgeProxyWidgetRef ref,
-  )
-  builder;
+  ) builder;
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
@@ -1767,8 +1741,7 @@ class SecondUserProfileBioField extends ConsumerWidget {
   final Widget Function(
     BuildContext context,
     SecondUserProfileBioProxyWidgetRef ref,
-  )
-  builder;
+  ) builder;
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
@@ -1826,8 +1799,7 @@ class SecondUserProfileBio2Field extends ConsumerWidget {
   final Widget Function(
     BuildContext context,
     SecondUserProfileBio2ProxyWidgetRef ref,
-  )
-  builder;
+  ) builder;
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
