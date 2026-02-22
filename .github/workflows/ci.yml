@@ -8,7 +8,7 @@ on:
 
 jobs:
   dart-packages:
-    name: Dart packages (format, test)
+    name: Dart packages (format, test, example)
     runs-on: ubuntu-latest
     steps:
       - name: Checkout
@@ -35,6 +35,21 @@ jobs:
         run: dart test
         working-directory: autoverpod_generator
 
+      - name: Generate example code (lean_builder)
+        run: dart run lean_builder build
+        working-directory: example
+
+      - name: Generate example code (build_runner)
+        run: dart run build_runner build --delete-conflicting-outputs
+        working-directory: example
+
+      - name: Analyze example
+        run: dart analyze
+        working-directory: example
+
+      - name: Verify example generated files are committed
+        run: git diff --exit-code -- example/lib
+
       - name: Format code
         run: dart format autoverpod autoverpod_annotation autoverpod_generator example
 
@@ -60,4 +75,3 @@ jobs:
       - name: Flutter tests
         run: flutter test
         working-directory: autoverpod
-

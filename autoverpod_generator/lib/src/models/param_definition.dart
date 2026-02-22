@@ -1,6 +1,7 @@
 import 'package:lean_builder/element.dart';
 
 import '../templates/utils.dart';
+import 'type_utils.dart';
 
 /// Simplified parameter definition for family providers
 class ParamDefinition {
@@ -21,18 +22,12 @@ class ParamDefinition {
   bool get isNullable => type.endsWith('?');
 
   factory ParamDefinition.fromElement(ParameterElement parameter) {
-    String? importPath;
-    final paramType = parameter.type;
-    if (paramType.element != null) {
-      final uri = paramType.element!.librarySrc.shortUri.toString();
-      if (!uri.startsWith('dart:')) {
-        importPath = uri;
-      }
-    }
+    final type = TypeUtils.safeReadType(() => parameter.type);
+    final importPath = TypeUtils.resolveImportPath(type);
 
     return ParamDefinition(
       name: parameter.name,
-      type: parameter.type.toString(),
+      type: type?.toString() ?? 'dynamic',
       isRequired: parameter.isRequired,
       isNamed: parameter.isNamed,
       importPath: importPath,

@@ -1,3 +1,16 @@
+## 0.1.4 - 2026-02-22
+
+### Bug Fixes
+
+- **Import resolution with prefixes/combinators** - Prevent skipped type imports when source imports use `as`, `show`, or `hide`, avoiding generated `.widget.dart` compile failures for unqualified type references.
+- **Stale type-index cache in watch builds** - Clear type import caches on each generation run so moved/renamed/new files are resolved correctly without restarting the build process.
+
+### Improvements
+
+- **Safer type extraction** - Centralize guarded type/import access via `TypeUtils` so generator model parsing tolerates analyzer edge cases and falls back gracefully.
+
+---
+
 ## 0.1.2 - 2025-12-13
 
 ### Improvements

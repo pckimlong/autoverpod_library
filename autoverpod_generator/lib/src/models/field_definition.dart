@@ -1,5 +1,7 @@
 import 'package:lean_builder/element.dart';
 
+import 'type_utils.dart';
+
 /// Simplified field definition - only includes fields actually used by generators
 class FieldDefinition {
   final String name;
@@ -16,38 +18,26 @@ class FieldDefinition {
 
   /// Parse from a Freezed factory constructor parameter
   factory FieldDefinition.fromParam(ParameterElement param) {
-    String? importPath;
-    final paramType = param.type;
-    if (paramType.element != null) {
-      final uri = paramType.element!.librarySrc.shortUri.toString();
-      if (!uri.startsWith('dart:')) {
-        importPath = uri;
-      }
-    }
+    final type = TypeUtils.safeReadType(() => param.type);
+    final importPath = TypeUtils.resolveImportPath(type);
 
     return FieldDefinition(
       name: param.name,
-      type: param.type.toString(),
-      isNullable: param.type.isNullable,
+      type: type?.toString() ?? 'dynamic',
+      isNullable: type?.isNullable ?? true,
       importPath: importPath,
     );
   }
 
   /// Parse from a class field
   factory FieldDefinition.fromField(FieldElement field) {
-    String? importPath;
-    final fieldType = field.type;
-    if (fieldType.element != null) {
-      final uri = fieldType.element!.librarySrc.shortUri.toString();
-      if (!uri.startsWith('dart:')) {
-        importPath = uri;
-      }
-    }
+    final type = TypeUtils.safeReadType(() => field.type);
+    final importPath = TypeUtils.resolveImportPath(type);
 
     return FieldDefinition(
       name: field.name,
-      type: field.type.toString(),
-      isNullable: field.type.isNullable,
+      type: type?.toString() ?? 'dynamic',
+      isNullable: type?.isNullable ?? true,
       importPath: importPath,
     );
   }
@@ -62,6 +52,5 @@ class FieldDefinition {
   }
 
   /// Get type without nullable suffix
-  String get typeWithoutNullable =>
-      isNullable ? type.substring(0, type.length - 1) : type;
+  String get typeWithoutNullable => isNullable ? type.substring(0, type.length - 1) : type;
 }
