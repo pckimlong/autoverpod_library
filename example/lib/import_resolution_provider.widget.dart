@@ -112,6 +112,8 @@ class ImportResolutionProxyWidgetRef {
     Selected Function(ImportResolutionState) selector,
   ) => _ref.watch(importResolutionProvider.select((value) => selector(value)));
 
+  WidgetRef get widgetRef => _ref;
+
   BuildContext get context => _ref.context;
 
   T read<T>(ProviderListenable<T> provider) => _ref.read(provider);

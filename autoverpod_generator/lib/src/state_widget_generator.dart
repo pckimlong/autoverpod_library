@@ -927,6 +927,8 @@ class StateWidgetGenerator extends GeneratorForAnnotatedClass<StateWidget> {
       );
     }
     buffer.writeln();
+    buffer.writeln('  WidgetRef get widgetRef => _ref;');
+    buffer.writeln();
     buffer.writeln('  BuildContext get context => _ref.context;');
     buffer.writeln();
     buffer.writeln(
