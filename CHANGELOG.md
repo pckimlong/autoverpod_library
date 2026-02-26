@@ -5,6 +5,10 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## 0.1.4 - 2026-02-26
+
+- Expose raw `WidgetRef` on generated `*ProxyWidgetRef` via `widgetRef` to support extension methods and direct Riverpod API usage.
+
 ## 0.1.3 - 2026-02-20
 
 - Relax analyzer dependency constraint to allow up to `<11.0.0`

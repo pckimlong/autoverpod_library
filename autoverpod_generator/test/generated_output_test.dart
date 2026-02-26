@@ -32,5 +32,6 @@ void main() {
     // Single-family-param optimization should not use record types.
     expect(content, isNot(contains('({int id})')));
     expect(content, contains('int get _params'));
+    expect(content, contains('WidgetRef get widgetRef => _ref;'));
   });
 }

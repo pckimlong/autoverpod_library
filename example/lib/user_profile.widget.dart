@@ -185,6 +185,8 @@ class AsyncUserProfileProxyWidgetRef {
         ).select((value) => selector(value.requireValue)),
       );
 
+  WidgetRef get widgetRef => _ref;
+
   BuildContext get context => _ref.context;
 
   T read<T>(ProviderListenable<T> provider) => _ref.read(provider);
@@ -892,6 +894,8 @@ class UserProfileProxyWidgetRef {
         userProfileProvider(_params).select((value) => selector(value)),
       );
 
+  WidgetRef get widgetRef => _ref;
+
   BuildContext get context => _ref.context;
 
   T read<T>(ProviderListenable<T> provider) => _ref.read(provider);
@@ -1463,6 +1467,8 @@ class SecondUserProfileProxyWidgetRef {
 
   Selected select<Selected>(Selected Function(UserProfileState) selector) =>
       _ref.watch(secondUserProfileProvider.select((value) => selector(value)));
+
+  WidgetRef get widgetRef => _ref;
 
   BuildContext get context => _ref.context;
 

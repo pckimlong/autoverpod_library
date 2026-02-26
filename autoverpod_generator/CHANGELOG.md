@@ -1,3 +1,11 @@
+## 0.1.5 - 2026-02-26
+
+### Improvements
+
+- **Expose raw `WidgetRef` in proxy refs** - Generated `*ProxyWidgetRef` classes now include `widgetRef`, enabling direct `WidgetRef` access for extension methods and advanced Riverpod APIs when needed.
+
+---
+
 ## 0.1.4 - 2026-02-22
 
 ### Bug Fixes
