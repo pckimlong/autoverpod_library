@@ -696,8 +696,11 @@ class StateWidgetGenerator extends GeneratorForAnnotatedClass<StateWidget> {
         buffer.writeln('    required this.${param.name},');
       }
       buffer.writeln('    required this.child,');
-      buffer.writeln('    required this.loading,');
-      buffer.writeln('    required this.error,');
+      buffer.writeln('    this.loading,');
+      buffer.writeln('    this.error,');
+      buffer.writeln('    this.skipLoadingOnRefresh = true,');
+      buffer.writeln('    this.skipLoadingOnReload = true,');
+      buffer.writeln('    this.skipError = false,');
       buffer.writeln('    this.builder,');
       buffer.writeln('    this.onStateChanged,');
       buffer.writeln(
@@ -712,6 +715,9 @@ class StateWidgetGenerator extends GeneratorForAnnotatedClass<StateWidget> {
       buffer.writeln(
         '  final Widget Function(Object error, StackTrace stackTrace)? error;',
       );
+      buffer.writeln('  final bool skipLoadingOnRefresh;');
+      buffer.writeln('  final bool skipLoadingOnReload;');
+      buffer.writeln('  final bool skipError;');
       buffer.writeln(
         '  final Widget Function(BuildContext context, AsyncValue<${provider.baseType}> asyncValue, Widget child)? builder;',
       );
@@ -755,6 +761,13 @@ class StateWidgetGenerator extends GeneratorForAnnotatedClass<StateWidget> {
       buffer.writeln(
         '      error: (err, stack) => error?.call(err, stack) ?? const SizedBox.shrink(),',
       );
+      buffer.writeln(
+        '      skipLoadingOnRefresh: skipLoadingOnRefresh,',
+      );
+      buffer.writeln(
+        '      skipLoadingOnReload: skipLoadingOnReload,',
+      );
+      buffer.writeln('      skipError: skipError,');
       buffer.writeln('    );');
       buffer.writeln('  }');
       buffer.writeln('}');
