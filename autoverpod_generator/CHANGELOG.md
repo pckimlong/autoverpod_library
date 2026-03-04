@@ -1,3 +1,12 @@
+## 0.1.6 - 2026-03-04
+
+### Improvements
+
+- **Async scope skip flags** - Generated `*Scope` widgets for async providers now expose `skipLoadingOnRefresh`, `skipLoadingOnReload`, and `skipError` and pass them through to `AsyncValue.when(...)`.
+- **Better scope constructor ergonomics** - Generated async `*Scope` constructors no longer require nullable `loading`/`error` arguments; they remain validated by assertion when no custom `builder` is provided.
+
+---
+
 ## 0.1.5 - 2026-02-26
 
 ### Improvements
