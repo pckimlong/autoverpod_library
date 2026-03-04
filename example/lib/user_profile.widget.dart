@@ -5,7 +5,7 @@
 // StateWidgetGenerator
 // **************************************************************************
 
-// ignore_for_file: type=lint, unused_element, deprecated_member_use, deprecated_member_use_from_same_package, use_function_type_syntax_for_parameters, unnecessary_const, avoid_init_to_null, invalid_override_different_default_values_named, prefer_expression_function_bodies, annotate_overrides, invalid_annotation_target, unnecessary_question_mark, invalid_use_of_visible_for_testing_member, invalid_use_of_protected_member, unnecessary_import, unused_import
+// ignore_for_file: type=lint, unused_element, unused_element_parameter, deprecated_member_use, deprecated_member_use_from_same_package, use_function_type_syntax_for_parameters, unnecessary_const, avoid_init_to_null, invalid_override_different_default_values_named, prefer_expression_function_bodies, annotate_overrides, invalid_annotation_target, unnecessary_question_mark, invalid_use_of_visible_for_testing_member, invalid_use_of_protected_member, unnecessary_import, unused_import
 
 // coverage:ignore-file
 
@@ -69,10 +69,16 @@ extension AsyncUserProfileFieldUpdater on AsyncUserProfile {
 class _AsyncUserProfileParamsInheritedWidget extends InheritedWidget {
   const _AsyncUserProfileParamsInheritedWidget({
     required this.id,
+    this.skipLoadingOnRefresh = true,
+    this.skipLoadingOnReload = true,
+    this.skipError = false,
     required super.child,
   });
 
   final int id;
+  final bool skipLoadingOnRefresh;
+  final bool skipLoadingOnReload;
+  final bool skipError;
 
   static _AsyncUserProfileParamsInheritedWidget? maybeOf(BuildContext context) {
     return context
@@ -89,7 +95,10 @@ class _AsyncUserProfileParamsInheritedWidget extends InheritedWidget {
   bool updateShouldNotify(
     covariant _AsyncUserProfileParamsInheritedWidget oldWidget,
   ) {
-    return id != oldWidget.id;
+    return id != oldWidget.id ||
+        skipLoadingOnRefresh != oldWidget.skipLoadingOnRefresh ||
+        skipLoadingOnReload != oldWidget.skipLoadingOnReload ||
+        skipError != oldWidget.skipError;
   }
 }
 
@@ -109,8 +118,11 @@ class AsyncUserProfileScope extends ConsumerWidget {
     super.key,
     required this.id,
     required this.child,
-    required this.loading,
-    required this.error,
+    this.loading,
+    this.error,
+    this.skipLoadingOnRefresh = true,
+    this.skipLoadingOnReload = true,
+    this.skipError = false,
     this.builder,
     this.onStateChanged,
   }) : assert(builder != null || (loading != null && error != null));
@@ -119,6 +131,9 @@ class AsyncUserProfileScope extends ConsumerWidget {
   final Widget child;
   final Widget? loading;
   final Widget Function(Object error, StackTrace stackTrace)? error;
+  final bool skipLoadingOnRefresh;
+  final bool skipLoadingOnReload;
+  final bool skipError;
   final Widget Function(
     BuildContext context,
     AsyncValue<UserProfileState> asyncValue,
@@ -142,6 +157,9 @@ class AsyncUserProfileScope extends ConsumerWidget {
     final asyncValue = ref.watch(asyncUserProfileProvider(params));
     final scopedChild = _AsyncUserProfileParamsInheritedWidget(
       id: id,
+      skipLoadingOnRefresh: skipLoadingOnRefresh,
+      skipLoadingOnReload: skipLoadingOnReload,
+      skipError: skipError,
       child: child,
     );
     if (builder != null) {
@@ -151,6 +169,9 @@ class AsyncUserProfileScope extends ConsumerWidget {
       data: (_) => scopedChild,
       loading: () => loading ?? const SizedBox.shrink(),
       error: (err, stack) => error?.call(err, stack) ?? const SizedBox.shrink(),
+      skipLoadingOnRefresh: skipLoadingOnRefresh,
+      skipLoadingOnReload: skipLoadingOnReload,
+      skipError: skipError,
     );
   }
 }
@@ -310,6 +331,7 @@ class AsyncUserProfileSelect<Selected> extends ConsumerWidget {
     assert(idValue != null, 'No id provided for AsyncUserProfileProvider');
     final params = idValue!;
     final asyncValue = ref.watch(asyncUserProfileProvider(params));
+    final scopeConfig = _AsyncUserProfileParamsInheritedWidget.maybeOf(context);
     if (onStateChanged != null) {
       ref.listen(asyncUserProfileProvider(params), (prev, next) {
         final prevData = prev?.value;
@@ -333,6 +355,9 @@ class AsyncUserProfileSelect<Selected> extends ConsumerWidget {
       },
       loading: () => loading ?? const SizedBox.shrink(),
       error: (err, stack) => error?.call(err, stack) ?? const SizedBox.shrink(),
+      skipLoadingOnRefresh: scopeConfig?.skipLoadingOnRefresh ?? true,
+      skipLoadingOnReload: scopeConfig?.skipLoadingOnReload ?? false,
+      skipError: scopeConfig?.skipError ?? false,
     );
   }
 }
@@ -429,6 +454,7 @@ class AsyncUserProfileNameField extends ConsumerWidget {
     assert(idValue != null, 'No id provided for AsyncUserProfileProvider');
     final params = idValue!;
     final asyncValue = ref.watch(asyncUserProfileProvider(params));
+    final scopeConfig = _AsyncUserProfileParamsInheritedWidget.maybeOf(context);
     return asyncValue.when(
       data: (data) {
         final value = data.name;
@@ -450,6 +476,9 @@ class AsyncUserProfileNameField extends ConsumerWidget {
       },
       loading: () => loading ?? const SizedBox.shrink(),
       error: (err, stack) => error?.call(err, stack) ?? const SizedBox.shrink(),
+      skipLoadingOnRefresh: scopeConfig?.skipLoadingOnRefresh ?? true,
+      skipLoadingOnReload: scopeConfig?.skipLoadingOnReload ?? false,
+      skipError: scopeConfig?.skipError ?? false,
     );
   }
 }
@@ -512,6 +541,7 @@ class AsyncUserProfileEmailField extends ConsumerWidget {
     assert(idValue != null, 'No id provided for AsyncUserProfileProvider');
     final params = idValue!;
     final asyncValue = ref.watch(asyncUserProfileProvider(params));
+    final scopeConfig = _AsyncUserProfileParamsInheritedWidget.maybeOf(context);
     return asyncValue.when(
       data: (data) {
         final value = data.email;
@@ -535,6 +565,9 @@ class AsyncUserProfileEmailField extends ConsumerWidget {
       },
       loading: () => loading ?? const SizedBox.shrink(),
       error: (err, stack) => error?.call(err, stack) ?? const SizedBox.shrink(),
+      skipLoadingOnRefresh: scopeConfig?.skipLoadingOnRefresh ?? true,
+      skipLoadingOnReload: scopeConfig?.skipLoadingOnReload ?? false,
+      skipError: scopeConfig?.skipError ?? false,
     );
   }
 }
@@ -596,6 +629,7 @@ class AsyncUserProfileAgeField extends ConsumerWidget {
     assert(idValue != null, 'No id provided for AsyncUserProfileProvider');
     final params = idValue!;
     final asyncValue = ref.watch(asyncUserProfileProvider(params));
+    final scopeConfig = _AsyncUserProfileParamsInheritedWidget.maybeOf(context);
     return asyncValue.when(
       data: (data) {
         final value = data.age;
@@ -617,6 +651,9 @@ class AsyncUserProfileAgeField extends ConsumerWidget {
       },
       loading: () => loading ?? const SizedBox.shrink(),
       error: (err, stack) => error?.call(err, stack) ?? const SizedBox.shrink(),
+      skipLoadingOnRefresh: scopeConfig?.skipLoadingOnRefresh ?? true,
+      skipLoadingOnReload: scopeConfig?.skipLoadingOnReload ?? false,
+      skipError: scopeConfig?.skipError ?? false,
     );
   }
 }
@@ -678,6 +715,7 @@ class AsyncUserProfileBioField extends ConsumerWidget {
     assert(idValue != null, 'No id provided for AsyncUserProfileProvider');
     final params = idValue!;
     final asyncValue = ref.watch(asyncUserProfileProvider(params));
+    final scopeConfig = _AsyncUserProfileParamsInheritedWidget.maybeOf(context);
     return asyncValue.when(
       data: (data) {
         final value = data.bio;
@@ -698,6 +736,9 @@ class AsyncUserProfileBioField extends ConsumerWidget {
       },
       loading: () => loading ?? const SizedBox.shrink(),
       error: (err, stack) => error?.call(err, stack) ?? const SizedBox.shrink(),
+      skipLoadingOnRefresh: scopeConfig?.skipLoadingOnRefresh ?? true,
+      skipLoadingOnReload: scopeConfig?.skipLoadingOnReload ?? false,
+      skipError: scopeConfig?.skipError ?? false,
     );
   }
 }
@@ -760,6 +801,7 @@ class AsyncUserProfileBio2Field extends ConsumerWidget {
     assert(idValue != null, 'No id provided for AsyncUserProfileProvider');
     final params = idValue!;
     final asyncValue = ref.watch(asyncUserProfileProvider(params));
+    final scopeConfig = _AsyncUserProfileParamsInheritedWidget.maybeOf(context);
     return asyncValue.when(
       data: (data) {
         final value = data.bio2;
@@ -780,6 +822,9 @@ class AsyncUserProfileBio2Field extends ConsumerWidget {
       },
       loading: () => loading ?? const SizedBox.shrink(),
       error: (err, stack) => error?.call(err, stack) ?? const SizedBox.shrink(),
+      skipLoadingOnRefresh: scopeConfig?.skipLoadingOnRefresh ?? true,
+      skipLoadingOnReload: scopeConfig?.skipLoadingOnReload ?? false,
+      skipError: scopeConfig?.skipError ?? false,
     );
   }
 }
@@ -822,10 +867,16 @@ extension UserProfileFieldUpdater on UserProfile {
 class _UserProfileParamsInheritedWidget extends InheritedWidget {
   const _UserProfileParamsInheritedWidget({
     required this.id,
+    this.skipLoadingOnRefresh = true,
+    this.skipLoadingOnReload = true,
+    this.skipError = false,
     required super.child,
   });
 
   final int id;
+  final bool skipLoadingOnRefresh;
+  final bool skipLoadingOnReload;
+  final bool skipError;
 
   static _UserProfileParamsInheritedWidget? maybeOf(BuildContext context) {
     return context
@@ -842,7 +893,10 @@ class _UserProfileParamsInheritedWidget extends InheritedWidget {
   bool updateShouldNotify(
     covariant _UserProfileParamsInheritedWidget oldWidget,
   ) {
-    return id != oldWidget.id;
+    return id != oldWidget.id ||
+        skipLoadingOnRefresh != oldWidget.skipLoadingOnRefresh ||
+        skipLoadingOnReload != oldWidget.skipLoadingOnReload ||
+        skipError != oldWidget.skipError;
   }
 }
 
@@ -1416,7 +1470,16 @@ extension SecondUserProfileFieldUpdater on SecondUserProfile {
 }
 
 class _SecondUserProfileParamsInheritedWidget extends InheritedWidget {
-  const _SecondUserProfileParamsInheritedWidget({required super.child});
+  const _SecondUserProfileParamsInheritedWidget({
+    this.skipLoadingOnRefresh = true,
+    this.skipLoadingOnReload = true,
+    this.skipError = false,
+    required super.child,
+  });
+
+  final bool skipLoadingOnRefresh;
+  final bool skipLoadingOnReload;
+  final bool skipError;
 
   static _SecondUserProfileParamsInheritedWidget? maybeOf(
     BuildContext context,
@@ -1435,7 +1498,9 @@ class _SecondUserProfileParamsInheritedWidget extends InheritedWidget {
   bool updateShouldNotify(
     covariant _SecondUserProfileParamsInheritedWidget oldWidget,
   ) {
-    return false;
+    return skipLoadingOnRefresh != oldWidget.skipLoadingOnRefresh ||
+        skipLoadingOnReload != oldWidget.skipLoadingOnReload ||
+        skipError != oldWidget.skipError;
   }
 }
 

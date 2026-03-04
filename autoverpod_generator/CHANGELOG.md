@@ -1,3 +1,11 @@
+## 0.1.7 - 2026-03-04
+
+### Bug Fixes
+
+- **Propagate async skip config through scope** - Generated scope inherited data now carries `skipLoadingOnRefresh`, `skipLoadingOnReload`, and `skipError`, allowing generated async select/field widgets to reuse scope-level skip behavior automatically.
+
+---
+
 ## 0.1.6 - 2026-03-04
 
 ### Improvements
