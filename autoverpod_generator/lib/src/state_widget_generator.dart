@@ -34,7 +34,7 @@ class StateWidgetGenerator extends GeneratorForAnnotatedClass<StateWidget> {
         _collectDirectlyAvailableSourceImports(element);
 
     final pieces = <String>[
-      '// ignore_for_file: type=lint, unused_element, deprecated_member_use, deprecated_member_use_from_same_package, use_function_type_syntax_for_parameters, unnecessary_const, avoid_init_to_null, invalid_override_different_default_values_named, prefer_expression_function_bodies, annotate_overrides, invalid_annotation_target, unnecessary_question_mark, invalid_use_of_visible_for_testing_member, invalid_use_of_protected_member, unnecessary_import, unused_import',
+      '// ignore_for_file: type=lint, unused_element, unused_element_parameter, deprecated_member_use, deprecated_member_use_from_same_package, use_function_type_syntax_for_parameters, unnecessary_const, avoid_init_to_null, invalid_override_different_default_values_named, prefer_expression_function_bodies, annotate_overrides, invalid_annotation_target, unnecessary_question_mark, invalid_use_of_visible_for_testing_member, invalid_use_of_protected_member, unnecessary_import, unused_import',
       '// coverage:ignore-file',
       '',
       // Collect imports
@@ -575,8 +575,9 @@ class StateWidgetGenerator extends GeneratorForAnnotatedClass<StateWidget> {
       '// ============================================================================',
     );
     buffer.writeln('//');
-    buffer
-        .writeln('// Source: ${provider.providerName} → ${provider.baseType}');
+    buffer.writeln(
+      '// Source: ${provider.providerName} → ${provider.baseType}',
+    );
     buffer.writeln('//');
     buffer.writeln(
       '// Widgets: ${provider.baseName}Widget, ${provider.baseName}Select',
@@ -633,12 +634,18 @@ class StateWidgetGenerator extends GeneratorForAnnotatedClass<StateWidget> {
     for (final param in provider.familyParameters) {
       buffer.writeln('    required this.${param.name},');
     }
+    buffer.writeln('    this.skipLoadingOnRefresh = true,');
+    buffer.writeln('    this.skipLoadingOnReload = true,');
+    buffer.writeln('    this.skipError = false,');
     buffer.writeln('    required super.child,');
     buffer.writeln('  });');
     buffer.writeln();
     for (final param in provider.familyParameters) {
       buffer.writeln('  final ${param.type} ${param.name};');
     }
+    buffer.writeln('  final bool skipLoadingOnRefresh;');
+    buffer.writeln('  final bool skipLoadingOnReload;');
+    buffer.writeln('  final bool skipError;');
     buffer.writeln();
     buffer.writeln(
       '  static _${provider.baseName}ParamsInheritedWidget? maybeOf(BuildContext context) {',
@@ -658,14 +665,16 @@ class StateWidgetGenerator extends GeneratorForAnnotatedClass<StateWidget> {
     buffer.writeln(
       '  bool updateShouldNotify(covariant _${provider.baseName}ParamsInheritedWidget oldWidget) {',
     );
-    if (provider.hasFamily) {
-      final conditions = provider.familyParameters
-          .map((p) => '${p.name} != oldWidget.${p.name}')
-          .join(' || ');
-      buffer.writeln('    return $conditions;');
-    } else {
-      buffer.writeln('    return false;');
-    }
+    final conditions = <String>[
+      if (provider.hasFamily)
+        ...provider.familyParameters.map(
+          (p) => '${p.name} != oldWidget.${p.name}',
+        ),
+      'skipLoadingOnRefresh != oldWidget.skipLoadingOnRefresh',
+      'skipLoadingOnReload != oldWidget.skipLoadingOnReload',
+      'skipError != oldWidget.skipError',
+    ].join(' || ');
+    buffer.writeln('    return $conditions;');
     buffer.writeln('  }');
     buffer.writeln('}');
     buffer.writeln();
@@ -746,6 +755,9 @@ class StateWidgetGenerator extends GeneratorForAnnotatedClass<StateWidget> {
       for (final param in provider.familyParameters) {
         buffer.writeln('          ${param.name}: ${param.name},');
       }
+      buffer.writeln('          skipLoadingOnRefresh: skipLoadingOnRefresh,');
+      buffer.writeln('          skipLoadingOnReload: skipLoadingOnReload,');
+      buffer.writeln('          skipError: skipError,');
       buffer.writeln('          child: child,');
       buffer.writeln('        );');
       buffer.writeln('    if (builder != null) {');
@@ -761,12 +773,8 @@ class StateWidgetGenerator extends GeneratorForAnnotatedClass<StateWidget> {
       buffer.writeln(
         '      error: (err, stack) => error?.call(err, stack) ?? const SizedBox.shrink(),',
       );
-      buffer.writeln(
-        '      skipLoadingOnRefresh: skipLoadingOnRefresh,',
-      );
-      buffer.writeln(
-        '      skipLoadingOnReload: skipLoadingOnReload,',
-      );
+      buffer.writeln('      skipLoadingOnRefresh: skipLoadingOnRefresh,');
+      buffer.writeln('      skipLoadingOnReload: skipLoadingOnReload,');
       buffer.writeln('      skipError: skipError,');
       buffer.writeln('    );');
       buffer.writeln('  }');
@@ -885,9 +893,7 @@ class StateWidgetGenerator extends GeneratorForAnnotatedClass<StateWidget> {
         buffer.writeln('    return (');
         for (final param in provider.familyParameters) {
           final bang = param.isNullable ? '' : '!';
-          buffer.writeln(
-            '      ${param.name}: ${param.name}Value$bang,',
-          );
+          buffer.writeln('      ${param.name}: ${param.name}Value$bang,');
         }
         buffer.writeln('    );');
         buffer.writeln('  }');
@@ -1105,8 +1111,9 @@ class StateWidgetGenerator extends GeneratorForAnnotatedClass<StateWidget> {
         ? ', ${provider.familyParameters.map((p) => '${p.name}: ${p.name}').join(', ')}'
         : '';
 
-    buffer
-        .writeln('/// Widget that rebuilds only when selected value changes.');
+    buffer.writeln(
+      '/// Widget that rebuilds only when selected value changes.',
+    );
     buffer.writeln('///');
     buffer.writeln('/// **Usage:**');
     buffer.writeln('/// ```dart');
@@ -1203,6 +1210,9 @@ class StateWidgetGenerator extends GeneratorForAnnotatedClass<StateWidget> {
       buffer.writeln(
         '    final asyncValue = ref.watch(${provider.providerNameWithFamily(prefix: 'params')});',
       );
+      buffer.writeln(
+        '    final scopeConfig = _${provider.baseName}ParamsInheritedWidget.maybeOf(context);',
+      );
       buffer.writeln('    if (onStateChanged != null) {');
       buffer.writeln(
         '      ref.listen(${provider.providerNameWithFamily(prefix: 'params')}, (prev, next) {',
@@ -1231,6 +1241,13 @@ class StateWidgetGenerator extends GeneratorForAnnotatedClass<StateWidget> {
       buffer.writeln(
         '      error: (err, stack) => error?.call(err, stack) ?? const SizedBox.shrink(),',
       );
+      buffer.writeln(
+        '      skipLoadingOnRefresh: scopeConfig?.skipLoadingOnRefresh ?? true,',
+      );
+      buffer.writeln(
+        '      skipLoadingOnReload: scopeConfig?.skipLoadingOnReload ?? false,',
+      );
+      buffer.writeln('      skipError: scopeConfig?.skipError ?? false,');
       buffer.writeln('    );');
     } else {
       buffer.writeln(
@@ -1238,9 +1255,7 @@ class StateWidgetGenerator extends GeneratorForAnnotatedClass<StateWidget> {
       );
       buffer.writeln('    if (onStateChanged != null) {');
       buffer.writeln('      ref.listen(selectedProvider, (prev, next) {');
-      buffer.writeln(
-        '        if (prev != next) onStateChanged!(prev, next);',
-      );
+      buffer.writeln('        if (prev != next) onStateChanged!(prev, next);');
       buffer.writeln('      });');
       buffer.writeln('    }');
       buffer.writeln('    final selected = ref.watch(selectedProvider);');
@@ -1467,6 +1482,9 @@ class StateWidgetGenerator extends GeneratorForAnnotatedClass<StateWidget> {
       buffer.writeln(
         '    final asyncValue = ref.watch(${provider.providerNameWithFamily(prefix: 'params')});',
       );
+      buffer.writeln(
+        '    final scopeConfig = _${provider.baseName}ParamsInheritedWidget.maybeOf(context);',
+      );
       buffer.writeln('    return asyncValue.when(');
       buffer.writeln(
         '      data: (_) => builder(context, $proxyName(ref$manualUpdateArg$proxyArgs)),',
@@ -1477,6 +1495,13 @@ class StateWidgetGenerator extends GeneratorForAnnotatedClass<StateWidget> {
       buffer.writeln(
         '      error: (err, stack) => error?.call(err, stack) ?? const SizedBox.shrink(),',
       );
+      buffer.writeln(
+        '      skipLoadingOnRefresh: scopeConfig?.skipLoadingOnRefresh ?? true,',
+      );
+      buffer.writeln(
+        '      skipLoadingOnReload: scopeConfig?.skipLoadingOnReload ?? false,',
+      );
+      buffer.writeln('      skipError: scopeConfig?.skipError ?? false,');
       buffer.writeln('    );');
     } else {
       buffer.writeln(
@@ -1515,8 +1540,9 @@ class StateWidgetGenerator extends GeneratorForAnnotatedClass<StateWidget> {
       'class $proxyName extends ${provider.baseName}ProxyWidgetRef {',
     );
     if (provider.hasCopyWith) {
-      buffer
-          .writeln('  $proxyName(super._ref, this._stringFieldRef$superArgs);');
+      buffer.writeln(
+        '  $proxyName(super._ref, this._stringFieldRef$superArgs);',
+      );
     } else {
       buffer.writeln(
         '  $proxyName(super._ref, this._stringFieldRef, this._manualUpdate$superArgs);',
@@ -1635,6 +1661,9 @@ class StateWidgetGenerator extends GeneratorForAnnotatedClass<StateWidget> {
       buffer.writeln(
         '    final asyncValue = ref.watch(${provider.providerNameWithFamily(prefix: 'params')});',
       );
+      buffer.writeln(
+        '    final scopeConfig = _${provider.baseName}ParamsInheritedWidget.maybeOf(context);',
+      );
       buffer.writeln('    return asyncValue.when(');
       buffer.writeln('      data: (data) {');
       buffer.writeln('        final value = data.${field.name};');
@@ -1679,6 +1708,13 @@ class StateWidgetGenerator extends GeneratorForAnnotatedClass<StateWidget> {
       buffer.writeln(
         '      error: (err, stack) => error?.call(err, stack) ?? const SizedBox.shrink(),',
       );
+      buffer.writeln(
+        '      skipLoadingOnRefresh: scopeConfig?.skipLoadingOnRefresh ?? true,',
+      );
+      buffer.writeln(
+        '      skipLoadingOnReload: scopeConfig?.skipLoadingOnReload ?? false,',
+      );
+      buffer.writeln('      skipError: scopeConfig?.skipError ?? false,');
       buffer.writeln('    );');
     } else {
       buffer.writeln('    final value = ref.watch(');
@@ -1754,8 +1790,9 @@ class StateWidgetGenerator extends GeneratorForAnnotatedClass<StateWidget> {
       'class $proxyName extends ${provider.baseName}ProxyWidgetRef {',
     );
     if (provider.hasCopyWith) {
-      buffer
-          .writeln('  $proxyName(super._ref, this._numberFieldRef$superArgs);');
+      buffer.writeln(
+        '  $proxyName(super._ref, this._numberFieldRef$superArgs);',
+      );
     } else {
       buffer.writeln(
         '  $proxyName(super._ref, this._numberFieldRef, this._manualUpdate$superArgs);',
@@ -1874,6 +1911,9 @@ class StateWidgetGenerator extends GeneratorForAnnotatedClass<StateWidget> {
       buffer.writeln(
         '    final asyncValue = ref.watch(${provider.providerNameWithFamily(prefix: 'params')});',
       );
+      buffer.writeln(
+        '    final scopeConfig = _${provider.baseName}ParamsInheritedWidget.maybeOf(context);',
+      );
       buffer.writeln('    return asyncValue.when(');
       buffer.writeln('      data: (data) {');
       buffer.writeln('        final value = data.${field.name};');
@@ -1915,6 +1955,13 @@ class StateWidgetGenerator extends GeneratorForAnnotatedClass<StateWidget> {
       buffer.writeln(
         '      error: (err, stack) => error?.call(err, stack) ?? const SizedBox.shrink(),',
       );
+      buffer.writeln(
+        '      skipLoadingOnRefresh: scopeConfig?.skipLoadingOnRefresh ?? true,',
+      );
+      buffer.writeln(
+        '      skipLoadingOnReload: scopeConfig?.skipLoadingOnReload ?? false,',
+      );
+      buffer.writeln('      skipError: scopeConfig?.skipError ?? false,');
       buffer.writeln('    );');
     } else {
       buffer.writeln('    final value = ref.watch(');

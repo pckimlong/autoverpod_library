@@ -6,7 +6,11 @@ void main() {
   test('example generation produces expected output', () async {
     final result = await Process.run(
       'dart',
-      const ['run', 'lean_builder', 'build'],
+      const [
+        'run',
+        'lean_builder',
+        'build',
+      ],
       workingDirectory: '../example',
     );
 
@@ -33,5 +37,21 @@ void main() {
     expect(content, isNot(contains('({int id})')));
     expect(content, contains('int get _params'));
     expect(content, contains('WidgetRef get widgetRef => _ref;'));
+    expect(content, contains('final bool skipLoadingOnRefresh;'));
+    expect(content, contains('final bool skipLoadingOnReload;'));
+    expect(content, contains('final bool skipError;'));
+    expect(
+      content,
+      contains(
+        'skipLoadingOnRefresh: scopeConfig?.skipLoadingOnRefresh ?? true,',
+      ),
+    );
+    expect(
+      content,
+      contains(
+        'skipLoadingOnReload: scopeConfig?.skipLoadingOnReload ?? false,',
+      ),
+    );
+    expect(content, contains('skipError: scopeConfig?.skipError ?? false,'));
   });
 }
