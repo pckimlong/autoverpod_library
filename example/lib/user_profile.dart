@@ -25,6 +25,11 @@ sealed class UserProfileState with _$UserProfileState {
     String? bio,
     String? bio2,
   }) = _UserProfileState;
+
+  static UserProfileState initial({DateTime? now}) =>
+      const UserProfileState(name: 'Initial');
+
+  static UserProfileState fromSeed(String seed) => UserProfileState(name: seed);
 }
 
 @stateWidget

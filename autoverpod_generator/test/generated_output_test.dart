@@ -53,5 +53,7 @@ void main() {
       ),
     );
     expect(content, contains('skipError: scopeConfig?.skipError ?? false,'));
+    expect(content, isNot(contains('updateNow(')));
+    expect(content, isNot(contains('updateSeed(')));
   });
 }

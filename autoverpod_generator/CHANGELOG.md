@@ -1,3 +1,11 @@
+## 0.1.8 - 2026-03-15
+
+### Bug Fixes
+
+- **Freezed field parsing** - Restrict generated field updaters to the primary Freezed state fields so helper APIs such as `initial(...)` and `fromDetail(...)` do not leak extra update methods like `updateNow` or `updateSale`.
+
+---
+
 ## 0.1.7 - 2026-03-04
 
 ### Bug Fixes
