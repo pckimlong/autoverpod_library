@@ -1,48 +1,47 @@
 name: Publish autoverpod_generator to pub.dev
 
 on:
-  release:
-    types: [published]
-  workflow_call:
-  workflow_dispatch:
+  push:
+    tags:
+      - 'autoverpod_generator-v*'
 
 jobs:
   publish:
     runs-on: ubuntu-latest
-    if: ${{ github.event_name == 'workflow_call' || github.event_name == 'workflow_dispatch' || startsWith(github.event.release.tag_name, 'autoverpod_generator-v') }}
     permissions:
-      id-token: write  # IMPORTANT: this permission is mandatory for pub.dev publishing
+      id-token: write
       contents: read
-    
     steps:
-    - uses: actions/checkout@v4
-    
-    - name: Setup Flutter
-      uses: subosito/flutter-action@v2
-      with:
-        channel: stable
-    
-    - name: Get required autoverpod version
-      id: required_version
-      run: |
-        REQUIRED_VERSION=$(grep '^autoverpod:' autoverpod_generator/pubspec.yaml | awk '{print $2}' | sed 's/\^//')
-        echo "required_version=$REQUIRED_VERSION" >> $GITHUB_OUTPUT
-    
-    - name: Check if autoverpod version exists on pub.dev
-      run: |
-        VERSION="${{ steps.required_version.outputs.required_version }}"
-        HTTP_STATUS=$(curl -s -o /dev/null -w "%{http_code}" "https://pub.dev/api/packages/autoverpod/versions/$VERSION")
-        if [ "$HTTP_STATUS" != "200" ]; then
-          echo "❌ autoverpod version $VERSION is not available on pub.dev"
-          echo "Please publish autoverpod first before publishing the generator"
+      - uses: actions/checkout@v4
+
+      - name: Setup Flutter
+        uses: subosito/flutter-action@v2
+        with:
+          channel: stable
+
+      - name: Wait for required autoverpod_annotation version on pub.dev
+        run: |
+          REQUIRED_VERSION=$(ruby -e 'require "yaml"; dep = YAML.load_file("autoverpod_generator/pubspec.yaml").dig("dependencies", "autoverpod_annotation"); puts dep.to_s.sub(/^\^/, "")')
+          URL="https://pub.dev/api/packages/autoverpod_annotation/versions/${REQUIRED_VERSION}"
+
+          for attempt in $(seq 1 30); do
+            code=$(curl -s -o /dev/null -w "%{http_code}" "$URL")
+            if [ "$code" = "200" ]; then
+              echo "autoverpod_annotation $REQUIRED_VERSION is available on pub.dev"
+              exit 0
+            fi
+
+            echo "Attempt $attempt: autoverpod_annotation $REQUIRED_VERSION is not available yet (HTTP $code)"
+            sleep 20
+          done
+
+          echo "Timed out waiting for autoverpod_annotation $REQUIRED_VERSION to appear on pub.dev"
           exit 1
-        fi
-        echo "✅ autoverpod version $VERSION is available on pub.dev"
-    
-    - name: Install dependencies
-      run: flutter pub get
-      working-directory: autoverpod_generator
-    
-    - name: Publish to pub.dev
-      run: dart pub publish --force
-      working-directory: autoverpod_generator
+
+      - name: Install dependencies
+        run: flutter pub get
+        working-directory: autoverpod_generator
+
+      - name: Publish to pub.dev
+        run: dart pub publish --force
+        working-directory: autoverpod_generator

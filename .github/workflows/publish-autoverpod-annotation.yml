@@ -1,32 +1,28 @@
 name: Publish autoverpod_annotation to pub.dev
 
 on:
-  release:
-    types: [published]
-  workflow_call:
-  workflow_dispatch:
+  push:
+    tags:
+      - 'autoverpod_annotation-v*'
 
 jobs:
   publish:
     runs-on: ubuntu-latest
-    if: ${{ github.event_name == 'workflow_call' || github.event_name == 'workflow_dispatch' || startsWith(github.event.release.tag_name, 'autoverpod_annotation-v') }}
     permissions:
-      id-token: write  # IMPORTANT: this permission is mandatory for pub.dev publishing
+      id-token: write
       contents: read
-    
     steps:
-    - uses: actions/checkout@v4
-    
-    - name: Setup Flutter
-      uses: subosito/flutter-action@v2
-      with:
-        channel: stable
-    
-    - name: Install dependencies
-      run: flutter pub get
-      working-directory: autoverpod_annotation
-    
-    - name: Publish to pub.dev
-      run: dart pub publish --force
-      working-directory: autoverpod_annotation
+      - uses: actions/checkout@v4
 
+      - name: Setup Flutter
+        uses: subosito/flutter-action@v2
+        with:
+          channel: stable
+
+      - name: Install dependencies
+        run: flutter pub get
+        working-directory: autoverpod_annotation
+
+      - name: Publish to pub.dev
+        run: dart pub publish --force
+        working-directory: autoverpod_annotation
