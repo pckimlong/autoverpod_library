@@ -41,6 +41,9 @@ jobs:
         with:
           channel: stable
 
+      - name: Fetch tags
+        run: git fetch --force --tags
+
       - name: Require release tag token
         env:
           RELEASE_TAG_TOKEN: ${{ secrets.RELEASE_TAG_TOKEN }}
@@ -51,6 +54,28 @@ jobs:
             exit 1
           fi
 
+      - name: Detect package changes in this push
+        id: changes
+        env:
+          BEFORE_SHA: ${{ github.event.before }}
+          CURRENT_SHA: ${{ github.sha }}
+        run: |
+          if [ "$BEFORE_SHA" = "0000000000000000000000000000000000000000" ]; then
+            DIFF_RANGE="$CURRENT_SHA^..$CURRENT_SHA"
+          else
+            DIFF_RANGE="$BEFORE_SHA..$CURRENT_SHA"
+          fi
+
+          echo "Comparing changed files in $DIFF_RANGE"
+
+          if git diff --name-only "$DIFF_RANGE" -- "${{ matrix.package_path }}" | grep -q .; then
+            echo "changed=true" >> "$GITHUB_OUTPUT"
+            echo "Package changes detected in ${{ matrix.package_path }}/"
+          else
+            echo "changed=false" >> "$GITHUB_OUTPUT"
+            echo "No package changes detected in ${{ matrix.package_path }}/"
+          fi
+
       - name: Extract version from package pubspec.yaml
         id: version
         run: |
@@ -59,30 +84,10 @@ jobs:
           echo "tag=${{ matrix.package_name }}-v$VERSION" >> "$GITHUB_OUTPUT"
           echo "Detected version for ${{ matrix.package_name }}: $VERSION"
 
-      - name: Detect package changes since last release
-        id: changes
-        run: |
-          LAST_TAG=$(git tag --list "${{ matrix.package_name }}-v*" --sort=-version:refname | head -n 1)
-          echo "last_tag=$LAST_TAG" >> "$GITHUB_OUTPUT"
-
-          if [ -z "$LAST_TAG" ]; then
-            echo "changed=true" >> "$GITHUB_OUTPUT"
-            echo "No previous release tag for ${{ matrix.package_name }}; treating as changed"
-            exit 0
-          fi
-
-          if git diff --quiet "$LAST_TAG"..HEAD -- "${{ matrix.package_path }}"; then
-            echo "changed=false" >> "$GITHUB_OUTPUT"
-            echo "No changes detected for ${{ matrix.package_name }} since $LAST_TAG"
-          else
-            echo "changed=true" >> "$GITHUB_OUTPUT"
-            echo "Changes detected for ${{ matrix.package_name }} since $LAST_TAG"
-          fi
-
       - name: Check if tag already exists
         id: check_tag
         run: |
-          if git rev-parse "${{ steps.version.outputs.tag }}" >/dev/null 2>&1; then
+          if git rev-parse --verify "refs/tags/${{ steps.version.outputs.tag }}" >/dev/null 2>&1; then
             echo "exists=true" >> "$GITHUB_OUTPUT"
             echo "Tag ${{ steps.version.outputs.tag }} already exists"
           else
@@ -93,8 +98,8 @@ jobs:
       - name: Require version bump when package changed
         if: steps.changes.outputs.changed == 'true' && steps.check_tag.outputs.exists == 'true'
         run: |
-          echo "Package changes were detected for ${{ matrix.package_name }}, but version ${{ steps.version.outputs.version }} is already tagged."
-          echo "Bump ${{ matrix.package_path }}/pubspec.yaml before merging to main."
+          echo "Package changes were detected in ${{ matrix.package_path }}/, but version ${{ steps.version.outputs.version }} is already tagged as ${{ steps.version.outputs.tag }}."
+          echo "Bump ${{ matrix.package_path }}/pubspec.yaml and add a matching CHANGELOG entry before merging to main."
           exit 1
 
       - name: Install dependencies
