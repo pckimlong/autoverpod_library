@@ -93,9 +93,10 @@ class ProviderDefinition {
     final isFreezed = _isFreezedClass(classElement);
 
     if (isFreezed) {
-      // Parse from factory constructor parameters for Freezed
+      // Prefer the primary unnamed Freezed factory. This avoids leaking
+      // parameters from helper factories/static helpers into generated fields.
       final factoryConstructors = classElement.constructors.where(
-        (c) => c.isFactory && c.name != 'fromJson',
+        (c) => c.isFactory && c.name.isEmpty,
       );
 
       for (final constructor in factoryConstructors) {
@@ -107,6 +108,19 @@ class ProviderDefinition {
           fields.add(FieldDefinition.fromParam(param));
         }
       }
+
+      // If constructor metadata is incomplete, fall back to public instance
+      // getters, which match the actual state surface exposed by Freezed.
+      if (fields.isEmpty) {
+        for (final accessor in classElement.accessors.where(
+          (a) =>
+              a.isGetter &&
+              _isUsableFieldName(a.name) &&
+              !fields.any((f) => f.name == a.name),
+        )) {
+          fields.add(FieldDefinition.fromAccessor(accessor));
+        }
+      }
     }
 
     // Fallback: if no fields found via factory, try public getters/fields
@@ -114,10 +128,7 @@ class ProviderDefinition {
     if (fields.isEmpty) {
       for (final field
           in classElement.fields.where((f) => f.isPublic && !f.isStatic)) {
-        // Skip internal Freezed fields
-        if (field.name.startsWith('_') ||
-            field.name == 'copyWith' ||
-            field.name == 'hashCode') {
+        if (!_isUsableFieldName(field.name)) {
           continue;
         }
         fields.add(FieldDefinition.fromField(field));
@@ -131,6 +142,13 @@ class ProviderDefinition {
     return classElement.mixins.any((m) => m.toString().startsWith('_\$')) ||
         classElement.mixins
             .any((m) => m.element?.name.startsWith('_\$') ?? false);
+  }
+
+  static bool _isUsableFieldName(String name) {
+    return !name.startsWith('_') &&
+        name != 'copyWith' &&
+        name != 'hashCode' &&
+        name != 'runtimeType';
   }
 
   static bool _hasCopyWith(DartType type) {

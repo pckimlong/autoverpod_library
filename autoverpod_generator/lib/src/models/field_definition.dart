@@ -42,6 +42,19 @@ class FieldDefinition {
     );
   }
 
+  /// Parse from an instance getter accessor.
+  factory FieldDefinition.fromAccessor(PropertyAccessorElement accessor) {
+    final type = TypeUtils.safeReadType(() => accessor.returnType);
+    final importPath = TypeUtils.resolveImportPath(type);
+
+    return FieldDefinition(
+      name: accessor.name,
+      type: type?.toString() ?? 'dynamic',
+      isNullable: type?.isNullable ?? true,
+      importPath: importPath,
+    );
+  }
+
   /// Check if this is a String field (for text controller generation)
   bool get isTextField => type == 'String' || type == 'String?';
 
@@ -52,5 +65,6 @@ class FieldDefinition {
   }
 
   /// Get type without nullable suffix
-  String get typeWithoutNullable => isNullable ? type.substring(0, type.length - 1) : type;
+  String get typeWithoutNullable =>
+      isNullable ? type.substring(0, type.length - 1) : type;
 }
