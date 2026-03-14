@@ -3,161 +3,162 @@ name: Create Release
 on:
   push:
     branches: [ main ]
+    paths:
+      - 'autoverpod/**'
+      - 'autoverpod_annotation/**'
+      - 'autoverpod_generator/**'
 
 jobs:
   release:
     runs-on: ubuntu-latest
     permissions:
       contents: write
-    outputs:
-      autoverpod_released: ${{ steps.set_release_flags.outputs.autoverpod_released }}
-      generator_released: ${{ steps.set_release_flags.outputs.generator_released }}
-      annotation_released: ${{ steps.set_release_flags.outputs.annotation_released }}
-    
+    strategy:
+      fail-fast: false
+      matrix:
+        include:
+          - package_name: autoverpod_annotation
+            package_path: autoverpod_annotation
+            publish_cmd: dart pub publish --dry-run
+            test_cmd: dart --version
+          - package_name: autoverpod
+            package_path: autoverpod
+            publish_cmd: flutter pub publish --dry-run
+            test_cmd: flutter test
+          - package_name: autoverpod_generator
+            package_path: autoverpod_generator
+            publish_cmd: dart pub publish --dry-run
+            test_cmd: dart test
+
     steps:
-    - uses: actions/checkout@v4
-      with:
-        fetch-depth: 0  # Fetch all tags
-    
-    - name: Get current versions
-      id: versions
-      run: |
-        echo "autoverpod_version=$(grep '^version:' autoverpod/pubspec.yaml | awk '{print $2}')" >> $GITHUB_OUTPUT
-        echo "autoverpod_generator_version=$(grep '^version:' autoverpod_generator/pubspec.yaml | awk '{print $2}')" >> $GITHUB_OUTPUT
-        echo "autoverpod_annotation_version=$(grep '^version:' autoverpod_annotation/pubspec.yaml | awk '{print $2}')" >> $GITHUB_OUTPUT
-    
-    - name: Check if version tags exist
-      id: check_tags
-      run: |
-        AUTOVERPOD_TAG="autoverpod-v${{ steps.versions.outputs.autoverpod_version }}"
-        GENERATOR_TAG="autoverpod_generator-v${{ steps.versions.outputs.autoverpod_generator_version }}"
-        ANNOTATION_TAG="autoverpod_annotation-v${{ steps.versions.outputs.autoverpod_annotation_version }}"
-        
-        git fetch --tags
-        
-        if git rev-parse --verify "refs/tags/$AUTOVERPOD_TAG" >/dev/null 2>&1; then
-          echo "autoverpod_exists=true" >> $GITHUB_OUTPUT
-        else
-          echo "autoverpod_exists=false" >> $GITHUB_OUTPUT
-        fi
-        
-        if git rev-parse --verify "refs/tags/$GENERATOR_TAG" >/dev/null 2>&1; then
-          echo "generator_exists=true" >> $GITHUB_OUTPUT
-        else
-          echo "generator_exists=false" >> $GITHUB_OUTPUT
-        fi
+      - uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+          persist-credentials: false
 
-        if git rev-parse --verify "refs/tags/$ANNOTATION_TAG" >/dev/null 2>&1; then
-          echo "annotation_exists=true" >> $GITHUB_OUTPUT
-        else
-          echo "annotation_exists=false" >> $GITHUB_OUTPUT
-        fi
-        
-        echo "autoverpod_tag=$AUTOVERPOD_TAG" >> $GITHUB_OUTPUT
-        echo "generator_tag=$GENERATOR_TAG" >> $GITHUB_OUTPUT
-        echo "annotation_tag=$ANNOTATION_TAG" >> $GITHUB_OUTPUT
+      - name: Setup Flutter
+        uses: subosito/flutter-action@v2
+        with:
+          channel: stable
 
-    - name: Set release flags
-      id: set_release_flags
-      run: |
-        if [ "${{ steps.check_tags.outputs.autoverpod_exists }}" = "false" ]; then
-          echo "autoverpod_released=true" >> "$GITHUB_OUTPUT"
-        else
-          echo "autoverpod_released=false" >> "$GITHUB_OUTPUT"
-        fi
+      - name: Require release tag token
+        env:
+          RELEASE_TAG_TOKEN: ${{ secrets.RELEASE_TAG_TOKEN }}
+        run: |
+          if [ -z "$RELEASE_TAG_TOKEN" ]; then
+            echo "Missing repository secret RELEASE_TAG_TOKEN."
+            echo "Use a PAT or GitHub App token to push release tags so publish workflows can trigger."
+            exit 1
+          fi
 
-        if [ "${{ steps.check_tags.outputs.generator_exists }}" = "false" ]; then
-          echo "generator_released=true" >> "$GITHUB_OUTPUT"
-        else
-          echo "generator_released=false" >> "$GITHUB_OUTPUT"
-        fi
+      - name: Extract version from package pubspec.yaml
+        id: version
+        run: |
+          VERSION=$(grep '^version:' "${{ matrix.package_path }}/pubspec.yaml" | sed 's/version: //')
+          echo "version=$VERSION" >> "$GITHUB_OUTPUT"
+          echo "tag=${{ matrix.package_name }}-v$VERSION" >> "$GITHUB_OUTPUT"
+          echo "Detected version for ${{ matrix.package_name }}: $VERSION"
 
-        if [ "${{ steps.check_tags.outputs.annotation_exists }}" = "false" ]; then
-          echo "annotation_released=true" >> "$GITHUB_OUTPUT"
-        else
-          echo "annotation_released=false" >> "$GITHUB_OUTPUT"
-        fi
-    
-    - name: Create autoverpod_annotation release
-      if: steps.check_tags.outputs.annotation_exists == 'false'
-      uses: softprops/action-gh-release@v2
-      with:
-        token: ${{ secrets.GITHUB_TOKEN }}
-        tag_name: ${{ steps.check_tags.outputs.annotation_tag }}
-        name: autoverpod_annotation ${{ steps.versions.outputs.autoverpod_annotation_version }}
-        body: |
-          Release of autoverpod_annotation package version ${{ steps.versions.outputs.autoverpod_annotation_version }}
-          
-          ## Installation
-          ```yaml
-          dependencies:
-            autoverpod_annotation: ^${{ steps.versions.outputs.autoverpod_annotation_version }}
-          ```
-        files: |
-          autoverpod_annotation/pubspec.yaml
-        draft: false
-        prerelease: false
-    
-    - name: Create autoverpod release
-      if: steps.check_tags.outputs.autoverpod_exists == 'false'
-      uses: softprops/action-gh-release@v2
-      with:
-        token: ${{ secrets.GITHUB_TOKEN }}
-        tag_name: ${{ steps.check_tags.outputs.autoverpod_tag }}
-        name: autoverpod ${{ steps.versions.outputs.autoverpod_version }}
-        body: |
-          Release of autoverpod package version ${{ steps.versions.outputs.autoverpod_version }}
-          
-          ## Installation
-          ```yaml
-          dependencies:
-            autoverpod: ^${{ steps.versions.outputs.autoverpod_version }}
-          ```
-        files: |
-          autoverpod/pubspec.yaml
-        draft: false
-        prerelease: false
-    
-    - name: Create autoverpod_generator release
-      if: steps.check_tags.outputs.generator_exists == 'false'
-      uses: softprops/action-gh-release@v2
-      with:
-        token: ${{ secrets.GITHUB_TOKEN }}
-        tag_name: ${{ steps.check_tags.outputs.generator_tag }}
-        name: autoverpod_generator ${{ steps.versions.outputs.autoverpod_generator_version }}
-        body: |
-          Release of autoverpod_generator package version ${{ steps.versions.outputs.autoverpod_generator_version }}
-          
-          ## Installation
-          ```yaml
-          dev_dependencies:
-            autoverpod_generator: ^${{ steps.versions.outputs.autoverpod_generator_version }}
-          ```
-        files: |
-          autoverpod_generator/pubspec.yaml
-        draft: false
-        prerelease: false
+      - name: Detect package changes since last release
+        id: changes
+        run: |
+          LAST_TAG=$(git tag --list "${{ matrix.package_name }}-v*" --sort=-version:refname | head -n 1)
+          echo "last_tag=$LAST_TAG" >> "$GITHUB_OUTPUT"
 
-  publish-annotation:
-    needs: release
-    if: needs.release.outputs.annotation_released == 'true'
-    uses: ./.github/workflows/publish-autoverpod-annotation.yml
-    permissions:
-      id-token: write
-      contents: read
+          if [ -z "$LAST_TAG" ]; then
+            echo "changed=true" >> "$GITHUB_OUTPUT"
+            echo "No previous release tag for ${{ matrix.package_name }}; treating as changed"
+            exit 0
+          fi
 
-  publish-autoverpod:
-    needs: [release, publish-annotation]
-    if: needs.release.outputs.autoverpod_released == 'true' && (needs.publish-annotation.result == 'success' || needs.publish-annotation.result == 'skipped')
-    uses: ./.github/workflows/publish-autoverpod.yml
-    permissions:
-      id-token: write
-      contents: read
+          if git diff --quiet "$LAST_TAG"..HEAD -- "${{ matrix.package_path }}"; then
+            echo "changed=false" >> "$GITHUB_OUTPUT"
+            echo "No changes detected for ${{ matrix.package_name }} since $LAST_TAG"
+          else
+            echo "changed=true" >> "$GITHUB_OUTPUT"
+            echo "Changes detected for ${{ matrix.package_name }} since $LAST_TAG"
+          fi
 
-  publish-generator:
-    needs: [release, publish-annotation, publish-autoverpod]
-    if: always() && needs.release.outputs.generator_released == 'true' && (needs.publish-annotation.result == 'success' || needs.publish-annotation.result == 'skipped') && (needs.publish-autoverpod.result == 'success' || needs.publish-autoverpod.result == 'skipped')
-    uses: ./.github/workflows/publish-autoverpod-generator.yml
-    permissions:
-      id-token: write
-      contents: read
+      - name: Check if tag already exists
+        id: check_tag
+        run: |
+          if git rev-parse "${{ steps.version.outputs.tag }}" >/dev/null 2>&1; then
+            echo "exists=true" >> "$GITHUB_OUTPUT"
+            echo "Tag ${{ steps.version.outputs.tag }} already exists"
+          else
+            echo "exists=false" >> "$GITHUB_OUTPUT"
+            echo "Tag ${{ steps.version.outputs.tag }} does not exist"
+          fi
+
+      - name: Require version bump when package changed
+        if: steps.changes.outputs.changed == 'true' && steps.check_tag.outputs.exists == 'true'
+        run: |
+          echo "Package changes were detected for ${{ matrix.package_name }}, but version ${{ steps.version.outputs.version }} is already tagged."
+          echo "Bump ${{ matrix.package_path }}/pubspec.yaml before merging to main."
+          exit 1
+
+      - name: Install dependencies
+        if: steps.changes.outputs.changed == 'true' && steps.check_tag.outputs.exists == 'false'
+        run: flutter pub get
+        working-directory: ${{ matrix.package_path }}
+
+      - name: Validate package before release
+        if: steps.changes.outputs.changed == 'true' && steps.check_tag.outputs.exists == 'false'
+        run: |
+          ${{ matrix.test_cmd }}
+          ${{ matrix.publish_cmd }}
+        working-directory: ${{ matrix.package_path }}
+
+      - name: Extract release notes from package changelog
+        if: steps.changes.outputs.changed == 'true' && steps.check_tag.outputs.exists == 'false'
+        id: changelog
+        shell: bash
+        run: |
+          VERSION="${{ steps.version.outputs.version }}"
+          NOTES=$(awk -v ver="$VERSION" '
+            $0 ~ "^## " ver "([[:space:]-]|$)" {
+              found=1
+              next
+            }
+            /^## / && found {
+              exit
+            }
+            found {
+              print
+            }
+          ' "${{ matrix.package_path }}/CHANGELOG.md")
+
+          if [ -z "$NOTES" ]; then
+            NOTES="Release ${{ matrix.package_name }} version $VERSION"
+          fi
+
+          echo "$NOTES" > release_notes.txt
+          echo "Release notes extracted"
+
+      - name: Create Git Tag
+        if: steps.changes.outputs.changed == 'true' && steps.check_tag.outputs.exists == 'false'
+        env:
+          RELEASE_TAG_TOKEN: ${{ secrets.RELEASE_TAG_TOKEN }}
+        run: |
+          git config user.name "github-actions[bot]"
+          git config user.email "github-actions[bot]@users.noreply.github.com"
+          git remote set-url origin "https://x-access-token:${RELEASE_TAG_TOKEN}@github.com/${{ github.repository }}.git"
+          git tag -a "${{ steps.version.outputs.tag }}" -m "Release ${{ steps.version.outputs.tag }}"
+          git push origin "${{ steps.version.outputs.tag }}"
+
+      - name: Create GitHub Release
+        if: steps.changes.outputs.changed == 'true' && steps.check_tag.outputs.exists == 'false'
+        uses: softprops/action-gh-release@v2
+        with:
+          tag_name: ${{ steps.version.outputs.tag }}
+          name: ${{ matrix.package_name }} ${{ steps.version.outputs.version }}
+          body_path: release_notes.txt
+          draft: false
+          prerelease: false
+          generate_release_notes: false
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+
+      - name: Skip release
+        if: steps.changes.outputs.changed == 'false'
+        run: echo "Skipping release - no package changes detected for ${{ matrix.package_name }}"

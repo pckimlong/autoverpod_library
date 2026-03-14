@@ -232,3 +232,26 @@ For providers returning `Future`, `Stream`, or `AsyncValue`, generated field wid
 ## License
 
 MIT License - see [LICENSE](LICENSE) for details.
+
+## Publishing
+
+This repo is configured for pub.dev automated publishing from GitHub Actions.
+
+Before automation can work:
+
+- Publish the first version of each package manually on pub.dev.
+- In each package's pub.dev Admin tab, enable automated publishing from `pckimlong/autoverpod_library`.
+- Add a repository secret named `RELEASE_TAG_TOKEN`.
+- Configure these tag patterns:
+  - `autoverpod_annotation-v{{version}}`
+  - `autoverpod-v{{version}}`
+  - `autoverpod_generator-v{{version}}`
+
+The release flow is:
+
+1. Bump package versions and changelogs in the repo.
+2. Merge to `main`.
+3. [`.github/workflows/release.yml`](.github/workflows/release.yml) validates changed packages, creates package tags, and creates GitHub releases.
+4. Those tag pushes trigger the package-specific publish workflows for pub.dev.
+
+`RELEASE_TAG_TOKEN` is required because tags pushed with the default `GITHUB_TOKEN` do not reliably trigger downstream tag-push workflows.
