@@ -1,53 +1,51 @@
 import 'dart:async';
-import 'dart:collection';
-import 'dart:io';
 
-import 'package:analyzer/dart/ast/ast.dart';
+import 'package:analyzer/dart/element/element.dart';
 import 'package:autoverpod_annotation/autoverpod_annotation.dart';
-import 'package:lean_builder/builder.dart';
-import 'package:lean_builder/element.dart';
+import 'package:build/build.dart';
+import 'package:source_gen/source_gen.dart';
 import 'package:recase/recase.dart';
 
 import 'models/field_definition.dart';
 import 'models/provider_definition.dart';
+import 'models/type_utils.dart';
 
-/// Main generator for @stateWidget annotation using lean_builder
-@LeanGenerator({'.widget.dart'})
-class StateWidgetGenerator extends GeneratorForAnnotatedClass<StateWidget> {
-  // Instance caches used during a single generation run.
-  final Map<String, String?> _typeImportCache = <String, String?>{};
-  final Map<String, Map<String, String>> _localTypeIndexCache =
-      <String, Map<String, String>>{};
-
+/// Generates standalone widget libraries from resolved provider declarations.
+class StateWidgetGenerator extends Generator {
   @override
-  FutureOr<Iterable<String>> generateForClass(
-    BuildStep buildStep,
-    ClassElement element,
-    ElementAnnotation annotation,
-  ) {
-    _typeImportCache.clear();
-    _localTypeIndexCache.clear();
-
-    final provider = ProviderDefinition.parse(element);
-    final sourceImportUris = _collectSourceImportUris(element);
-    final directlyAvailableSourceImports =
-        _collectDirectlyAvailableSourceImports(element);
-
-    final pieces = <String>[
-      '// ignore_for_file: type=lint, unused_element, unused_element_parameter, deprecated_member_use, deprecated_member_use_from_same_package, use_function_type_syntax_for_parameters, unnecessary_const, avoid_init_to_null, invalid_override_different_default_values_named, prefer_expression_function_bodies, annotate_overrides, invalid_annotation_target, unnecessary_question_mark, invalid_use_of_visible_for_testing_member, invalid_use_of_protected_member, unnecessary_import, unused_import',
-      '// coverage:ignore-file',
-      '',
-      // Collect imports
-      ..._collectLibraryImports(element),
+  FutureOr<String?> generate(LibraryReader library, BuildStep buildStep) {
+    // Riverpod copies annotations onto generated provider variables. Only the
+    // original classes are inputs, just as with the previous class generator.
+    const checker = TypeChecker.typeNamed(
+      StateWidget,
+      inPackage: 'autoverpod_annotation',
+    );
+    final providers = library.classes
+        .where(
+          (element) =>
+              element.firstFragment.libraryFragment.source ==
+                  library.element.firstFragment.source &&
+              checker.hasAnnotationOfExact(element),
+        )
+        .toList();
+    if (providers.isEmpty) return null;
+    final imports = <String>{
       ..._getDefaultImports(),
-      _getSourceFileImport(element),
-      ..._collectFieldTypeImports(
-        provider,
-        element,
-        sourceImportUris,
-        directlyAvailableSourceImports,
-      ),
-      '',
+      "import '${buildStep.inputId.uri}';",
+      for (final provider in providers)
+        ...TypeUtils.importsFor(provider).map((uri) => "import '$uri';"),
+    };
+    return [
+      '// ignore_for_file: type=lint, unused_element, unused_element_parameter, unnecessary_import, unused_import, invalid_use_of_protected_member, invalid_use_of_visible_for_testing_member',
+      '// coverage:ignore-file',
+      ...imports,
+      for (final provider in providers) _generateClass(provider),
+    ].join('\n');
+  }
+
+  String _generateClass(ClassElement element) {
+    final provider = ProviderDefinition.parse(element);
+    final pieces = <String>[
       // Generate widgets
       _generateHeaderComment(provider),
     ];
@@ -86,456 +84,15 @@ class StateWidgetGenerator extends GeneratorForAnnotatedClass<StateWidget> {
       pieces.add(_generateFieldWidget(provider, field));
     }
 
-    return pieces;
+    return pieces.join('\n');
   }
 
-  List<String> _collectSourceImportUris(ClassElement element) {
-    final unit = element.library.compilationUnit;
-    final shortUrl = element.librarySrc.shortUri;
-    final baseName = shortUrl.pathSegments.last.split('.').first;
-    final generatedSuffix = '$baseName.widget.dart';
-    final uris = <String>[];
-
-    for (final directive in unit.directives.whereType<ImportDirective>()) {
-      final uri = directive.uri.stringValue;
-      if (uri == null) continue;
-      if (uri.endsWith(generatedSuffix)) continue;
-      if (uri.endsWith('.g.dart') || uri.endsWith('.freezed.dart')) continue;
-      uris.add(uri);
-    }
-
-    return uris;
-  }
-
-  Set<String> _collectDirectlyAvailableSourceImports(ClassElement element) {
-    final unit = element.library.compilationUnit;
-    final shortUrl = element.librarySrc.shortUri;
-    final baseName = shortUrl.pathSegments.last.split('.').first;
-    final generatedSuffix = '$baseName.widget.dart';
-    final uris = <String>{};
-
-    for (final directive in unit.directives.whereType<ImportDirective>()) {
-      final uri = directive.uri.stringValue;
-      if (uri == null) continue;
-      if (uri.endsWith(generatedSuffix)) continue;
-      if (uri.endsWith('.g.dart') || uri.endsWith('.freezed.dart')) continue;
-
-      final hasPrefix = directive.prefix != null;
-      final hasCombinators = directive.combinators.isNotEmpty;
-      if (!hasPrefix && !hasCombinators) {
-        uris.add(uri);
-      }
-    }
-
-    return uris;
-  }
-
-  /// Collect imports from the source file's AST
-  Iterable<String> _collectLibraryImports(ClassElement element) sync* {
-    final unit = element.library.compilationUnit;
-    final shortUrl = element.librarySrc.shortUri;
-    final baseName = shortUrl.pathSegments.last.split('.').first;
-    final generatedSuffix = '$baseName.widget.dart';
-
-    for (final directive in unit.directives.whereType<ImportDirective>()) {
-      final uri = directive.uri.stringValue;
-      if (uri == null) continue;
-      // Skip the generated file itself
-      if (uri.endsWith(generatedSuffix)) continue;
-      // Skip generated files
-      if (uri.endsWith('.g.dart') || uri.endsWith('.freezed.dart')) continue;
-      yield directive.toSource();
-    }
-  }
-
-  /// Get default imports required by generated widgets
   Iterable<String> _getDefaultImports() sync* {
     yield "import 'package:flutter/widgets.dart';";
     yield "import 'package:flutter/material.dart';";
     yield "import 'package:flutter_riverpod/flutter_riverpod.dart';";
     yield "import 'package:riverpod_annotation/riverpod_annotation.dart' show ProviderListenable, ProviderOrFamily;";
     yield "import 'package:autoverpod/autoverpod.dart';";
-  }
-
-  /// Import the source file itself
-  String _getSourceFileImport(ClassElement element) {
-    final shortUrl = element.librarySrc.shortUri;
-    return "import '$shortUrl';";
-  }
-
-  /// Collect imports from field types
-  Iterable<String> _collectFieldTypeImports(
-    ProviderDefinition provider,
-    ClassElement element,
-    List<String> sourceImportUris,
-    Set<String> directlyAvailableSourceImports,
-  ) sync* {
-    final collected = <String>{};
-    final packageName = _packageNameFor(element.librarySrc.shortUri.toString());
-    final sourceFilePath = packageName != null
-        ? _packageUriToFilePath(
-            element.librarySrc.shortUri.toString(),
-            packageName,
-          )
-        : null;
-    final knownFiles = <String>{};
-    if (sourceFilePath != null && packageName != null) {
-      for (final uri in directlyAvailableSourceImports) {
-        final filePath = _resolveImportToFilePath(
-          uri: uri,
-          currentFilePath: sourceFilePath,
-          packageName: packageName,
-        );
-        if (filePath != null) {
-          knownFiles.add(filePath);
-        }
-      }
-    }
-
-    for (final field in provider.fields) {
-      if (field.importPath != null) {
-        final uri = field.importPath!;
-        if (uri.startsWith('dart:') ||
-            uri.contains('/sky_engine/') ||
-            collected.contains(uri) ||
-            directlyAvailableSourceImports.contains(uri)) {
-          continue;
-        }
-        if (sourceFilePath != null && packageName != null) {
-          final filePath = _resolveImportToFilePath(
-            uri: uri,
-            currentFilePath: sourceFilePath,
-            packageName: packageName,
-          );
-          if (filePath != null && knownFiles.contains(filePath)) {
-            continue;
-          }
-          if (filePath != null) {
-            knownFiles.add(filePath);
-          }
-        }
-        collected.add(uri);
-        yield "import '$uri';";
-      }
-    }
-
-    for (final param in provider.familyParameters) {
-      if (param.importPath != null) {
-        final uri = param.importPath!;
-        if (uri.startsWith('dart:') ||
-            uri.contains('/sky_engine/') ||
-            collected.contains(uri) ||
-            directlyAvailableSourceImports.contains(uri)) {
-          continue;
-        }
-        if (sourceFilePath != null && packageName != null) {
-          final filePath = _resolveImportToFilePath(
-            uri: uri,
-            currentFilePath: sourceFilePath,
-            packageName: packageName,
-          );
-          if (filePath != null && knownFiles.contains(filePath)) {
-            continue;
-          }
-          if (filePath != null) {
-            knownFiles.add(filePath);
-          }
-        }
-        collected.add(uri);
-        yield "import '$uri';";
-      }
-    }
-
-    final unresolvedTypes = <String>{};
-    for (final field in provider.fields) {
-      if (field.importPath != null) continue;
-      unresolvedTypes.addAll(_extractTypeNames(field.type));
-    }
-    for (final param in provider.familyParameters) {
-      if (param.importPath != null) continue;
-      unresolvedTypes.addAll(_extractTypeNames(param.type));
-    }
-
-    if (sourceFilePath == null ||
-        packageName == null ||
-        unresolvedTypes.isEmpty) {
-      return;
-    }
-
-    for (final typeName in unresolvedTypes) {
-      final uri = _resolveImportUriForType(
-        typeName: typeName,
-        sourceFilePath: sourceFilePath,
-        sourceImportUris: sourceImportUris,
-        packageName: packageName,
-      );
-      if (uri == null ||
-          uri.startsWith('dart:') ||
-          uri.contains('/sky_engine/') ||
-          collected.contains(uri) ||
-          directlyAvailableSourceImports.contains(uri)) {
-        continue;
-      }
-
-      final filePath = _resolveImportToFilePath(
-        uri: uri,
-        currentFilePath: sourceFilePath,
-        packageName: packageName,
-      );
-      if (filePath != null && knownFiles.contains(filePath)) {
-        continue;
-      }
-      if (filePath != null) {
-        knownFiles.add(filePath);
-      }
-
-      collected.add(uri);
-      yield "import '$uri';";
-    }
-  }
-
-  Iterable<String> _extractTypeNames(String type) sync* {
-    final matches = RegExp(r'[A-Za-z_][A-Za-z0-9_]*').allMatches(type);
-    for (final match in matches) {
-      final token = match.group(0);
-      if (token == null) continue;
-      if (_isResolvableTypeToken(token)) {
-        yield token;
-      }
-    }
-  }
-
-  bool _isResolvableTypeToken(String token) {
-    if (token.isEmpty) return false;
-    if (!RegExp(r'^[A-Z]').hasMatch(token)) return false;
-    const builtins = <String>{
-      'Object',
-      'String',
-      'num',
-      'int',
-      'double',
-      'bool',
-      'Null',
-      'Never',
-      'Type',
-      'Future',
-      'FutureOr',
-      'Stream',
-      'Iterable',
-      'Iterator',
-      'List',
-      'Map',
-      'Set',
-      'Record',
-      'DateTime',
-      'Duration',
-      'Uri',
-      'RegExp',
-      'Pattern',
-      'Symbol',
-      'Function',
-      'Widget',
-      'BuildContext',
-      'Key',
-      'Color',
-      'TextStyle',
-      'IconData',
-      'ImageProvider',
-      'ChangeNotifier',
-      'ValueNotifier',
-    };
-    return !builtins.contains(token);
-  }
-
-  String? _packageNameFor(String libraryUri) {
-    final parsed = Uri.parse(libraryUri);
-    if (parsed.scheme == 'package' && parsed.pathSegments.isNotEmpty) {
-      return parsed.pathSegments.first;
-    }
-    return null;
-  }
-
-  String? _packageUriToFilePath(String uri, String packageName) {
-    if (!uri.startsWith('package:$packageName/')) return null;
-    final relativePath = uri.substring('package:$packageName/'.length);
-    // Use path.join for cross-platform compatibility
-    final path = [
-      Directory.current.path,
-      'lib',
-      ...relativePath.split('/'),
-    ].join(Platform.pathSeparator);
-    final file = File(path);
-    return file.existsSync() ? file.path : null;
-  }
-
-  String? _resolveImportToFilePath({
-    required String uri,
-    required String currentFilePath,
-    required String packageName,
-  }) {
-    if (uri.startsWith('dart:')) return null;
-    if (uri.startsWith('package:')) {
-      return _packageUriToFilePath(uri, packageName);
-    }
-
-    final resolved = Uri.file(currentFilePath).resolve(uri).toFilePath();
-    final file = File(resolved);
-    return file.existsSync() ? file.path : null;
-  }
-
-  String? _filePathToPackageUri(String filePath, String packageName) {
-    final libDir = [Directory.current.path, 'lib'].join(Platform.pathSeparator);
-    // Normalize both paths for comparison
-    final normalizedFilePath = filePath.replaceAll('\\', '/');
-    final normalizedLibDir = libDir.replaceAll('\\', '/');
-    if (!normalizedFilePath.startsWith(normalizedLibDir)) return null;
-    final relative = normalizedFilePath.substring(normalizedLibDir.length + 1);
-    return 'package:$packageName/$relative';
-  }
-
-  Iterable<String> _parseImportUris(String source) sync* {
-    final regex = RegExp(r'''^\s*import\s+['"]([^'"]+)['"]''', multiLine: true);
-    for (final match in regex.allMatches(source)) {
-      final uri = match.group(1);
-      if (uri == null || uri.isEmpty) continue;
-      if (uri.endsWith('.g.dart') ||
-          uri.endsWith('.freezed.dart') ||
-          uri.endsWith('.widget.dart')) {
-        continue;
-      }
-      yield uri;
-    }
-  }
-
-  bool _declaresType(String source, String typeName) {
-    final escaped = RegExp.escape(typeName);
-    final patterns = <RegExp>[
-      RegExp('\\bclass\\s+$escaped\\b'),
-      RegExp('\\benum\\s+$escaped\\b'),
-      RegExp('\\bmixin\\s+$escaped\\b'),
-      RegExp('\\btypedef\\s+$escaped\\b'),
-      RegExp('\\bextension\\s+type\\s+$escaped(?:\\b|\\.)'),
-      RegExp('\\bextension\\s+$escaped\\b'),
-    ];
-
-    for (final pattern in patterns) {
-      if (pattern.hasMatch(source)) return true;
-    }
-    return false;
-  }
-
-  String? _resolveImportUriForType({
-    required String typeName,
-    required String sourceFilePath,
-    required List<String> sourceImportUris,
-    required String packageName,
-  }) {
-    final cacheKey = '$sourceFilePath::$typeName';
-    if (_typeImportCache.containsKey(cacheKey)) {
-      return _typeImportCache[cacheKey];
-    }
-
-    final indexedUri = _lookupLocalTypeImport(typeName, packageName);
-    if (indexedUri != null) {
-      _typeImportCache[cacheKey] = indexedUri;
-      return indexedUri;
-    }
-
-    final queue = Queue<({String uri, String filePath, int depth})>();
-    final visited = <String>{};
-
-    for (final uri in sourceImportUris) {
-      final filePath = _resolveImportToFilePath(
-        uri: uri,
-        currentFilePath: sourceFilePath,
-        packageName: packageName,
-      );
-      if (filePath == null) continue;
-      final canonical = _filePathToPackageUri(filePath, packageName);
-      if (canonical == null) continue;
-      queue.add((uri: canonical, filePath: filePath, depth: 0));
-    }
-
-    while (queue.isNotEmpty) {
-      final node = queue.removeFirst();
-      if (!visited.add(node.filePath)) continue;
-
-      final source = File(node.filePath).readAsStringSync();
-      if (_declaresType(source, typeName)) {
-        _typeImportCache[cacheKey] = node.uri;
-        return node.uri;
-      }
-
-      if (node.depth >= 2) continue;
-
-      for (final importUri in _parseImportUris(source)) {
-        final childPath = _resolveImportToFilePath(
-          uri: importUri,
-          currentFilePath: node.filePath,
-          packageName: packageName,
-        );
-        if (childPath == null || visited.contains(childPath)) continue;
-        final canonical = _filePathToPackageUri(childPath, packageName);
-        if (canonical == null) continue;
-        queue.add((uri: canonical, filePath: childPath, depth: node.depth + 1));
-      }
-    }
-
-    _typeImportCache[cacheKey] = null;
-    return null;
-  }
-
-  String? _lookupLocalTypeImport(String typeName, String packageName) {
-    final index = _localTypeIndexCache.putIfAbsent(
-      packageName,
-      () => _buildLocalTypeIndex(packageName),
-    );
-    return index[typeName];
-  }
-
-  Map<String, String> _buildLocalTypeIndex(String packageName) {
-    final result = <String, String>{};
-    final libDir = Directory('${Directory.current.path}/lib');
-    if (!libDir.existsSync()) return result;
-
-    final classRegex = RegExp(r'\bclass\s+([A-Za-z_][A-Za-z0-9_]*)\b');
-    final enumRegex = RegExp(r'\benum\s+([A-Za-z_][A-Za-z0-9_]*)\b');
-    final mixinRegex = RegExp(r'\bmixin\s+([A-Za-z_][A-Za-z0-9_]*)\b');
-    final typedefRegex = RegExp(r'\btypedef\s+([A-Za-z_][A-Za-z0-9_]*)\b');
-    final extensionTypeRegex = RegExp(
-      r'\bextension\s+type\s+([A-Za-z_][A-Za-z0-9_]*)',
-    );
-
-    for (final entity in libDir.listSync(recursive: true)) {
-      if (entity is! File) continue;
-      if (!entity.path.endsWith('.dart')) continue;
-      if (entity.path.endsWith('.g.dart') ||
-          entity.path.endsWith('.freezed.dart') ||
-          entity.path.endsWith('.widget.dart')) {
-        continue;
-      }
-
-      final relativePath =
-          entity.path.substring('${libDir.path}/'.length).replaceAll('\\', '/');
-      final uri = 'package:$packageName/$relativePath';
-
-      final source = entity.readAsStringSync();
-      for (final regex in [
-        classRegex,
-        enumRegex,
-        mixinRegex,
-        typedefRegex,
-        extensionTypeRegex,
-      ]) {
-        for (final match in regex.allMatches(source)) {
-          final name = match.group(1);
-          if (name == null || name.isEmpty) continue;
-          result.putIfAbsent(name, () => uri);
-        }
-      }
-    }
-
-    return result;
   }
 
   /// Helper to generate params assignment for family providers
@@ -557,8 +114,9 @@ class StateWidgetGenerator extends GeneratorForAnnotatedClass<StateWidget> {
       buffer.writeln('    final params = (');
       for (final param in provider.familyParameters) {
         final bang = param.isNullable ? '' : '!';
-        final valueName =
-            useValueSuffix ? '${param.name}Value$bang' : param.name;
+        final valueName = useValueSuffix
+            ? '${param.name}Value$bang'
+            : param.name;
         buffer.writeln('      ${param.name}: $valueName,');
       }
       buffer.writeln('    );');
@@ -1060,11 +618,13 @@ class StateWidgetGenerator extends GeneratorForAnnotatedClass<StateWidget> {
     buffer.writeln('  Widget build(BuildContext context, WidgetRef ref) {');
 
     if (provider.hasFamily) {
-      final nonNullableParams =
-          provider.familyParameters.where((p) => !p.isNullable).toList();
+      final nonNullableParams = provider.familyParameters
+          .where((p) => !p.isNullable)
+          .toList();
       if (nonNullableParams.isNotEmpty) {
-        final needsScopeConditions =
-            nonNullableParams.map((p) => '${p.name} == null').join(' || ');
+        final needsScopeConditions = nonNullableParams
+            .map((p) => '${p.name} == null')
+            .join(' || ');
         buffer.writeln('    final needsScope = $needsScopeConditions;');
         buffer.writeln(
           '    if (needsScope) assert(_debugCheckHas${provider.baseName}Scope(context));',
@@ -1180,11 +740,13 @@ class StateWidgetGenerator extends GeneratorForAnnotatedClass<StateWidget> {
     buffer.writeln('  Widget build(BuildContext context, WidgetRef ref) {');
 
     if (provider.hasFamily) {
-      final nonNullableParams =
-          provider.familyParameters.where((p) => !p.isNullable).toList();
+      final nonNullableParams = provider.familyParameters
+          .where((p) => !p.isNullable)
+          .toList();
       if (nonNullableParams.isNotEmpty) {
-        final needsScopeConditions =
-            nonNullableParams.map((p) => '${p.name} == null').join(' || ');
+        final needsScopeConditions = nonNullableParams
+            .map((p) => '${p.name} == null')
+            .join(' || ');
         buffer.writeln('    final needsScope = $needsScopeConditions;');
         buffer.writeln(
           '    if (needsScope) assert(_debugCheckHas${provider.baseName}Scope(context));',
@@ -1452,11 +1014,13 @@ class StateWidgetGenerator extends GeneratorForAnnotatedClass<StateWidget> {
     buffer.writeln('  @override');
     buffer.writeln('  Widget build(BuildContext context, WidgetRef ref) {');
     if (provider.hasFamily) {
-      final nonNullableParams =
-          provider.familyParameters.where((p) => !p.isNullable).toList();
+      final nonNullableParams = provider.familyParameters
+          .where((p) => !p.isNullable)
+          .toList();
       if (nonNullableParams.isNotEmpty) {
-        final needsScopeConditions =
-            nonNullableParams.map((p) => '${p.name} == null').join(' || ');
+        final needsScopeConditions = nonNullableParams
+            .map((p) => '${p.name} == null')
+            .join(' || ');
         buffer.writeln('    final needsScope = $needsScopeConditions;');
         buffer.writeln(
           '    if (needsScope) assert(_debugCheckHas${provider.baseName}Scope(context));',
@@ -1475,7 +1039,9 @@ class StateWidgetGenerator extends GeneratorForAnnotatedClass<StateWidget> {
           );
         }
       }
-      _writeParamsAssignment(buffer, provider, useValueSuffix: true);
+      if (provider.isAsyncValue) {
+        _writeParamsAssignment(buffer, provider, useValueSuffix: true);
+      }
     }
 
     if (provider.isAsyncValue) {
@@ -1631,11 +1197,13 @@ class StateWidgetGenerator extends GeneratorForAnnotatedClass<StateWidget> {
     buffer.writeln('  Widget build(BuildContext context, WidgetRef ref) {');
 
     if (provider.hasFamily) {
-      final nonNullableParams =
-          provider.familyParameters.where((p) => !p.isNullable).toList();
+      final nonNullableParams = provider.familyParameters
+          .where((p) => !p.isNullable)
+          .toList();
       if (nonNullableParams.isNotEmpty) {
-        final needsScopeConditions =
-            nonNullableParams.map((p) => '${p.name} == null').join(' || ');
+        final needsScopeConditions = nonNullableParams
+            .map((p) => '${p.name} == null')
+            .join(' || ');
         buffer.writeln('    final needsScope = $needsScopeConditions;');
         buffer.writeln(
           '    if (needsScope) assert(_debugCheckHas${provider.baseName}Scope(context));',
@@ -1881,11 +1449,13 @@ class StateWidgetGenerator extends GeneratorForAnnotatedClass<StateWidget> {
     buffer.writeln('  Widget build(BuildContext context, WidgetRef ref) {');
 
     if (provider.hasFamily) {
-      final nonNullableParams =
-          provider.familyParameters.where((p) => !p.isNullable).toList();
+      final nonNullableParams = provider.familyParameters
+          .where((p) => !p.isNullable)
+          .toList();
       if (nonNullableParams.isNotEmpty) {
-        final needsScopeConditions =
-            nonNullableParams.map((p) => '${p.name} == null').join(' || ');
+        final needsScopeConditions = nonNullableParams
+            .map((p) => '${p.name} == null')
+            .join(' || ');
         buffer.writeln('    final needsScope = $needsScopeConditions;');
         buffer.writeln(
           '    if (needsScope) assert(_debugCheckHas${provider.baseName}Scope(context));',

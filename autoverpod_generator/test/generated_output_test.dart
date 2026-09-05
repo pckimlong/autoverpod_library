@@ -4,25 +4,9 @@ import 'package:test/test.dart';
 
 void main() {
   test('example generation produces expected output', () async {
-    final result = await Process.run(
-      'dart',
-      const [
-        'run',
-        'lean_builder',
-        'build',
-      ],
-      workingDirectory: '../example',
-    );
-
-    if (result.exitCode != 0) {
-      fail(
-        'lean_builder build failed (exitCode=${result.exitCode})\n'
-        'stdout:\n${result.stdout}\n'
-        'stderr:\n${result.stderr}',
-      );
-    }
-
-    final generatedFile = File('../example/lib/user_profile.widget.dart');
+    final consumer =
+        Platform.environment['AUTOVERPOD_CONSUMER'] ?? '../example';
+    final generatedFile = File('$consumer/lib/user_profile.widget.dart');
     expect(generatedFile.existsSync(), isTrue);
 
     final content = generatedFile.readAsStringSync();

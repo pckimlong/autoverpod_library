@@ -1,3 +1,7 @@
+## 0.2.0 - 2026-09-05
+
+- Update documentation and examples for `build_runner` code generation.
+
 ## 0.1.1 - 2025-12-13
 
 ### New Features

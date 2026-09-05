@@ -1,4 +1,4 @@
-import 'package:lean_builder/element.dart';
+import 'package:analyzer/dart/element/element.dart';
 
 import 'type_utils.dart';
 
@@ -17,14 +17,14 @@ class FieldDefinition {
   });
 
   /// Parse from a Freezed factory constructor parameter
-  factory FieldDefinition.fromParam(ParameterElement param) {
+  factory FieldDefinition.fromParam(FormalParameterElement param) {
     final type = TypeUtils.safeReadType(() => param.type);
     final importPath = TypeUtils.resolveImportPath(type);
 
     return FieldDefinition(
-      name: param.name,
-      type: type?.toString() ?? 'dynamic',
-      isNullable: type?.isNullable ?? true,
+      name: param.name!,
+      type: type.getDisplayString(),
+      isNullable: TypeUtils.isNullable(type),
       importPath: importPath,
     );
   }
@@ -35,22 +35,22 @@ class FieldDefinition {
     final importPath = TypeUtils.resolveImportPath(type);
 
     return FieldDefinition(
-      name: field.name,
-      type: type?.toString() ?? 'dynamic',
-      isNullable: type?.isNullable ?? true,
+      name: field.name!,
+      type: type.getDisplayString(),
+      isNullable: TypeUtils.isNullable(type),
       importPath: importPath,
     );
   }
 
   /// Parse from an instance getter accessor.
-  factory FieldDefinition.fromAccessor(PropertyAccessorElement accessor) {
+  factory FieldDefinition.fromAccessor(GetterElement accessor) {
     final type = TypeUtils.safeReadType(() => accessor.returnType);
     final importPath = TypeUtils.resolveImportPath(type);
 
     return FieldDefinition(
-      name: accessor.name,
-      type: type?.toString() ?? 'dynamic',
-      isNullable: type?.isNullable ?? true,
+      name: accessor.name!,
+      type: type.getDisplayString(),
+      isNullable: TypeUtils.isNullable(type),
       importPath: importPath,
     );
   }

@@ -1,4 +1,4 @@
-import 'package:lean_builder/element.dart';
+import 'package:analyzer/dart/element/element.dart';
 
 import '../templates/utils.dart';
 import 'type_utils.dart';
@@ -21,13 +21,13 @@ class ParamDefinition {
 
   bool get isNullable => type.endsWith('?');
 
-  factory ParamDefinition.fromElement(ParameterElement parameter) {
+  factory ParamDefinition.fromElement(FormalParameterElement parameter) {
     final type = TypeUtils.safeReadType(() => parameter.type);
     final importPath = TypeUtils.resolveImportPath(type);
 
     return ParamDefinition(
-      name: parameter.name,
-      type: type?.toString() ?? 'dynamic',
+      name: parameter.name!,
+      type: type.getDisplayString(),
       isRequired: parameter.isRequired,
       isNamed: parameter.isNamed,
       importPath: importPath,
