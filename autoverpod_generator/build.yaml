@@ -1,0 +1,8 @@
+builders:
+  state_widget:
+    import: "package:autoverpod_generator/builder.dart"
+    builder_factories: ["stateWidgetBuilder"]
+    build_extensions: {".dart": [".widget.dart"]}
+    auto_apply: dependents
+    build_to: source
+    required_inputs: [".supabase.dart", ".freezed.dart", ".g.dart"]

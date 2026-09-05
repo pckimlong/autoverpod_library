@@ -64,11 +64,15 @@ dependencies:
   flutter:
     sdk: flutter
   autoverpod: ^<latest>
-  flutter_riverpod: ^<latest>
+  flutter_riverpod: ^3.0.3
+  riverpod_annotation: ^4.0.2
+  freezed_annotation: ^3.1.0
 
 dev_dependencies:
   autoverpod_generator: ^<latest>
-  lean_builder: ^<latest>
+  build_runner: ^2.15.0
+  riverpod_generator: ^4.0.3
+  freezed: ^4.0.0
   riverpod_annotation: ^<latest>
   freezed_annotation: ^<latest>
 ```
@@ -79,9 +83,9 @@ Alternatively, the same dependencies can be added with:
 dart pub add autoverpod
 dart pub add flutter_riverpod
 dart pub add --dev autoverpod_generator
-dart pub add --dev lean_builder
-dart pub add --dev riverpod_annotation
-dart pub add --dev freezed_annotation
+dart pub add --dev build_runner riverpod_generator freezed
+dart pub add riverpod_annotation
+dart pub add freezed_annotation
 ```
 
 ### 2. Define state and provider
@@ -95,7 +99,7 @@ part 'user_profile.freezed.dart';
 part 'user_profile.g.dart';
 
 @freezed
-class UserProfileState with _$UserProfileState {
+sealed class UserProfileState with _$UserProfileState {
   const factory UserProfileState({
     @Default('') String name,
     @Default('') String email,
@@ -113,8 +117,14 @@ class UserProfile extends _$UserProfile {
 ### 3. Run the generator
 
 ```bash
-dart run lean_builder watch
+dart run build_runner build
+# Or continuously regenerate after edits:
+dart run build_runner watch
 ```
+
+The generator requires Dart 3.11 or later; this Freezed 4 workflow requires
+Dart 3.13 / Flutter 3.47. Existing annotations and `.widget.dart` imports stay
+the same.
 
 ### 4. Use generated widgets
 

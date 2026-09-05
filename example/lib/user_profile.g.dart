@@ -16,15 +16,16 @@ final asyncUserProfileProvider = AsyncUserProfileFamily._();
 @stateWidget
 final class AsyncUserProfileProvider
     extends $AsyncNotifierProvider<AsyncUserProfile, UserProfileState> {
-  AsyncUserProfileProvider._(
-      {required AsyncUserProfileFamily super.from, required int super.argument})
-      : super(
-          retry: null,
-          name: r'asyncUserProfileProvider',
-          isAutoDispose: true,
-          dependencies: null,
-          $allTransitiveDependencies: null,
-        );
+  AsyncUserProfileProvider._({
+    required AsyncUserProfileFamily super.from,
+    required int super.argument,
+  }) : super(
+         retry: null,
+         name: r'asyncUserProfileProvider',
+         isAutoDispose: true,
+         dependencies: null,
+         $allTransitiveDependencies: null,
+       );
 
   @override
   String debugGetCreateSourceHash() => _$asyncUserProfileHash();
@@ -56,21 +57,24 @@ String _$asyncUserProfileHash() => r'20a71b236dd3809644b472794a6c621ecf8534a7';
 @stateWidget
 final class AsyncUserProfileFamily extends $Family
     with
-        $ClassFamilyOverride<AsyncUserProfile, AsyncValue<UserProfileState>,
-            UserProfileState, FutureOr<UserProfileState>, int> {
+        $ClassFamilyOverride<
+          AsyncUserProfile,
+          AsyncValue<UserProfileState>,
+          UserProfileState,
+          FutureOr<UserProfileState>,
+          int
+        > {
   AsyncUserProfileFamily._()
-      : super(
-          retry: null,
-          name: r'asyncUserProfileProvider',
-          dependencies: null,
-          $allTransitiveDependencies: null,
-          isAutoDispose: true,
-        );
+    : super(
+        retry: null,
+        name: r'asyncUserProfileProvider',
+        dependencies: null,
+        $allTransitiveDependencies: null,
+        isAutoDispose: true,
+      );
 
   @stateWidget
-  AsyncUserProfileProvider call(
-    int id,
-  ) =>
+  AsyncUserProfileProvider call(int id) =>
       AsyncUserProfileProvider._(argument: id, from: this);
 
   @override
@@ -82,24 +86,21 @@ abstract class _$AsyncUserProfile extends $AsyncNotifier<UserProfileState> {
   late final _$args = ref.$arg as int;
   int get id => _$args;
 
-  FutureOr<UserProfileState> build(
-    int id,
-  );
+  FutureOr<UserProfileState> build(int id);
   @$mustCallSuper
   @override
-  void runBuild() {
+  WhenComplete runBuild() {
     final ref =
         this.ref as $Ref<AsyncValue<UserProfileState>, UserProfileState>;
-    final element = ref.element as $ClassProviderElement<
-        AnyNotifier<AsyncValue<UserProfileState>, UserProfileState>,
-        AsyncValue<UserProfileState>,
-        Object?,
-        Object?>;
-    element.handleCreate(
-        ref,
-        () => build(
-              _$args,
-            ));
+    final element =
+        ref.element
+            as $ClassProviderElement<
+              AnyNotifier<AsyncValue<UserProfileState>, UserProfileState>,
+              AsyncValue<UserProfileState>,
+              Object?,
+              Object?
+            >;
+    return element.handleCreate(ref, () => build(_$args));
   }
 }
 
@@ -110,15 +111,16 @@ final userProfileProvider = UserProfileFamily._();
 @stateWidget
 final class UserProfileProvider
     extends $NotifierProvider<UserProfile, UserProfileState> {
-  UserProfileProvider._(
-      {required UserProfileFamily super.from, required int super.argument})
-      : super(
-          retry: null,
-          name: r'userProfileProvider',
-          isAutoDispose: true,
-          dependencies: null,
-          $allTransitiveDependencies: null,
-        );
+  UserProfileProvider._({
+    required UserProfileFamily super.from,
+    required int super.argument,
+  }) : super(
+         retry: null,
+         name: r'userProfileProvider',
+         isAutoDispose: true,
+         dependencies: null,
+         $allTransitiveDependencies: null,
+       );
 
   @override
   String debugGetCreateSourceHash() => _$userProfileHash();
@@ -158,21 +160,24 @@ String _$userProfileHash() => r'e851175700d2f25bc8861453a5a98b9375d1f8db';
 @stateWidget
 final class UserProfileFamily extends $Family
     with
-        $ClassFamilyOverride<UserProfile, UserProfileState, UserProfileState,
-            UserProfileState, int> {
+        $ClassFamilyOverride<
+          UserProfile,
+          UserProfileState,
+          UserProfileState,
+          UserProfileState,
+          int
+        > {
   UserProfileFamily._()
-      : super(
-          retry: null,
-          name: r'userProfileProvider',
-          dependencies: null,
-          $allTransitiveDependencies: null,
-          isAutoDispose: true,
-        );
+    : super(
+        retry: null,
+        name: r'userProfileProvider',
+        dependencies: null,
+        $allTransitiveDependencies: null,
+        isAutoDispose: true,
+      );
 
   @stateWidget
-  UserProfileProvider call(
-    int id,
-  ) =>
+  UserProfileProvider call(int id) =>
       UserProfileProvider._(argument: id, from: this);
 
   @override
@@ -184,23 +189,20 @@ abstract class _$UserProfile extends $Notifier<UserProfileState> {
   late final _$args = ref.$arg as int;
   int get id => _$args;
 
-  UserProfileState build(
-    int id,
-  );
+  UserProfileState build(int id);
   @$mustCallSuper
   @override
-  void runBuild() {
+  WhenComplete runBuild() {
     final ref = this.ref as $Ref<UserProfileState, UserProfileState>;
-    final element = ref.element as $ClassProviderElement<
-        AnyNotifier<UserProfileState, UserProfileState>,
-        UserProfileState,
-        Object?,
-        Object?>;
-    element.handleCreate(
-        ref,
-        () => build(
-              _$args,
-            ));
+    final element =
+        ref.element
+            as $ClassProviderElement<
+              AnyNotifier<UserProfileState, UserProfileState>,
+              UserProfileState,
+              Object?,
+              Object?
+            >;
+    return element.handleCreate(ref, () => build(_$args));
   }
 }
 
@@ -212,15 +214,15 @@ final secondUserProfileProvider = SecondUserProfileProvider._();
 final class SecondUserProfileProvider
     extends $NotifierProvider<SecondUserProfile, UserProfileState> {
   SecondUserProfileProvider._()
-      : super(
-          from: null,
-          argument: null,
-          retry: null,
-          name: r'secondUserProfileProvider',
-          isAutoDispose: true,
-          dependencies: null,
-          $allTransitiveDependencies: null,
-        );
+    : super(
+        from: null,
+        argument: null,
+        retry: null,
+        name: r'secondUserProfileProvider',
+        isAutoDispose: true,
+        dependencies: null,
+        $allTransitiveDependencies: null,
+      );
 
   @override
   String debugGetCreateSourceHash() => _$secondUserProfileHash();
@@ -245,13 +247,16 @@ abstract class _$SecondUserProfile extends $Notifier<UserProfileState> {
   UserProfileState build();
   @$mustCallSuper
   @override
-  void runBuild() {
+  WhenComplete runBuild() {
     final ref = this.ref as $Ref<UserProfileState, UserProfileState>;
-    final element = ref.element as $ClassProviderElement<
-        AnyNotifier<UserProfileState, UserProfileState>,
-        UserProfileState,
-        Object?,
-        Object?>;
-    element.handleCreate(ref, build);
+    final element =
+        ref.element
+            as $ClassProviderElement<
+              AnyNotifier<UserProfileState, UserProfileState>,
+              UserProfileState,
+              Object?,
+              Object?
+            >;
+    return element.handleCreate(ref, build);
   }
 }

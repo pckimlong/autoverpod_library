@@ -1,0 +1,5 @@
+# These templates are analyzed after copying into the generated temporary
+# consumer, where schema outputs and the consumer package imports exist.
+analyzer:
+  exclude:
+    - '**/*.dart'

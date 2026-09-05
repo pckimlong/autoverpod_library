@@ -1,5 +1,5 @@
-import 'package:lean_builder/element.dart';
-import 'package:lean_builder/src/type/type.dart';
+import 'package:analyzer/dart/element/element.dart';
+import 'package:analyzer/dart/element/type.dart';
 import 'package:recase/recase.dart';
 
 import 'field_definition.dart';
@@ -30,7 +30,7 @@ class ProviderDefinition {
 
   /// Parse a class element into a ProviderDefinition
   factory ProviderDefinition.parse(ClassElement element) {
-    final baseName = element.name.pascalCase;
+    final baseName = element.name!.pascalCase;
     final providerName = '${baseName}Provider'.camelCase;
 
     // Find the build method
@@ -43,10 +43,15 @@ class ProviderDefinition {
 
     // Parse return type
     final returnType = buildMethod.returnType;
-    final wrapperType =
-        returnType is InterfaceType ? returnType.element.name : null;
-    final isAsyncValue =
-        ['Future', 'Stream', 'FutureOr', 'AsyncValue'].contains(wrapperType);
+    final wrapperType = returnType is InterfaceType
+        ? returnType.element.name
+        : null;
+    final isAsyncValue = [
+      'Future',
+      'Stream',
+      'FutureOr',
+      'AsyncValue',
+    ].contains(wrapperType);
 
     // Get base type (unwrap Future/Stream if needed)
     String baseType;
@@ -55,16 +60,16 @@ class ProviderDefinition {
         returnType is ParameterizedType &&
         returnType.typeArguments.isNotEmpty) {
       stateType = returnType.typeArguments.first;
-      baseType = stateType.toString();
+      baseType = stateType.getDisplayString();
     } else {
       stateType = returnType;
-      baseType = returnType.toString();
+      baseType = returnType.getDisplayString();
     }
 
     final hasCopyWith = _hasCopyWith(stateType);
 
     // Parse family parameters from build method
-    final familyParameters = buildMethod.parameters
+    final familyParameters = buildMethod.formalParameters
         .map((p) => ParamDefinition.fromElement(p))
         .toList();
 
@@ -96,13 +101,15 @@ class ProviderDefinition {
       // Prefer the primary unnamed Freezed factory. This avoids leaking
       // parameters from helper factories/static helpers into generated fields.
       final factoryConstructors = classElement.constructors.where(
-        (c) => c.isFactory && c.name.isEmpty,
+        (c) => c.isFactory && c.name == 'new',
       );
 
       for (final constructor in factoryConstructors) {
-        for (final param in constructor.parameters) {
+        for (final param in constructor.formalParameters) {
           final paramName = param.name;
-          if (paramName.isEmpty || fields.any((f) => f.name == paramName)) {
+          if (paramName == null ||
+              paramName.isEmpty ||
+              fields.any((f) => f.name == paramName)) {
             continue;
           }
           fields.add(FieldDefinition.fromParam(param));
@@ -112,10 +119,9 @@ class ProviderDefinition {
       // If constructor metadata is incomplete, fall back to public instance
       // getters, which match the actual state surface exposed by Freezed.
       if (fields.isEmpty) {
-        for (final accessor in classElement.accessors.where(
+        for (final accessor in classElement.getters.where(
           (a) =>
-              a.isGetter &&
-              _isUsableFieldName(a.name) &&
+              _isUsableFieldName(a.name ?? '') &&
               !fields.any((f) => f.name == a.name),
         )) {
           fields.add(FieldDefinition.fromAccessor(accessor));
@@ -126,9 +132,10 @@ class ProviderDefinition {
     // Fallback: if no fields found via factory, try public getters/fields
     // This handles cases where Freezed detection fails or non-Freezed classes
     if (fields.isEmpty) {
-      for (final field
-          in classElement.fields.where((f) => f.isPublic && !f.isStatic)) {
-        if (!_isUsableFieldName(field.name)) {
+      for (final field in classElement.fields.where(
+        (f) => f.isPublic && !f.isStatic,
+      )) {
+        if (!_isUsableFieldName(field.name ?? '')) {
           continue;
         }
         fields.add(FieldDefinition.fromField(field));
@@ -140,8 +147,9 @@ class ProviderDefinition {
 
   static bool _isFreezedClass(ClassElement classElement) {
     return classElement.mixins.any((m) => m.toString().startsWith('_\$')) ||
-        classElement.mixins
-            .any((m) => m.element?.name.startsWith('_\$') ?? false);
+        classElement.mixins.any(
+          (m) => m.element.name?.startsWith('_\$') ?? false,
+        );
   }
 
   static bool _isUsableFieldName(String name) {
@@ -155,8 +163,7 @@ class ProviderDefinition {
     if (type.element is! ClassElement) return false;
     final classElement = type.element as ClassElement;
     if (_isFreezedClass(classElement)) return true;
-    return classElement.accessors
-            .any((a) => a.isGetter && a.name == 'copyWith') ||
+    return classElement.getters.any((a) => a.name == 'copyWith') ||
         classElement.methods.any((m) => m.name == 'copyWith');
   }
 
@@ -173,10 +180,12 @@ class ProviderDefinition {
     }
 
     // For multiple params, use record field access
-    final params = familyParameters.map((p) {
-      final value = prefix.isEmpty ? p.name : '$prefix.${p.name}';
-      return p.isNamed ? '${p.name}: $value' : value;
-    }).join(', ');
+    final params = familyParameters
+        .map((p) {
+          final value = prefix.isEmpty ? p.name : '$prefix.${p.name}';
+          return p.isNamed ? '${p.name}: $value' : value;
+        })
+        .join(', ');
 
     return '$providerName($params)';
   }
@@ -185,9 +194,11 @@ class ProviderDefinition {
   String familyBindString({String prefix = ''}) {
     if (!hasFamily) return '';
 
-    return familyParameters.map((p) {
-      final value = prefix.isEmpty ? p.name : '$prefix.${p.name}';
-      return p.isNamed ? '${p.name}: $value' : value;
-    }).join(', ');
+    return familyParameters
+        .map((p) {
+          final value = prefix.isEmpty ? p.name : '$prefix.${p.name}';
+          return p.isNamed ? '${p.name}: $value' : value;
+        })
+        .join(', ');
   }
 }

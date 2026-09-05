@@ -1,6 +1,6 @@
 // GENERATED CODE - DO NOT MODIFY BY HAND
 // coverage:ignore-file
-// ignore_for_file: type=lint
+// ignore_for_file: type=lint, type=warning, deprecated_member_use, deprecated_member_use_from_same_package
 // ignore_for_file: unused_element, deprecated_member_use, deprecated_member_use_from_same_package, use_function_type_syntax_for_parameters, unnecessary_const, avoid_init_to_null, invalid_override_different_default_values_named, prefer_expression_function_bodies, annotate_overrides, invalid_annotation_target, unnecessary_question_mark
 
 part of 'user_profile.dart';
@@ -9,7 +9,7 @@ part of 'user_profile.dart';
 // FreezedGenerator
 // **************************************************************************
 
-// dart format off
+// GENERATED CODE - DO NOT MODIFY BY HAND
 T _$identity<T>(T value) => value;
 
 /// @nodoc
@@ -26,34 +26,50 @@ mixin _$UserProfileState {
   @pragma('vm:prefer-inline')
   $UserProfileStateCopyWith<UserProfileState> get copyWith =>
       _$UserProfileStateCopyWithImpl<UserProfileState>(
-          this as UserProfileState, _$identity);
+        this as UserProfileState,
+        _$identity,
+      );
 
   @override
   bool operator ==(Object other) {
+    final _this = this as UserProfileState;
     return identical(this, other) ||
         (other.runtimeType == runtimeType &&
             other is UserProfileState &&
-            (identical(other.name, name) || other.name == name) &&
-            (identical(other.email, email) || other.email == email) &&
-            (identical(other.age, age) || other.age == age) &&
-            (identical(other.bio, bio) || other.bio == bio) &&
-            (identical(other.bio2, bio2) || other.bio2 == bio2));
+            (identical(other.name, _this.name) || other.name == _this.name) &&
+            (identical(other.email, _this.email) ||
+                other.email == _this.email) &&
+            (identical(other.age, _this.age) || other.age == _this.age) &&
+            (identical(other.bio, _this.bio) || other.bio == _this.bio) &&
+            (identical(other.bio2, _this.bio2) || other.bio2 == _this.bio2));
   }
 
   @override
-  int get hashCode => Object.hash(runtimeType, name, email, age, bio, bio2);
+  int get hashCode {
+    final _this = this as UserProfileState;
+    return Object.hash(
+      runtimeType,
+      _this.name,
+      _this.email,
+      _this.age,
+      _this.bio,
+      _this.bio2,
+    );
+  }
 
   @override
   String toString() {
-    return 'UserProfileState(name: $name, email: $email, age: $age, bio: $bio, bio2: $bio2)';
+    final _this = this as UserProfileState;
+    return 'UserProfileState(name: ${_this.name}, email: ${_this.email}, age: ${_this.age}, bio: ${_this.bio}, bio2: ${_this.bio2})';
   }
 }
 
 /// @nodoc
 abstract mixin class $UserProfileStateCopyWith<$Res> {
   factory $UserProfileStateCopyWith(
-          UserProfileState value, $Res Function(UserProfileState) _then) =
-      _$UserProfileStateCopyWithImpl;
+    UserProfileState value,
+    $Res Function(UserProfileState) _then,
+  ) = _$UserProfileStateCopyWithImpl;
   @useResult
   $Res call({String name, String email, int age, String? bio, String? bio2});
 }
@@ -77,28 +93,30 @@ class _$UserProfileStateCopyWithImpl<$Res>
     Object? bio = freezed,
     Object? bio2 = freezed,
   }) {
-    return _then(_self.copyWith(
-      name: null == name
-          ? _self.name
-          : name // ignore: cast_nullable_to_non_nullable
-              as String,
-      email: null == email
-          ? _self.email
-          : email // ignore: cast_nullable_to_non_nullable
-              as String,
-      age: null == age
-          ? _self.age
-          : age // ignore: cast_nullable_to_non_nullable
-              as int,
-      bio: freezed == bio
-          ? _self.bio
-          : bio // ignore: cast_nullable_to_non_nullable
-              as String?,
-      bio2: freezed == bio2
-          ? _self.bio2
-          : bio2 // ignore: cast_nullable_to_non_nullable
-              as String?,
-    ));
+    return _then(
+      UserProfileState(
+        name: null == name
+            ? _self.name
+            : name // ignore: cast_nullable_to_non_nullable
+                  as String,
+        email: null == email
+            ? _self.email
+            : email // ignore: cast_nullable_to_non_nullable
+                  as String,
+        age: null == age
+            ? _self.age
+            : age // ignore: cast_nullable_to_non_nullable
+                  as int,
+        bio: freezed == bio
+            ? _self.bio
+            : bio // ignore: cast_nullable_to_non_nullable
+                  as String?,
+        bio2: freezed == bio2
+            ? _self.bio2
+            : bio2 // ignore: cast_nullable_to_non_nullable
+                  as String?,
+      ),
+    );
   }
 }
 
@@ -194,15 +212,25 @@ extension UserProfileStatePatterns on UserProfileState {
   @optionalTypeArgs
   TResult maybeWhen<TResult extends Object?>(
     TResult Function(
-            String name, String email, int age, String? bio, String? bio2)?
-        $default, {
+      String name,
+      String email,
+      int age,
+      String? bio,
+      String? bio2,
+    )?
+    $default, {
     required TResult orElse(),
   }) {
     final _that = this;
     switch (_that) {
       case _UserProfileState() when $default != null:
         return $default(
-            _that.name, _that.email, _that.age, _that.bio, _that.bio2);
+          _that.name,
+          _that.email,
+          _that.age,
+          _that.bio,
+          _that.bio2,
+        );
       case _:
         return orElse();
     }
@@ -224,14 +252,24 @@ extension UserProfileStatePatterns on UserProfileState {
   @optionalTypeArgs
   TResult when<TResult extends Object?>(
     TResult Function(
-            String name, String email, int age, String? bio, String? bio2)
-        $default,
+      String name,
+      String email,
+      int age,
+      String? bio,
+      String? bio2,
+    )
+    $default,
   ) {
     final _that = this;
     switch (_that) {
       case _UserProfileState():
         return $default(
-            _that.name, _that.email, _that.age, _that.bio, _that.bio2);
+          _that.name,
+          _that.email,
+          _that.age,
+          _that.bio,
+          _that.bio2,
+        );
     }
   }
 
@@ -250,14 +288,24 @@ extension UserProfileStatePatterns on UserProfileState {
   @optionalTypeArgs
   TResult? whenOrNull<TResult extends Object?>(
     TResult? Function(
-            String name, String email, int age, String? bio, String? bio2)?
-        $default,
+      String name,
+      String email,
+      int age,
+      String? bio,
+      String? bio2,
+    )?
+    $default,
   ) {
     final _that = this;
     switch (_that) {
       case _UserProfileState() when $default != null:
         return $default(
-            _that.name, _that.email, _that.age, _that.bio, _that.bio2);
+          _that.name,
+          _that.email,
+          _that.age,
+          _that.bio,
+          _that.bio2,
+        );
       case _:
         return null;
     }
@@ -267,8 +315,13 @@ extension UserProfileStatePatterns on UserProfileState {
 /// @nodoc
 
 class _UserProfileState implements UserProfileState {
-  const _UserProfileState(
-      {this.name = '', this.email = '', this.age = 0, this.bio, this.bio2});
+  const _UserProfileState({
+    this.name = '',
+    this.email = '',
+    this.age = 0,
+    this.bio,
+    this.bio2,
+  });
 
   @override
   @JsonKey()
@@ -305,7 +358,9 @@ class _UserProfileState implements UserProfileState {
   }
 
   @override
-  int get hashCode => Object.hash(runtimeType, name, email, age, bio, bio2);
+  int get hashCode {
+    return Object.hash(runtimeType, name, email, age, bio, bio2);
+  }
 
   @override
   String toString() {
@@ -317,8 +372,9 @@ class _UserProfileState implements UserProfileState {
 abstract mixin class _$UserProfileStateCopyWith<$Res>
     implements $UserProfileStateCopyWith<$Res> {
   factory _$UserProfileStateCopyWith(
-          _UserProfileState value, $Res Function(_UserProfileState) _then) =
-      __$UserProfileStateCopyWithImpl;
+    _UserProfileState value,
+    $Res Function(_UserProfileState) _then,
+  ) = __$UserProfileStateCopyWithImpl;
   @override
   @useResult
   $Res call({String name, String email, int age, String? bio, String? bio2});
@@ -343,29 +399,29 @@ class __$UserProfileStateCopyWithImpl<$Res>
     Object? bio = freezed,
     Object? bio2 = freezed,
   }) {
-    return _then(_UserProfileState(
-      name: null == name
-          ? _self.name
-          : name // ignore: cast_nullable_to_non_nullable
-              as String,
-      email: null == email
-          ? _self.email
-          : email // ignore: cast_nullable_to_non_nullable
-              as String,
-      age: null == age
-          ? _self.age
-          : age // ignore: cast_nullable_to_non_nullable
-              as int,
-      bio: freezed == bio
-          ? _self.bio
-          : bio // ignore: cast_nullable_to_non_nullable
-              as String?,
-      bio2: freezed == bio2
-          ? _self.bio2
-          : bio2 // ignore: cast_nullable_to_non_nullable
-              as String?,
-    ));
+    return _then(
+      _UserProfileState(
+        name: null == name
+            ? _self.name
+            : name // ignore: cast_nullable_to_non_nullable
+                  as String,
+        email: null == email
+            ? _self.email
+            : email // ignore: cast_nullable_to_non_nullable
+                  as String,
+        age: null == age
+            ? _self.age
+            : age // ignore: cast_nullable_to_non_nullable
+                  as int,
+        bio: freezed == bio
+            ? _self.bio
+            : bio // ignore: cast_nullable_to_non_nullable
+                  as String?,
+        bio2: freezed == bio2
+            ? _self.bio2
+            : bio2 // ignore: cast_nullable_to_non_nullable
+                  as String?,
+      ),
+    );
   }
 }
-
-// dart format on

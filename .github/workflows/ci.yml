@@ -2,94 +2,46 @@ name: CI
 
 on:
   push:
-    branches: [ main ]
+    branches: [main]
   pull_request:
-    branches: [ main ]
+    branches: [main]
 
 jobs:
-  dart-packages:
-    name: Dart packages (format, test, example)
+  compatibility:
+    name: Generator / analyzer ${{ matrix.analyzer }}
     runs-on: ubuntu-latest
+    strategy:
+      fail-fast: false
+      matrix:
+        include:
+          - analyzer: '13.3.0'
+          - analyzer: '14.0.0'
+          - analyzer: '>=13.3.0 <15.0.0'
+          - analyzer: '13.3.0'
+            older: '--build 4.0.6 --build-runner 2.15.0 --freezed 4.0.0'
     steps:
-      - name: Checkout
-        uses: actions/checkout@v4
-
-      - name: Setup Flutter
-        uses: subosito/flutter-action@v2
+      - uses: actions/checkout@v4
+      - uses: subosito/flutter-action@v2
         with:
+          flutter-version: '3.47.0'
           channel: stable
-
-      - name: Install dependencies (autoverpod_annotation)
-        run: flutter pub get
-        working-directory: autoverpod_annotation
-
-      - name: Install dependencies (autoverpod_generator)
-        run: flutter pub get
-        working-directory: autoverpod_generator
-
-      - name: Install dependencies (example)
-        run: flutter pub get
-        working-directory: example
-
-      - name: Analyze example (pre-generation)
-        run: flutter analyze
-        working-directory: example
-
-      - name: Test autoverpod_generator
-        run: dart test
-        working-directory: autoverpod_generator
-
-      - name: Clean lean_builder generated files (example)
-        run: |
-          find lib -type f -name "*.widget.dart" -delete
-        working-directory: example
-
-      - name: Generate example code (lean_builder)
-        run: dart run lean_builder build
-        working-directory: example
-
-      - name: Analyze example (after lean_builder generation)
-        run: flutter analyze
-        working-directory: example
-
-      - name: Clean build_runner generated files (example)
-        run: |
-          find lib -type f \( -name "*.g.dart" -o -name "*.freezed.dart" \) -delete
-        working-directory: example
-
-      - name: Generate example code (build_runner)
-        run: dart run build_runner build --delete-conflicting-outputs
-        working-directory: example
-
-      - name: Analyze example (after build_runner generation)
-        run: flutter analyze
-        working-directory: example
-
-      - name: Verify example generated files are committed
-        run: git diff --exit-code -- example/lib
-
-      - name: Format code
-        run: dart format autoverpod autoverpod_annotation autoverpod_generator example
-
-      - name: Format check
-        run: dart format --output=none --set-exit-if-changed autoverpod autoverpod_annotation autoverpod_generator example
+      - run: flutter pub get
+      - name: Clean consumer build, analyze, tests, incremental and watch
+        run: python3 tool/check_codegen.py --analyzer '${{ matrix.analyzer }}' ${{ matrix.older }}
+      - name: Analyze generator against selected dependencies
+        # The harness also analyzes its copied generator with the matrix solve.
+        run: dart analyze autoverpod_generator autoverpod_annotation
 
   flutter-package:
-    name: Flutter package tests
+    name: Runtime tests and format
     runs-on: ubuntu-latest
     steps:
-      - name: Checkout
-        uses: actions/checkout@v4
-
-      - name: Setup Flutter
-        uses: subosito/flutter-action@v2
+      - uses: actions/checkout@v4
+      - uses: subosito/flutter-action@v2
         with:
+          flutter-version: '3.47.0'
           channel: stable
-
-      - name: Install Flutter dependencies
-        run: flutter pub get
+      - run: flutter pub get
+      - run: flutter test
         working-directory: autoverpod
-
-      - name: Flutter tests
-        run: flutter test
-        working-directory: autoverpod
+      - run: dart format --output=none --set-exit-if-changed autoverpod_generator/lib autoverpod_generator/test tool/integration

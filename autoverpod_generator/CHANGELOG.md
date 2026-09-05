@@ -1,3 +1,16 @@
+## 0.2.0 - 2026-09-05
+
+- Migrate widget generation to build_runner. Use `dart run build_runner build`
+  or `dart run build_runner watch` for schema models, Freezed, JSON, Riverpod,
+  mutation wiring, and Autoverpod widgets in one pipeline.
+- Order widget generation after standalone schema libraries, Freezed outputs,
+  and combined `.g.dart` files; use public analyzer APIs and tracked resolution.
+- Breaking tooling requirement: generator Dart >=3.11 and analyzer
+  >=13.3.0 <15.0.0. The Freezed 4 example requires Dart 3.13 / Flutter 3.47.
+- Preserve annotations, standalone `.widget.dart` filenames, widget APIs,
+  field updates, and text-controller behavior.
+- Add clean-consumer compatibility, incremental, watch, and runtime checks.
+
 ## 0.1.8 - 2026-03-15
 
 ### Bug Fixes

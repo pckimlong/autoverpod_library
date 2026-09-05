@@ -17,15 +17,15 @@ final importResolutionProvider = ImportResolutionProvider._();
 final class ImportResolutionProvider
     extends $NotifierProvider<ImportResolution, ImportResolutionState> {
   ImportResolutionProvider._()
-      : super(
-          from: null,
-          argument: null,
-          retry: null,
-          name: r'importResolutionProvider',
-          isAutoDispose: true,
-          dependencies: null,
-          $allTransitiveDependencies: null,
-        );
+    : super(
+        from: null,
+        argument: null,
+        retry: null,
+        name: r'importResolutionProvider',
+        isAutoDispose: true,
+        dependencies: null,
+        $allTransitiveDependencies: null,
+      );
 
   @override
   String debugGetCreateSourceHash() => _$importResolutionHash();
@@ -50,13 +50,16 @@ abstract class _$ImportResolution extends $Notifier<ImportResolutionState> {
   ImportResolutionState build();
   @$mustCallSuper
   @override
-  void runBuild() {
+  WhenComplete runBuild() {
     final ref = this.ref as $Ref<ImportResolutionState, ImportResolutionState>;
-    final element = ref.element as $ClassProviderElement<
-        AnyNotifier<ImportResolutionState, ImportResolutionState>,
-        ImportResolutionState,
-        Object?,
-        Object?>;
-    element.handleCreate(ref, build);
+    final element =
+        ref.element
+            as $ClassProviderElement<
+              AnyNotifier<ImportResolutionState, ImportResolutionState>,
+              ImportResolutionState,
+              Object?,
+              Object?
+            >;
+    return element.handleCreate(ref, build);
   }
 }

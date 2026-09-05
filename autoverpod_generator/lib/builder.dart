@@ -1,7 +1,8 @@
-/// Builder exports for autoverpod_generator
-///
-/// This package uses lean_builder with the @LeanGenerator annotation.
-/// The generator is automatically discovered when running `dart run lean_builder`.
-library;
+import 'package:build/build.dart';
+import 'package:source_gen/source_gen.dart';
 
+import 'src/state_widget_generator.dart';
 export 'src/state_widget_generator.dart';
+
+Builder stateWidgetBuilder(BuilderOptions options) =>
+    LibraryBuilder(StateWidgetGenerator(), generatedExtension: '.widget.dart');

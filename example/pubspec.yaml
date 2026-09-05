@@ -3,7 +3,7 @@ description: Example app demonstrating autoverpod package usage.
 publish_to: 'none'
 
 environment:
-  sdk: ^3.6.0
+  sdk: ^3.13.0
   flutter: ">=3.0.0"
 
 dependencies:
@@ -19,15 +19,15 @@ dev_dependencies:
   flutter_test:
     sdk: flutter
   riverpod_generator: ^4.0.3
-  freezed: ^3.2.3
-  build_runner: ^2.4.14
-  lean_builder: ^0.1.2
+  freezed: ^4.0.0
+  build_runner: ^2.15.0
   autoverpod_generator:
     path: ../autoverpod_generator
 
+flutter:
+  uses-material-design: true
+
+# Use the local annotation package alongside the local runtime and generator.
 dependency_overrides:
   autoverpod_annotation:
     path: ../autoverpod_annotation
-
-flutter:
-  uses-material-design: true
