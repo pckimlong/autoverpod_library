@@ -111,6 +111,7 @@ jobs:
         if: steps.changes.outputs.changed == 'true' && steps.check_tag.outputs.exists == 'false'
         run: |
           ${{ matrix.test_cmd }}
+          git checkout -- .
           ${{ matrix.publish_cmd }}
         working-directory: ${{ matrix.package_path }}
 

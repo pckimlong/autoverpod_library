@@ -14,7 +14,10 @@ jobs:
     steps:
       - uses: actions/checkout@v4
 
-      - uses: dart-lang/setup-dart@v1
+      - name: Setup Flutter
+        uses: subosito/flutter-action@v2
+        with:
+          channel: stable
 
       - name: Wait for required autoverpod_annotation version on pub.dev
         run: |
@@ -36,7 +39,7 @@ jobs:
           exit 1
 
       - name: Install dependencies
-        run: dart pub get
+        run: flutter pub get
         working-directory: autoverpod_generator
 
       - name: Publish to pub.dev
