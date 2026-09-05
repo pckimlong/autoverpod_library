@@ -16,6 +16,14 @@ analyzer:
   errors:
     unintended_html_in_doc_comment: ignore
     implementation_imports: ignore
+  exclude:
+    - build/**
+    - android/**
+    - ios/**
+    - web/**
+    - windows/**
+    - macos/**
+    - linux/**
 
 # Uncomment the following section to specify additional rules.
 
