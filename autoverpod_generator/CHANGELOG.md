@@ -1,3 +1,9 @@
+## 0.2.1 - 2026-09-06
+
+### Bug Fixes
+
+- **Exclude Dart SDK types from state field parsing** - Prevent primitive and Dart SDK classes (such as `double`, `int`, `String`, etc.) from having getters like `double.sign` incorrectly parsed as state form fields, resolving compilation errors (e.g. `unchecked_use_of_nullable_value`) for providers returning scalar or nullable primitive types.
+
 ## 0.2.0 - 2026-09-05
 
 - Migrate widget generation to build_runner. Use `dart run build_runner build`
