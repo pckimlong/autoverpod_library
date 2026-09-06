@@ -92,6 +92,11 @@ class ProviderDefinition {
     if (type.element is! ClassElement) return [];
 
     final classElement = type.element as ClassElement;
+    if (classElement.library.isInSdk ||
+        classElement.library.uri.scheme == 'dart') {
+      return [];
+    }
+
     final fields = <FieldDefinition>[];
 
     // Check if it's a Freezed class by multiple strategies
@@ -162,6 +167,10 @@ class ProviderDefinition {
   static bool _hasCopyWith(DartType type) {
     if (type.element is! ClassElement) return false;
     final classElement = type.element as ClassElement;
+    if (classElement.library.isInSdk ||
+        classElement.library.uri.scheme == 'dart') {
+      return false;
+    }
     if (_isFreezedClass(classElement)) return true;
     return classElement.getters.any((a) => a.name == 'copyWith') ||
         classElement.methods.any((m) => m.name == 'copyWith');

@@ -61,7 +61,9 @@ class TypeUtils {
         ].contains(state.element.name)) {
       state = state.typeArguments.first;
     }
-    if (state is InterfaceType) {
+    if (state is InterfaceType &&
+        !state.element.library.isInSdk &&
+        state.element.library.uri.scheme != 'dart') {
       for (final field in state.element.fields.where(
         (f) => !f.isStatic && f.isPublic,
       )) {
