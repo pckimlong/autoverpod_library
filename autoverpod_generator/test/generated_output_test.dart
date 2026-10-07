@@ -20,6 +20,10 @@ void main() {
     // Single-family-param optimization should not use record types.
     expect(content, isNot(contains('({int id})')));
     expect(content, contains('int get _params'));
+    // Public proxy getter returns the value resolved from scope, not the raw
+    // override.
+    expect(content, contains('int get id => _params;'));
+    expect(content, contains('final int? _id;'));
     expect(content, contains('WidgetRef get widgetRef => _ref;'));
     expect(content, contains('final bool skipLoadingOnRefresh;'));
     expect(content, contains('final bool skipLoadingOnReload;'));

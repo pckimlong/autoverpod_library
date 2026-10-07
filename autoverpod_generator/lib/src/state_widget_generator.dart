@@ -399,17 +399,30 @@ class StateWidgetGenerator extends Generator {
     if (provider.hasFamily) {
       buffer.writeln('  ${provider.baseName}ProxyWidgetRef(this._ref, {');
       for (final param in provider.familyParameters) {
-        buffer.writeln('    this.${param.name},');
+        final overrideType = param.isNullable ? param.type : '${param.type}?';
+        buffer.writeln('    $overrideType ${param.name},');
       }
-      buffer.writeln('  });');
+      buffer.writeln(
+        '  }) : ${provider.familyParameters.map((p) => '_${p.name} = ${p.name}').join(', ')};',
+      );
       buffer.writeln();
       buffer.writeln('  final WidgetRef _ref;');
       buffer.writeln();
       for (final param in provider.familyParameters) {
         final overrideType = param.isNullable ? param.type : '${param.type}?';
-        buffer.writeln('  final $overrideType ${param.name};');
+        buffer.writeln('  final $overrideType _${param.name};');
       }
       buffer.writeln();
+      for (final param in provider.familyParameters) {
+        final access = provider.familyParameters.length == 1
+            ? '_params'
+            : '_params.${param.name}';
+        buffer.writeln(
+          '  /// Resolved `${param.name}` from the direct value or the scope.',
+        );
+        buffer.writeln('  ${param.type} get ${param.name} => $access;');
+        buffer.writeln();
+      }
       buffer.writeln(
         '  /// Resolved family parameters from direct values or scope.',
       );
@@ -421,7 +434,7 @@ class StateWidgetGenerator extends Generator {
           '    final scope = _${provider.baseName}ParamsInheritedWidget.maybeOf(_ref.context);',
         );
         buffer.writeln(
-          '    final ${param.name}Value = ${param.name} ?? scope?.${param.name};',
+          '    final ${param.name}Value = _${param.name} ?? scope?.${param.name};',
         );
         if (!param.isNullable) {
           buffer.writeln(
@@ -440,7 +453,7 @@ class StateWidgetGenerator extends Generator {
         );
         for (final param in provider.familyParameters) {
           buffer.writeln(
-            '    final ${param.name}Value = ${param.name} ?? scope?.${param.name};',
+            '    final ${param.name}Value = _${param.name} ?? scope?.${param.name};',
           );
           if (!param.isNullable) {
             buffer.writeln(

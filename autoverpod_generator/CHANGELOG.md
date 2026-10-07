@@ -1,3 +1,9 @@
+## 0.2.2 - 2026-10-07
+
+### Bug Fixes
+
+- **State widget proxy ref resolves family parameters** - `ref.<param>` on generated `*ProxyWidgetRef` now returns the value resolved from the direct argument or the enclosing `*Scope`, instead of the raw (usually `null` inside a scope) constructor override. Multi-parameter families return their part of the resolved record. Fixes #24.
+
 ## 0.2.1 - 2026-09-06
 
 ### Bug Fixes

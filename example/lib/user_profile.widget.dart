@@ -167,16 +167,19 @@ class AsyncUserProfileScope extends ConsumerWidget {
 
 /// Proxy widget ref providing access to the provider.
 class AsyncUserProfileProxyWidgetRef {
-  AsyncUserProfileProxyWidgetRef(this._ref, {this.id});
+  AsyncUserProfileProxyWidgetRef(this._ref, {int? id}) : _id = id;
 
   final WidgetRef _ref;
 
-  final int? id;
+  final int? _id;
+
+  /// Resolved `id` from the direct value or the scope.
+  int get id => _params;
 
   /// Resolved family parameters from direct values or scope.
   int get _params {
     final scope = _AsyncUserProfileParamsInheritedWidget.maybeOf(_ref.context);
-    final idValue = id ?? scope?.id;
+    final idValue = _id ?? scope?.id;
     assert(idValue != null, 'No id provided for AsyncUserProfileProvider');
     return idValue!;
   }
@@ -911,16 +914,19 @@ class UserProfileScope extends StatelessWidget {
 
 /// Proxy widget ref providing access to the provider.
 class UserProfileProxyWidgetRef {
-  UserProfileProxyWidgetRef(this._ref, {this.id});
+  UserProfileProxyWidgetRef(this._ref, {int? id}) : _id = id;
 
   final WidgetRef _ref;
 
-  final int? id;
+  final int? _id;
+
+  /// Resolved `id` from the direct value or the scope.
+  int get id => _params;
 
   /// Resolved family parameters from direct values or scope.
   int get _params {
     final scope = _UserProfileParamsInheritedWidget.maybeOf(_ref.context);
-    final idValue = id ?? scope?.id;
+    final idValue = _id ?? scope?.id;
     assert(idValue != null, 'No id provided for UserProfileProvider');
     return idValue!;
   }
