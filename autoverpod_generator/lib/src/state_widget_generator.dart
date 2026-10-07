@@ -616,19 +616,9 @@ class StateWidgetGenerator extends Generator {
     if (provider.hasFamily) {
       for (final param in provider.familyParameters) {
         final overrideType = param.isNullable ? param.type : '${param.type}?';
-        buffer.writeln('  final $overrideType _${param.name};');
+        buffer.writeln('  final $overrideType ${param.name};');
       }
       buffer.writeln();
-      for (final param in provider.familyParameters) {
-        final access = provider.familyParameters.length == 1
-            ? '_params'
-            : '_params.${param.name}';
-        buffer.writeln(
-          '  /// Resolved `${param.name}` from the direct value or the scope.',
-        );
-        buffer.writeln('  ${param.type} get ${param.name} => $access;');
-        buffer.writeln();
-      }
     }
     buffer.writeln(
       '  final Widget Function(BuildContext context, ${provider.baseName}ProxyWidgetRef ref, $stateType state) builder;',
@@ -739,19 +729,9 @@ class StateWidgetGenerator extends Generator {
     if (provider.hasFamily) {
       for (final param in provider.familyParameters) {
         final overrideType = param.isNullable ? param.type : '${param.type}?';
-        buffer.writeln('  final $overrideType _${param.name};');
+        buffer.writeln('  final $overrideType ${param.name};');
       }
       buffer.writeln();
-      for (final param in provider.familyParameters) {
-        final access = provider.familyParameters.length == 1
-            ? '_params'
-            : '_params.${param.name}';
-        buffer.writeln(
-          '  /// Resolved `${param.name}` from the direct value or the scope.',
-        );
-        buffer.writeln('  ${param.type} get ${param.name} => $access;');
-        buffer.writeln();
-      }
     }
     buffer.writeln(
       '  final Selected Function(${provider.baseType} state) selector;',
@@ -1024,19 +1004,9 @@ class StateWidgetGenerator extends Generator {
     if (provider.hasFamily) {
       for (final param in provider.familyParameters) {
         final overrideType = param.isNullable ? param.type : '${param.type}?';
-        buffer.writeln('  final $overrideType _${param.name};');
+        buffer.writeln('  final $overrideType ${param.name};');
       }
       buffer.writeln();
-      for (final param in provider.familyParameters) {
-        final access = provider.familyParameters.length == 1
-            ? '_params'
-            : '_params.${param.name}';
-        buffer.writeln(
-          '  /// Resolved `${param.name}` from the direct value or the scope.',
-        );
-        buffer.writeln('  ${param.type} get ${param.name} => $access;');
-        buffer.writeln();
-      }
     }
     if (!provider.hasCopyWith) {
       buffer.writeln(
@@ -1215,19 +1185,9 @@ class StateWidgetGenerator extends Generator {
     if (provider.hasFamily) {
       for (final param in provider.familyParameters) {
         final overrideType = param.isNullable ? param.type : '${param.type}?';
-        buffer.writeln('  final $overrideType _${param.name};');
+        buffer.writeln('  final $overrideType ${param.name};');
       }
       buffer.writeln();
-      for (final param in provider.familyParameters) {
-        final access = provider.familyParameters.length == 1
-            ? '_params'
-            : '_params.${param.name}';
-        buffer.writeln(
-          '  /// Resolved `${param.name}` from the direct value or the scope.',
-        );
-        buffer.writeln('  ${param.type} get ${param.name} => $access;');
-        buffer.writeln();
-      }
     }
     buffer.writeln('  final TextEditingController? controller;');
     buffer.writeln('  final Duration? debounceDuration;');
@@ -1477,19 +1437,9 @@ class StateWidgetGenerator extends Generator {
     if (provider.hasFamily) {
       for (final param in provider.familyParameters) {
         final overrideType = param.isNullable ? param.type : '${param.type}?';
-        buffer.writeln('  final $overrideType _${param.name};');
+        buffer.writeln('  final $overrideType ${param.name};');
       }
       buffer.writeln();
-      for (final param in provider.familyParameters) {
-        final access = provider.familyParameters.length == 1
-            ? '_params'
-            : '_params.${param.name}';
-        buffer.writeln(
-          '  /// Resolved `${param.name}` from the direct value or the scope.',
-        );
-        buffer.writeln('  ${param.type} get ${param.name} => $access;');
-        buffer.writeln();
-      }
     }
     buffer.writeln('  final TextEditingController? controller;');
     buffer.writeln('  final Duration? debounceDuration;');
