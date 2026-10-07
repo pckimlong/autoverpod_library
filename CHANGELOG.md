@@ -5,6 +5,10 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## 0.2.2 - 2026-10-07
+
+- **autoverpod_generator**: `ref.<param>` on generated `*ProxyWidgetRef` now returns the family parameter resolved from the scope instead of the raw override (`null` inside a scope). Fixes #24.
+
 ## 0.2.1 - 2026-09-06
 
 - **autoverpod_generator**: Exclude Dart SDK types from state field parsing to prevent getters like `double.sign` from generating phantom form field widgets for primitive state types.
